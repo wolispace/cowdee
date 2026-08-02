@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>cowsee v{{version}}</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
+      <link rel='stylesheet' href='cowdee.css?{{version}}' />
+      <script type="module" src='cowdee.js?{{version}}'></script>
+  </head>
+  <body>
+    <content>
+      <div id="panels">
+        <section id="top">
+          <h2>Welcome to cow</h2>
+          <p>Log in to enter the world.</p>
+           
+        </section>
+        <div id="splitter"><hr/></div>
+        <section id="bottom">
+        </section>
+      </div>
+      <form id="input" class="commandform">
+        <input type="hidden" name="type" value="cmd" />
+        <label for="cmd" class="commandlabel">Command </label>
+        <input type="text" class="commandterm" name="cmd" id="cmd" placeholder="What do you want to do?" value="{{q}}" />
+        <input type="submit" class="commandbutton" value="Go" />
+      </form> 
+    </content>
+    <div id="menu">&#9776;</div>
+    <dialog id="dialog" class="buttonize"></dialog>
+  </body>
+</html>

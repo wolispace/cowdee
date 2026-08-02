@@ -1,0 +1,218 @@
+:root {
+  --font-color: rgba(255, 255, 255, 0.75);
+  --background-color: #151924;
+  --max-width: 800px;
+  --splitter-height: 1rem;
+  --input-height: 2rem;
+  --section-min-height: 2rem;
+}
+
+html,
+body {
+  color: var(--font-color);
+  font-family: Tahoma, Verdana, Geneva, sans-serif;
+  background-color: var(--background-color);
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  /* prevent pull-to-refresh and overscroll on mobile */
+  overscroll-behavior: none;
+}
+
+a {
+  color: #cbced2;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+a:hover {
+  color: white;
+  text-decoration: underline;
+}
+
+.metadata {
+  font-size: 75%;
+  opacity: 65%;
+  padding-top: .5rem;
+}
+
+/* ── Main layout: full viewport column ── */
+content {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  /* dynamic viewport height — adjusts when mobile keyboard opens */
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+/* ── Panels wrapper: holds top/splitter/bottom, fills space above input ── */
+#panels {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+  /* allow flex child to shrink below content size */
+}
+
+/* ── Top & Bottom sections ── */
+section {
+  background-color: rgba(0, 0, 0, .35);
+  padding: 0.5rem;
+  min-height: var(--section-min-height);
+  overflow-y: auto;
+  /* smooth momentum scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+}
+
+section div {
+  padding-bottom: 0.5rem;
+  padding-right: 1rem;
+}
+
+#top {
+  flex: 1 1 30%;
+  /* starts at ~30%, grows/shrinks */
+}
+
+#bottom {
+  flex: 1 1 70%;
+  /* starts at ~70%, grows/shrinks */
+}
+
+/* ── Splitter ── */
+#splitter {
+  flex: 0 0 var(--splitter-height);
+  height: var(--splitter-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: row-resize;
+  touch-action: none;
+  /* prevent browser gestures while dragging */
+  user-select: none;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+#splitter hr {
+  width: 3rem;
+  border: none;
+  border-top: 3px solid rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  margin: 0;
+  pointer-events: none;
+}
+
+#splitter:hover hr,
+#splitter:active hr {
+  border-top-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ── Input form ── */
+.commandform {
+  flex: 0 0 var(--input-height);
+  height: var(--input-height);
+  background-color: rgba(0, 0, 0, .85);
+  padding: 0 .25rem;
+  padding-left: .5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  /* no longer position:fixed — flexbox keeps it at the bottom */
+}
+
+.commandlabel {
+  font-size: 80%;
+  white-space: nowrap;
+}
+
+.commandterm {
+  font-size: 80%;
+  border-top-left-radius: 1rem;
+  border-bottom-left-radius: 1rem;
+  background-color: wheat;
+  padding-left: .5rem;
+  flex: 1;
+  height: 1.5rem;
+  border: none;
+  outline: none;
+}
+
+.commandbutton {
+  font-size: 80%;
+  border-top-right-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+  height: 1.5rem;
+  border: none;
+  cursor: pointer;
+}
+
+/* ── Hamburger menu ── */
+#menu {
+  position: fixed;
+  top: 0.5rem;
+  right: 1rem;
+  z-index: 1000;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: var(--font-color);
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 0.4rem;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#menu:hover {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+}
+
+li {
+  padding-bottom: .5rem;
+}
+
+dialog {
+  background-color: slategray;
+  border-radius: .5rem;
+  box-shadow: 0rem .5rem 2rem 0rem black;
+}
+
+.buttonize {
+  border-top: 3px solid rgba(255, 255, 255, .25);
+  border-right: 3px solid rgba(0, 0, 0, .45);
+  border-bottom: 3px solid rgba(0, 0, 0, .45);
+  border-left: 3px solid rgba(255, 255, 255, .25);
+  border-radius: .5rem;
+}
+
+dialog button {
+  font-size: 1.2rem;
+  background-color: silver;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+dialog button:hover {
+  background-color: #e0e0e0;
+}
+
+menu {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  margin-bottom: 0;
+  padding-inline-start: 0;
+}
+
+#loginform {
+  display: flex;
+  flex-direction: column;
+}
