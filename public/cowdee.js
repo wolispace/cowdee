@@ -14,7 +14,7 @@ class App {
 
   start() {
     console.log('started');
-    this.ui.showDialog(' Hi ', () => {alert('hmm')});
+    // this.ui.showDialog(' Hi ', () => {alert('hmm')});
 
     // universal form submit we pass to the handler for forms
     document.addEventListener("submit", async (event) => {
@@ -29,12 +29,26 @@ class App {
     console.log('wake player');
   }
 
-  sendCommand() {
-    console.log('send command');
+  async sendCommand(data) {
+    const result = this.io.fetchJson('command', data);
+    console.log('sendCommand', result);
   }
 
   handleForm(data) {
-    console.log('handleForm', data);
+    if (data.type == 'login') {
+      const result = this.io.fetchJson('player', data);
+      if (result.id) {
+        localStorage.setItem(PLAYER_KEY, result.id);
+        playerInfo.id = result.id;
+        playerInfo.loc = result.loc;
+        this.wakePlayer();
+        this.closeDialog();
+      } else {
+        alert('Invalid player or password');
+      }
+    } else {
+      this.sendCommand(data);
+    }
   }
 };
 

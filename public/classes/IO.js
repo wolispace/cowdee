@@ -1,7 +1,7 @@
 // for handling data to and from server
 export class IO {
   token = '';
-  types = {command: '/?command', player: '/?player'};
+  types = {command: '/public/api.php', player: '/?player'};
 
   setToken(token) {
     this.token = token;
@@ -10,7 +10,7 @@ export class IO {
   async fetchJson(type, json) {
     json.token = this.token;
 
-    const response = await fetch(this.type[type], {
+    const response = await fetch(this.types[type], {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(json),

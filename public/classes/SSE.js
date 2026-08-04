@@ -3,13 +3,13 @@ export class SSE {
   constructor() {
     this.sse = new EventSource('server.php');
 
-    this.sse.addEventListener('update', (e) => {
-        const msg = JSON.parse(e.data);
+    this.sse.addEventListener('update', (event) => {
+        const msg = JSON.parse(event.data);
         console.log("Game update:", msg);
     });
 
     this.sse.addEventListener('ping', () => {
-        // console.log("heartbeat");
+        //console.log("heartbeat");
     });
 
     this.sse.addEventListener('shutdown', () => {

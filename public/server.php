@@ -24,7 +24,7 @@ function sse_event($event, $data) {
 
 // Main loop
 while (time() < $endTime) {
-
+  if (false) {
     // --- Read game state from disk ---
     $state = ["state" => "ok"];
     
@@ -33,12 +33,13 @@ while (time() < $endTime) {
         "timestamp" => time(),
         "state"     => $state
     ]);
+  }
 
-    // --- Heartbeat every 5 seconds ---
-    sse_event("ping", ["alive" => true]);
+  // --- Heartbeat every 5 seconds ---
+  sse_event("ping", ["alive" => true]);
 
-    // Sleep before next cycle
-    sleep(5);
+  // Sleep before next cycle
+  sleep(3);
 }
 
 // Graceful shutdown message
