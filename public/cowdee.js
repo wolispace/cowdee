@@ -1,22 +1,47 @@
-function connect() {
-    const sse = new EventSource('server.php');
 
-    sse.addEventListener('update', (e) => {
-        const msg = JSON.parse(e.data);
-        console.log("Game update:", msg);
+import { Utils } from './classes/Utils.js';
+import { SSE } from './classes/SSE.js';
+import { IO } from './classes/IO.js';
+import { UI } from './classes/UI.js';
+
+class App {
+  constructor() {
+    this.utils = new Utils(this);
+    this.sse = new SSE(this);
+    this.io = new IO(this);
+    this.ui = new UI(this);
+  }
+
+  start() {
+    console.log('started');
+    this.ui.showDialog(' Hi ', () => {alert('hmm')});
+
+    // universal form submit we pass to the handler for forms
+    document.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.target;
+      const data = Object.fromEntries(new FormData(form));
+      this.handleForm(data);
     });
+  }
 
-    sse.addEventListener('ping', () => {
-        console.log("heartbeat");
-    });
+  wakePlayer() {
+    console.log('wake player');
+  }
 
-    sse.addEventListener('shutdown', () => {
-        console.log("Server ended session, reconnecting soon...");
-    });
+  sendCommand() {
+    console.log('send command');
+  }
 
-    sse.onerror = () => {
-        console.log("Connection lost, retrying...");
-    };
-}
+  handleForm(data) {
+    console.log('handleForm', data);
+  }
+};
 
-connect();
+// ----- It all starts here -------------------------------------------------------------
+
+document.addEventListener('DOMContentLoaded', () => {
+  const app = new App();
+  app.start();
+});
+

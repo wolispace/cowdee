@@ -1,0 +1,416 @@
+import fs from 'fs';
+import path from 'path';
+import { IdManager } from './IdManager.js';
+import { PoolManager } from '../PoolManager.js';
+import { SetMap } from '../SetMap.js';
+
+/**
+ * 
+ */
+export class ObjectManager {
+  idManager = new IdManager();
+  pools = {};
+  reactions = 0;
+  maxReactions = 5;
+  keys = ['id', 'name', 'code', 'loc', 'trigger', 'info'];
+
+  constructor(tickManager) {
+    this.tickManager = tickManager;
+    this.utils = tickManager.utils;
+    for (const key of this.keys) {
+      this.pools[key] = new PoolManager(tickManager, key);
+    }
+  }
+
+  /**
+   * Flush all objects from all pools
+   */
+  flush() {
+    for (const key of this.keys) {
+      this.pools[key].clear();
+    }
+  }
+
+  dump() {
+    for (const key of this.keys) {
+      console.log(`pool ${key}`, this.pools[key].pool.entries());
+    }
+  }
+
+  /**
+   * Returns the whole object from a chunked file
+   * @param {string} id 
+   * @returns {object}
+   */
+  getById(id) {
+    const set = this.pools.id.get(id);
+    if (!set || set.size === 0) return undefined;
+    const obj = set.values().next().value;
+    return obj;
+  };
+
+  getFormattedById(id) {
+    const obj = this.getById(id);
+    if (obj) {
+      this.formatObject(obj);
+      return obj; 
+    } 
+  }
+
+  /**
+   * Returns an array of IDs with the required word eg: "cat" returns ["AB", "Ax" ...]
+   * @param {string} key 
+   * @returns {set} of IDs with this name
+   */
+  findByName(key) {
+    const name = key.replace(/^(?:the|an|a)\b/i, '').trim().toLocaleLowerCase();
+    return this.pools.name.get(name);
+  };
+
+  /**
+   * Return the obj of the player matching the name
+   * TODO: worry about passwords later
+   * @param {object} data with data.username and data.pw
+   * @returns {object}
+   */
+  findPlayer(data) {
+    const candidates = this.pools.name.get(data.playername.toLocaleLowerCase());
+    // check all candidates to ensure they are class='player'
+    // TODO: worry about password later
+    for (const id of candidates) {
+      const obj = this.getById(id);
+      if (obj.class == 'player') {
+        // first player with matching name..
+        // TODO: compare passwords too
+        return obj; 
+      }
+    }
+  }
+
+  /**
+   * Find the first named object in the location
+   * @param {string} name 
+   * @param {string} loc 
+   * @returns {string} the ID of the found object
+   */
+  findByNameInLoc(name, loc) {
+    const inName = this.findByName(name);
+    if (loc == 'all') {
+      return inName.values().next().value;
+    }
+
+    const inLoc = this.findInLoc(loc);
+    for (const key of inLoc) {
+      if (inName.has(key)) {
+        return key;
+      }
+    }
+  }
+
+  /**
+   * Returns an array of object IDs in the location
+   * @param {string} key 
+   * @returns {set}
+   */
+  findInLoc(key) {
+    //  so we load fresh merged data
+    if (this.pools.loc.isDirty()) {
+      this.pools.loc.saveDirty();
+      this.pools.loc.clear();
+    }
+    return this.pools.loc.get(key);
+  }
+
+  findMatchInLoc(obj, context) {
+    // TODO: for creating a new object that merges with an existing
+    // loop through all objects in the location and if they match the obj.class, obj.color etc..
+    // then return it else return null
+  }
+
+  /**
+   * Retruns the code for the object.id passed in
+   * for consistancy, even tho its just a string, its stored in an array with one element
+   * @param {id} id 
+   * @returns {string}
+   */
+  getCode(id) {
+    const set = this.pools.code.get(id);
+    if (!set || set.size === 0) return '';
+    const codeObj = set.values().next().value;
+    return codeObj?.code ?? '';
+  };
+
+  /**
+   * Find the first named command (look in player then location then globaly so long as its a command)
+   * "find" means look for it somewhere, where as "get" means we know it so get it.
+   * @param {string} firstword 
+   * @param {object} context 
+   * @returns {string} return the code from the bext match object
+   */
+  findCommand(firstword, context) {
+    const ids = this.findByName(firstword);
+
+    if (!ids || ids.size < 1) return '';
+    if (ids.size === 1) {
+      const [id] = ids;
+      return this.getCode(id);
+    }
+    for (const id of ids) {
+      const obj = this.getById(id);
+      if (!obj) continue;
+      if (obj.loc === context.actor) {
+        return this.getCode(id);
+      }
+      if (obj.loc === context.loc) {
+        return this.getCode(id);
+      }
+      if (obj.class === 'command') {
+        return this.getCode(id);
+      }
+    }
+    return '';
+  };
+
+  /**
+   * Runs code from a triggered object
+   * @param {object} context 
+   * @returns 
+   */
+  findTrigger(context) {
+    if (!context) return;
+    const found = this.pools.trigger.get(context.trigger);
+    if (!found || found.size < 1) return;
+    // loop through these to see if they are in the context.loc
+    const inLoc = this.pools.loc.get(context.loc);
+    if (!inLoc || inLoc.size < 1) return;
+    const triggerable = new Set(
+      [...found].filter(obj => inLoc.has(obj.id))
+    );
+
+    if (triggerable.size < 1) return;
+
+    // dont do infinate reactions
+    if (this.reactions++ >= this.maxReactions) return;
+
+    for (const triggered of triggerable) {
+      const obj = this.getById(triggered.id);
+      if (!obj) continue;
+      // prepare the context for this execution
+      context.actor = obj.id;
+      obj.code = this.getCode(obj.id);
+      this.tickManager.commandManager.runCodeFrom(obj.code, triggered.block, context);
+    }
+  }
+
+  /**
+   * Saves changes (back to the pool which eventually end up on disk)
+   * @param {object} obj 
+   * @param {object} old 
+   */
+  save(obj, old) {
+    this.addToPools(obj, old);
+  }
+
+  /**
+   * Add the object to all of the pools updaing and old pools
+   * @param {obj} obj 
+   * @param {object} old 
+   */
+  addToPools(obj, old) {
+    // if there is already an obj, we maybe changing existing values like its loc from one to another
+    // so clear from all pools
+    if (obj.code) {
+      this.pools.code.set(obj.id, { id: obj.id, loc: obj.loc, code: obj.code }, null, true);
+      this.addTriggers(obj);
+      delete obj.code; // const { code, ...rest } = obj; // delete obj.code using destructuring
+    }
+    if (obj.info) {
+      this.pools.info.set(obj.id, obj.info, null, true);
+      delete obj.info; // delete const { info, ...rest } = obj; // delete obj.info using destructuring
+    }
+    this.formatObject(obj);
+    this.pools.id.set(obj.id, obj, null, true);
+    const oldLongName = `${old?.class ?? ''} ${old?.name ?? ''}`.trim().toLowerCase();
+    const objLongName = `${obj?.class ?? ''} ${obj?.name ?? ''}`.trim().toLowerCase();
+
+    if (oldLongName != objLongName) {
+      for (const name of objLongName.split(' ').filter(Boolean)) {
+        this.pools.name.set(name, obj.id);
+      }
+    }
+    if (!old || obj.loc !== old.loc) {
+      this.pools.loc.set(obj.loc, obj.id, old?.loc);
+    }
+  }
+
+  /**
+   * Adds a trigger word if this code is triggred in some way
+   * @param {object} obj 
+   * @returns 
+   */
+  addTriggers(obj) {
+    // combined
+    const pattern = /\bif\s+(reacting\s+to|target\s+of)\s+(\w+)\s+then\s+(\w+);/i;
+    const match = obj.code.match(pattern);
+    if (!match) return;
+    const type = match[1].includes('target') ? 'target' : 'reacts';
+    const trigger = match[2];
+    const block = match[3];
+    this.pools.trigger.set(trigger, { id: obj.id, block: block });
+  }
+
+  /**
+   * Write to disk all of the changed pools
+   * - merging the objects with existing json on disk
+   */
+  savePoolsToDisk() {
+
+    const caller = this.utils.getImmediateCaller();
+    // console.log(caller, '--- save pool ---');
+    // save changed pools to disk
+    for (const pool of Object.values(this.pools)) {
+      pool.saveDirty();
+    }
+  }
+
+
+  /**
+   * Add all referenced objects into this context from "{Ax} says hi to {b2}"
+   * @param {object} data 
+   * @returns nothing, updates obj
+   */
+  prepContext(data) {
+    data.objs = data.objs ?? {};
+
+    
+    // Phase 1: Process [$var] (bracketed = linkable objects)
+    data.msg = data.msg.replace(/\[\$(\w+)\]/g, (_, varName) => {
+      const value = data.context[varName] ?? '';
+      const obj = this.getById(value);
+      if (obj) {
+        data.objs[value] = { id: obj.id, loc: obj.loc, name: obj.name, longname: obj.longname, color: obj.color, link: true };
+        return `{${value}}`;
+      }
+      return value; // fallback: plain text substitution
+    });
+
+    // Phase 2: Process $var (non-bracketed = styled but not linked)
+    data.msg = data.msg.replace(/\$(\w+)/g, (_, varName) => {
+      const value = data.context[varName] ?? '';
+      const obj = this.getById(value);
+      if (obj) {
+        if (!data.objs[value]) {
+          data.objs[value] = { longname: obj.longname, color: obj.color };
+        }
+        return `{${value}}`;
+      }
+      return value; // plain text: substitute literally
+    });
+
+    //    console.log(data.brief);
+    if (data.brief) {
+      for (const obj of Object.entries(data.objs)) {
+        obj.longname = `the ${obj.class}`;
+        console.log(obj.longname);
+      }
+      //console.log(data.objs);
+    }
+  }
+
+  /**
+   * Adds formatted/processed versions of values within the object. Saved to disk so we dont need to reprocess again.
+   * Each time an object is added to the pools its re formatted.
+   * @param {obj} obj 
+   * @returns nothing, the obj is updated
+   */
+  formatObject(obj) {
+    this.formatQty(obj);
+    this.formatPlural(obj);
+    if (obj.qty == 1) {
+      obj.is = 'is';
+      obj.gender = 'it';  
+    } else {
+      obj.is = 'are';
+      obj.gender = 'them';
+    }
+    obj.longname = `${obj.qtyText} ${obj.plural}`;
+    if (obj.name) {
+      obj.longname += ' called ' + obj.name;
+    }
+    if (['player','command'].includes(obj.class)) {
+      obj.longname = obj.name;
+    }
+  }
+
+  /**
+   * Formats the qty as a string eg 30 = many
+   * @param {obj} obj 
+   * @returns nothing, updates obj
+   */
+  formatQty(obj) {
+    obj.qty = !obj.qty ? 1 : obj.qty;
+    obj.qtyText = obj.qty;
+    if (obj.qty == 1) {
+      obj.qtyText = ['a', 'e', 'i', 'o', 'u'].includes(obj.class[0]) ? 'an' : 'a';
+    } else if (obj.qty == 2) {
+      obj.qtyText = 'two';
+    } else if (obj.qty == 3) {
+      obj.qtyText = 'three';
+    } else if (obj.qty == -1) {
+      obj.qtyText = 'the';
+    } else if (obj.qty < 10) {
+      obj.qtyText = obj.qty;
+    } else if (obj.qty < 20) {
+      obj.qtyText = 'some';
+    } else if (obj.qty < 99) {
+      obj.qtyText = 'many';
+    } else if (obj.qty < 999) {
+      obj.qtyText = 'hundreds of';
+    } else if (obj.qty < 999999) {
+      obj.qtyText = 'thousands of';
+    } else if (obj.qty < 999999999) {
+      obj.qtyText = 'millions of';
+    } else {
+      obj.qtyText = 'a mind-boggling quantity of';
+    }
+  }
+
+  /**
+   * Formats the plural version of this object
+   * @param {object} obj 
+   * @returns nothing, updates obj
+   */
+  formatPlural(obj) {
+    obj.plural = '';
+    if (obj.qty > 1) {
+      const plurals = { 'knife': 'knives', 'sheep': 'sheep', 'loaf': 'loaves', 'mouse': 'mice' };
+      const plural = plurals[obj.class];
+      obj.plural = (plural === undefined) ? obj.class + 's' : plural;
+    } else {
+      obj.plural = obj.class;
+    }
+  }
+
+  /**
+   * New lookLoc2 method that structures descriptions dynamically and recursively
+   * with limits on sentence group size and rotating templates.
+   * @param {object} context 
+   * @returns {object}
+   */
+  lookLoc(context) {
+    const data = this.tickManager.lookManager.look(context);
+    // messageManager.add(data);
+    return data;
+  }
+
+    /**
+   * Lits objects in a location
+   * @param {object} context 
+   * @returns {object}
+   */
+  listLoc(context) {
+    const data = this.tickManager.lookManager.list(context);
+    return data;
+  }
+};
+
