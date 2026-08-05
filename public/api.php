@@ -17,7 +17,15 @@ function handleInput($request) {
     */
     $mstimestamp = round(microtime(true) * 1000);
     $context = "{$mstimestamp},{$request['actor']},{$request['loc']},{$request['cmd']}"; 
-    file_put_contents('contexts.txt', $context . PHP_EOL, FILE_APPEND);
+
+    // TODO: wrap this into a function
+    $f = fopen('_contexts.txt', 'a');
+    if (flock($f, LOCK_EX)) {
+      fwrite($f, $context . "\n");
+      flock($f, LOCK_UN);
+    }
+    fclose($f);
+
     outputJson(['status' => "ok"]);
   } else if (!empty($request['file'])) {
     $file = shardName($request['type'], $request['key']);

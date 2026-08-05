@@ -10,9 +10,9 @@ export class SSE {
     // for dev this will be 'http://localhost:8881/public/server.php'
     this.sse = new EventSource(url.toString());
     
-    this.sse.addEventListener('update', (event) => {
+    this.sse.addEventListener('context', (event) => {
         const msg = JSON.parse(event.data);
-        console.log("Game update:", msg);
+        console.log("new context:", msg);
     });
 
     this.sse.addEventListener('ping', () => {
