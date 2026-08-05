@@ -21,6 +21,8 @@ class App {
       event.preventDefault();
       const form = event.target;
       const data = Object.fromEntries(new FormData(form));
+      data.actor = 'wol';
+      data.loc = '2';
       this.handleForm(data);
     });
   }
@@ -30,13 +32,13 @@ class App {
   }
 
   async sendCommand(data) {
-    const result = this.io.fetchJson('command', data);
+    const result = await this.io.fetchJson('command', data);
     console.log('sendCommand', result);
   }
 
   handleForm(data) {
     if (data.type == 'login') {
-      const result = this.io.fetchJson('player', data);
+      const result = await this.io.fetchJson('player', data);
       if (result.id) {
         localStorage.setItem(PLAYER_KEY, result.id);
         playerInfo.id = result.id;

@@ -1,9 +1,10 @@
 <?php
 // --- SSE headers ---
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET');
 header('Content-Type: text/event-stream');
 header('Cache-Control: no-cache');
 header('Connection: keep-alive');
-header('Access-Control-Allow-Origin: *');
 
 // Disable buffering
 while (ob_get_level() > 0) {
