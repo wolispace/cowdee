@@ -2,8 +2,14 @@ export class SSE {
   
   constructor() {
     // web server hosted on 8880, SSE server hosted on 8881 since we run php -S for each port
-    this.sse = new EventSource('http://localhost:8881/public/server.php');
+    const url = new URL(window.location.href);
+    // Override only the port and pathname
+    url.port = '8881';
+    url.pathname = '/public/server.php';
 
+    // for dev this will be 'http://localhost:8881/public/server.php'
+    this.sse = new EventSource(url.toString());
+    
     this.sse.addEventListener('update', (event) => {
         const msg = JSON.parse(event.data);
         console.log("Game update:", msg);

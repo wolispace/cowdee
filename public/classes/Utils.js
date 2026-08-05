@@ -31,6 +31,16 @@ export class Utils {
   isObject(v) {
     return v !== null && typeof v === "object" && !this.isString(v);
   }
+   
+  /**
+   * Replace all key in {} with their value eg "Hi {w}" + {w: "wolis"} = "Hi wolis"
+   * @param {string} content 
+   * @param {object} params 
+   * @returns {string} 
+   */
+  replaceParams(content, params) {
+    return content.replace(/\{\{(\w+)\}\}/g, (_, key) => params[key] ?? '');
+  }
 
   /**
    * Returns the data.msg, with all {key} replaced with value from data.objs[key].prop values
@@ -78,14 +88,20 @@ export class Utils {
     return this.capitalEachSentence(data.msg);
   }
 
+  // Brute force assume everything after ". " needs to be capitalised
   capitalEachSentence(text) {
     return text.replace(/\.\s*([a-z])/g, (_, letter) => `. ${letter.toUpperCase()}`);
   }
 
+  // not used yet, maybe a smarter thing to use than capitalEachSentence()
   sentenceCaseString(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
+  /**
+   * Returns the calling function for debugging purposes only
+   * @returns {string}
+   */
   getImmediateCaller() {
     const originalFunc = Error.prepareStackTrace;
 

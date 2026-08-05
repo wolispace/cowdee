@@ -1,24 +1,15 @@
-import fs from 'fs';
-import path from 'path';
-import { IdManager } from './IdManager.js';
-import { PoolManager } from '../PoolManager.js';
-import { SetMap } from '../SetMap.js';
+// handles the memory pools
+import { PoolManager} from './PoolManager.js'
 
-/**
- * 
- */
-export class ObjectManager {
-  idManager = new IdManager();
+export class DB {
   pools = {};
-  reactions = 0;
-  maxReactions = 5;
   keys = ['id', 'name', 'code', 'loc', 'trigger', 'info'];
 
-  constructor(tickManager) {
-    this.tickManager = tickManager;
-    this.utils = tickManager.utils;
+  constructor(app) {
+    this.app = app;
+    
     for (const key of this.keys) {
-      this.pools[key] = new PoolManager(tickManager, key);
+      this.pools[key] = new PoolManager(this, key);
     }
   }
 
@@ -31,12 +22,16 @@ export class ObjectManager {
     }
   }
 
+  /**
+   * console log the contents of the pools
+   */
   dump() {
     for (const key of this.keys) {
       console.log(`pool ${key}`, this.pools[key].pool.entries());
     }
   }
 
+  
   /**
    * Returns the whole object from a chunked file
    * @param {string} id 
@@ -198,7 +193,7 @@ export class ObjectManager {
       // prepare the context for this execution
       context.actor = obj.id;
       obj.code = this.getCode(obj.id);
-      this.tickManager.commandManager.runCodeFrom(obj.code, triggered.block, context);
+      this.app.commandManager.runCodeFrom(obj.code, triggered.block, context);
     }
   }
 
@@ -398,7 +393,7 @@ export class ObjectManager {
    * @returns {object}
    */
   lookLoc(context) {
-    const data = this.tickManager.lookManager.look(context);
+    const data = this.app.lookManager.look(context);
     // messageManager.add(data);
     return data;
   }
@@ -409,8 +404,9 @@ export class ObjectManager {
    * @returns {object}
    */
   listLoc(context) {
-    const data = this.tickManager.lookManager.list(context);
+    const data = this.app.lookManager.list(context);
     return data;
   }
-};
 
+
+}

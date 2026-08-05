@@ -2,8 +2,8 @@
 export class PlayerManager {
   #sessions = new Map(); // token -> username
 
-  constructor(tickManager) {
-    this.tickManager = tickManager;
+  constructor(app) {
+    this.app = app;
   }
 
   handle(request, result) {
@@ -15,14 +15,14 @@ export class PlayerManager {
       if (!data) { result.writeHead(401); result.end(); return({type: "empty"}); }
 
       if (data.type == 'return') {
-        const obj = this.tickManager.objectManager.getById(data.id);
+        const obj = this.app.db.getById(data.id);
         if (!obj) {
           return {type: "no obj ", data: {data}};
         }
         //console.log(`get data.id`, data.id, obj);
          playerState = { type: "return", id: obj.id, playername: obj.name, loc: obj.loc };
       } else if (data.type == 'login') {
-        const obj = this.tickManager.objectManager.findPlayer(data);
+        const obj = this.app.db.findPlayer(data);
         if (!obj) {
           playerState = {type: "login"};
         } else {
@@ -50,7 +50,7 @@ export class PlayerManager {
 
   #validate(user, pw) {
     // TODO: check DB with hashed pw
-    const obj = this.tickManager.objectManager.findUser(user, pw);
+    const obj = this.app.db.findUser(user, pw);
     return (obj) ? true : false;
   }
 
@@ -60,7 +60,7 @@ export class PlayerManager {
    * @param {string} pw 
    */
   add(user, pw) {
-    const obj = this.tickManager.objectManager.findUser(user, pw);
+    const obj = this.app.db.findUser(user, pw);
     const token = crypto.randomUUID();
     this.#sessions.set(token) = {user: user, pw: pw};
   }

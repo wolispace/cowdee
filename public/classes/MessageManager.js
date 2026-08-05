@@ -1,4 +1,4 @@
-import { Queue } from '../Queue.js';
+import { Queue } from './Queue.js';
 /**
  * Handles the Server Side Events (SSE) hence cowsee (yes I know sse and see but see is nicer)
  */
@@ -7,15 +7,15 @@ export class MessageManager extends Queue {
   #clients = new Set();
   players = new Set();
 
-  constructor(tickManager) {
+  constructor(app) {
     super();
-    this.tickManager = tickManager;
+    this.app = app;
   }
 
   add(data) {
-    this.tickManager.objectManager.prepContext(data);
+    this.app.db.prepContext(data);
     super.add(data);
-    this.tickManager.doNext();
+    this.app.doNext();
   }
 
   handle(request, result) {
@@ -34,7 +34,7 @@ export class MessageManager extends Queue {
   send(data) {
     const payload = `data: ${JSON.stringify(data)}\n\n`;
     for (const result of this.#clients) result.write(payload);
-    this.tickManager.commandManager.reactions(data);
+    this.app.commandManager.reactions(data);
   }
 
   show() {

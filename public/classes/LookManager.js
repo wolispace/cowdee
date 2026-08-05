@@ -1,5 +1,4 @@
-import { SetMap } from '../SetMap.js';
-import { Utilities } from '../Utils.js';
+import { SetMap } from './SetMap.js';
 
 export class LookManager {
   seen = [];
@@ -12,10 +11,8 @@ export class LookManager {
   objCounter = 0;
   maxPerGroup = 2;
 
-  constructor(tickManager) {
-    this.tickManager = tickManager;
-    this.objectManager = this.tickManager.objectManager;
-    this.utils = new Utilities();
+  constructor(app) {
+    this.app = app;
   }
 
   /**
@@ -26,8 +23,8 @@ export class LookManager {
     this.context = context;
     this.sentences = [];
     
-    const loc = this.objectManager.getById(this.context.loc);
-    this.found = this.objectManager.findInLoc(loc.id);
+    const loc = this.db.getById(this.context.loc);
+    this.found = this.db.findInLoc(loc.id);
 
     this.sentences = [`In {${loc.id}} you see: `];
     if (this.found.size < 1) {
@@ -61,14 +58,14 @@ export class LookManager {
       this.sentences.push('You are nowhere');
       return this.returnData();
     }
-    let loc = this.objectManager.getById(this.context.loc);
+    let loc = this.db.getById(this.context.loc);
     if (!loc) {
-      loc = this.objectManager.getById(0);
+      loc = this.db.getById(0);
     }
     if (loc) {
-      this.objectManager.formatObject(loc);
+      this.db.formatObject(loc);
     }
-    this.found = this.objectManager.findInLoc(loc.id);
+    this.found = this.db.findInLoc(loc.id);
     // console.log(`found in ${loc.id}`, this.found);
     const inon = 'in';
     this.sentences = [`You are ${inon} {${loc.id}}`];
@@ -99,10 +96,10 @@ export class LookManager {
   populateObjs() {
     const objs = {};
     for (const id of this.found) {
-      const obj = this.objectManager.getById(id);
+      const obj = this.db.getById(id);
       if (!obj || obj.pose == 'hidden') continue;
       objs[id] = obj;
-      this.objectManager.formatObject(objs[id]);
+      this.db.formatObject(objs[id]);
     }
     return objs;
   }

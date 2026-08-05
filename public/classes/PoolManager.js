@@ -12,12 +12,12 @@ export class PoolManager {
   /**
    * A pool manager you get and set into which loads and saves to a base62 shard file eg 'index_name_D.json' 
    * (assume linux with case sensitive filenames)
-   * @param {object} tickManager  
+   * @param {object} app  
    * @param {string} keyName - what this pool is storing: ids, names, code, locations etc..?
    */
-  constructor(tickManager, keyName = 'id') {
-    this.tickManager = tickManager;
-    this.utils = this.tickManager.utils;
+  constructor(app, keyName = 'id') {
+    this.app = app;
+    this.utils = this.app.utils;
     this.keyName = keyName;
     this.basename += this.keyName;
   }
@@ -39,7 +39,7 @@ export class PoolManager {
    */
   get(key) {
     if (this.pool.has(key)) return this.pool.get(key);
-    const items = this.tickManager.fileManager.loadJson(this.shardName(key));
+    const items = this.app.io.loadJson(this.shardName(key));
     const item = new Set(items?.[key] ?? []);
     this.pool.replace(key, item);
     return item;
@@ -65,7 +65,7 @@ export class PoolManager {
       this.pool.add(key, thing);
     }
     this.dirtyUpdated.add(key);
-    this.tickManager.anyDirty = true;
+    this.app.anyDirty = true;
     // remove from the previous key eg was in loc:A now in loc:B
     // if loc is empty then flag it as deleted
     if (!oldKey || oldKey === key) return;
@@ -76,10 +76,10 @@ export class PoolManager {
     if (isEmpty) {
       // console.log(`delete old loc=${oldKey} id=${thing} isEmpty=`, isEmpty);
       this.dirtyDeleted.add(oldKey);
-          this.tickManager.anyDirty = true;
+          this.app.anyDirty = true;
     } else {
       this.dirtyUpdated.add(oldKey);
-          this.tickManager.anyDirty = true;
+          this.app.anyDirty = true;
     }
   }
 
@@ -97,11 +97,11 @@ export class PoolManager {
       if (thing === undefined || thing === null) {
         this.pool.delete(key);
         this.dirtyDeleted.add(key);
-            this.tickManager.anyDirty = true;
+            this.app.anyDirty = true;
       } else {
         existing.delete(thing);
         this.dirtyUpdated.add(key);
-            this.tickManager.anyDirty = true;
+            this.app.anyDirty = true;
       }
     }
   }
@@ -162,7 +162,7 @@ export class PoolManager {
 
     // Apply changes to each shard file
     for (const [filename, { updated, deleted }] of files) {
-      const json = this.tickManager.fileManager.loadJson(filename) ?? {};
+      const json = this.app.io.loadJson(filename) ?? {};
       // Apply deletions
       for (const key of deleted) {
         delete json[key];
@@ -179,7 +179,7 @@ export class PoolManager {
         const item = new Set(json?.[key] ?? undefined);
         this.pool.replace(key, item);
       }
-      this.tickManager.fileManager.saveJson(filename, json);
+      this.app.io.saveJson(filename, json);
     }
 
     this.dirtyUpdated.clear();

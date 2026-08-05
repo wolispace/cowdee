@@ -1,18 +1,17 @@
-import fs from 'fs';
-import { Utilities } from '../Utils.js';
-
 /**
  * Generate sequential IDs starting at 0 and incrementing in base62 or whatever we have set the alphabet to be
  * The 16,777,216th object will be id '9999' so plenty of growth wile taking up very little space 
  */
-export class IdManager {
+export class ID {
   filename = '_data/id_counter.json';
   counter = 0;
   // if alphabet is 62 char long then we are doing base62 encoding
   alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   chunkSize = 500; // how many objects per file
   chunkLength = 2; // how many chars in the chunk c0_cz or c00_czz 
-  constructor() {
+
+  constructor(app) {
+    this.app = app;
     this.load();
   }
 
@@ -21,18 +20,20 @@ export class IdManager {
    * @returns 
    */
   load() {
-    if (!fs.existsSync(this.filename)) {
-      this.counter = 0;
-      return;
-    }
-    this.counter = 0 + fs.readFileSync(this.filename);
+    // TODO: use IO to load the file
+    // if (!fs.existsSync(this.filename)) {
+    //   this.counter = 0;
+    //   return;
+    // }
+    // this.counter = 0 + fs.readFileSync(this.filename);
   }
 
   /**
    * Save the counter
    */
   save() {
-    fs.writeFileSync(this.filename, `${this.counter}`);
+    // TODO: use this.app.io to save the file
+    //fs.writeFileSync(this.filename, `${this.counter}`);
   }
 
   /**
@@ -40,12 +41,9 @@ export class IdManager {
    * @returns {string}
    */
   new() {
-    const utils = new Utilities();
-
     const id = this.encodeInt(this.counter);
     this.counter++;
     this.save();
-    //utils.log('id', id);
     return id;
   }
 

@@ -1,8 +1,4 @@
-import fs from 'fs';
-import path from 'path';
-import { Queue } from '../Queue.js';
-import { Utilities } from '../Utils.js';
-
+import { Queue } from './Queue.js';
 
 export class CommandManager extends Queue {
 
@@ -10,11 +6,9 @@ export class CommandManager extends Queue {
   context = {}; // the context the statement is run agains (which actor which location etc..)
   relWords = 'at|as|to|on|in|near|far from|far away from|away from|under|between|above|around|encompassing|beside|behind|leaning against|next to|through|against|with|by|over|across|facing|leaning|looking|leading|heading|pointing|going|running|to the|north|east|west|south|up|down|from|off';
 
-  constructor(tickManager) {
+  constructor(app) {
     super();
-    this.tickManager = tickManager;
-    this.utils = new Utilities();
-
+    this.app = app;
   }
 
   handle(request, result) {
@@ -24,13 +18,13 @@ export class CommandManager extends Queue {
       const userCommand = JSON.parse(body);
       // DEBUG:
       if (userCommand.cmd.includes('dump')) {
-        this.tickManager.objectManager.dump();
+        this.app.db.dump();
       }
       // userCommand = {actor: 'w', loc: '2', cmd: 'create a small black cat', lastt='X'}
       this.add(userCommand);
       result.writeHead(200, { 'Content-Type': 'application/json' });
       result.end(JSON.stringify({ ok: true }));
-      this.tickManager.doNext();
+      this.app.doNext();
     });
   }
 
@@ -70,7 +64,7 @@ export class CommandManager extends Queue {
   parse(commandObj) {
     //console.log({commandObj});
     // reset reactions after a human sends something
-    this.tickManager.objectManager.reactions = 0;
+    this.app.db.reactions = 0;
     const rawCmd = commandObj.cmd;
     if (!rawCmd) return;
 
@@ -89,11 +83,11 @@ export class CommandManager extends Queue {
     };
     // add
     const objs = {}
-    objs[this.context.actor] = this.tickManager.objectManager.getFormattedById(this.context.actor);
+    objs[this.context.actor] = this.app.db.getFormattedById(this.context.actor);
 
-    const code = this.tickManager.objectManager.findCommand(firstword, this.context);
+    const code = this.app.db.findCommand(firstword, this.context);
     if (!code) {
-      this.tickManager.messageManager.add({
+      this.app.messageManager.add({
         msg: `{${this.context.actor}} tries to ${rawCmd}, but nothing happens`,
         objs: objs,
         context: this.context
@@ -201,7 +195,7 @@ export class CommandManager extends Queue {
     let value = this.context[varName] ?? '';
 
     for (let i = 1; i < parts.length; i++) {
-      const obj = this.tickManager.objectManager.getById(value);
+      const obj = this.app.db.getById(value);
       if (!obj) return '';
       value = obj[parts[i]] ?? '';
     }
@@ -218,7 +212,7 @@ export class CommandManager extends Queue {
   resolveObj(token) {
     const id = this.resolveValue(token);
     if (!id) return null;
-    return this.tickManager.objectManager.getById(id) || null;
+    return this.app.db.getById(id) || null;
   }
 
   /**
@@ -411,7 +405,7 @@ export class CommandManager extends Queue {
       this.context.second = lsecond;
 
       // Helper: returns true if the value is already a known object ID (skip name lookup)
-      const isAlreadyId = (val) => !!this.tickManager.objectManager.getById(val);
+      const isAlreadyId = (val) => !!this.app.db.getById(val);
 
       // Resolve: if the variable is 'target' or 'second', look up the object ID
       if (ntarget) {
@@ -419,7 +413,7 @@ export class CommandManager extends Queue {
           // Already an ID (e.g. resolved from 'it') — use directly
           this.context.target = ntarget;
         } else {
-          const resolved = this.tickManager.objectManager.findByNameInLoc(ntarget, getLocValue);
+          const resolved = this.app.db.findByNameInLoc(ntarget, getLocValue);
           this.context.target = resolved || ntarget; // keep raw text if no object found
         }
       }
@@ -427,7 +421,7 @@ export class CommandManager extends Queue {
         if (isAlreadyId(nsecond)) {
           this.context.second = nsecond;
         } else {
-          const resolved = this.tickManager.objectManager.findByNameInLoc(nsecond, getSecondLocValue);
+          const resolved = this.app.db.findByNameInLoc(nsecond, getSecondLocValue);
           this.context.second = resolved || nsecond; // keep raw text if no object found
         }
       }
@@ -530,7 +524,7 @@ export class CommandManager extends Queue {
       obj[prop] = val;
 
       // Save the updated object
-      this.tickManager.objectManager.save(obj, oldObj);
+      this.app.db.save(obj, oldObj);
     },
 
     // eg: update $new_id to "worth=0, link=$exit, material='_door_', color='lightgreen'"
@@ -551,7 +545,7 @@ export class CommandManager extends Queue {
         obj[prop] = val;
       }
 
-      this.tickManager.objectManager.save(obj, oldObj);
+      this.app.db.save(obj, oldObj);
     },
 
     clear: (rest) => {
@@ -571,7 +565,7 @@ export class CommandManager extends Queue {
       // TODO: clear the x, y and z and maybe other positional things
 
       // Save the updated object
-      this.tickManager.objectManager.save(obj, oldObj);
+      this.app.db.save(obj, oldObj);
     },
 
     // SAY handler
@@ -581,9 +575,9 @@ export class CommandManager extends Queue {
       // include the trigger word 'say' or 'ask' into the context so we can find which objects react to it
       this.context.trigger = (match[1]);
 
-      let msg = this.utils.trimQuotes(match[2].trim());
+      let msg = this.app.utils.trimQuotes(match[2].trim());
 
-      this.tickManager.messageManager.add({
+      this.app.messageManager.add({
         msg,
         brief: true,
         objs: this.objs,
@@ -594,23 +588,23 @@ export class CommandManager extends Queue {
     relook: (rest) => {
       const loc = this.resolveValue(rest.trim());
       this.context.loc = loc;
-      const data = this.tickManager.objectManager.lookLoc({ ...this.context });
-      this.tickManager.messageManager.add(data);
+      const data = this.app.db.lookLoc({ ...this.context });
+      this.app.messageManager.add(data);
     },
 
     
     list: (rest) => {
       const loc = this.resolveValue(rest.trim());
       this.context.loc = loc;
-      const data = this.tickManager.objectManager.listLoc({ ...this.context });
-      this.tickManager.messageManager.add(data);
+      const data = this.app.db.listLoc({ ...this.context });
+      this.app.messageManager.add(data);
 
     },
 
 
     new: (rest) => {
       const parsed = this.parseObj(this.resolveValue(rest.trim()));
-      const objectManager = this.tickManager.objectManager;
+      const db = this.app.db;
       const loc = this.context.loc;
       // find existing object with same class+name in this loc to stack onto
       // let existing = null;
@@ -631,8 +625,8 @@ export class CommandManager extends Queue {
 
       // quick and simple object creator
       const obj = { loc, ...parsed };
-      obj.id = objectManager.idManager.new();
-      objectManager.addToPools(obj);
+      obj.id = this.app.id.new();
+      db.addToPools(obj);
       this.context.target = obj.id;   // set target to the new object's ID
       this.context.lastt = obj.id;    // update lastt so 'it' works in follow-up commands
       this.context.new_id = obj.id;
@@ -651,7 +645,7 @@ export class CommandManager extends Queue {
     },
 
     flush: ($rest) => {
-      this.tickManager.objectManager.flush();
+      this.app.db.flush();
     },
 
     unhost: (rest) => {
@@ -659,15 +653,15 @@ export class CommandManager extends Queue {
       // Supports simple vars ($target) and chained expressions ($target's link's host)
       const obj = this.resolveObj(rest.trim());
       if (!obj) return;
-      const hosted = this.tickManager.objectManager.findInLoc(obj.id);
+      const hosted = this.app.db.findInLoc(obj.id);
       for (const subId of hosted) {
-        const sub = this.tickManager.objectManager.getById(subId);
+        const sub = this.app.db.getById(subId);
         if (!sub) continue;
         const oldObj = { ...sub };
         sub.host = '';
         sub.hosthow = '';
         sub.pose = '';
-        this.tickManager.objectManager.save(sub, oldObj);
+        this.app.db.save(sub, oldObj);
       }
     },
 
@@ -709,7 +703,7 @@ export class CommandManager extends Queue {
    */
   reactions(data) {
     // eg 'ask', there is a robot in your location that "has statement "if taget of 'say' then answer;
-    this.tickManager.objectManager.findTrigger(data.context);
+    this.app.db.findTrigger(data.context);
 
   }
 }
