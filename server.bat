@@ -2,7 +2,8 @@
 :: SSE needs to hold the session open so the other requests dont get a lookin
 set PORT=8880
 start "" http://localhost:%PORT%/public/
-start "Website" "W:\My Drive\Apps\php7\php.exe" -S localhost:%PORT%
-// SSE server
+start "Website" "W:\My Drive\Apps\php\php_859\php.exe" -S localhost:%PORT%
+:: SSE server - multiple workers so concurrent connections don't block each other
 set PORT=8881
-start "SSE" "W:\My Drive\Apps\php7\php.exe" -S localhost:%PORT%
+:: set PHP_CLI_SERVER_WORKERS=10
+start "SSE" "W:\My Drive\Apps\php\php_859\php.exe" -S localhost:%PORT%

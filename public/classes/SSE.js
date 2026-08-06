@@ -7,33 +7,35 @@ export class SSE {
     url.port = '8881';
     url.pathname = '/public/sse.php';
 
-    // for dev this will be 'http://localhost:8881/public/sse.php'
-    this.sse = new EventSource(url.toString());
-    
-
-    // TODO: convert string into a context object
-    // - do we need a Context() class?
-    // remember last context key (timestamp+actorID) so we dont show the same one twice
-    // process each context as it comes in as per this.app.commandManager.handle() 
     const lastSeen = () => localStorage.getItem('lastContext') || '';
 
-    this.sse.addEventListener('context', (event) => {
+    const connect = () => {
+      const url = new URL(window.location.href);
+      url.port = '8881';
+      url.pathname = '/public/sse.php';
+      url.searchParams.set('since', lastSeen());
+      console.log('[SSE] connecting, since:', lastSeen() || '(none)');
+      this.sse = new EventSource(url.toString());
+
+      this.sse.addEventListener('context', (event) => {
         const msg = JSON.parse(event.data);
-        if (msg.ts <= lastSeen()) return;
+        const lastTs = parseInt(lastSeen()) || 0;
+        console.log('[SSE] received:', msg.ts, 'lastSeen:', lastTs, 'skip:', msg.ts <= lastTs);
+        if (msg.ts <= lastTs) return;
         localStorage.setItem('lastContext', msg.ts);
-        console.log("process context:", msg);
-    });
+        console.log('[SSE] processing:', msg);
+      });
 
-    this.sse.addEventListener('ping', () => {
-        //console.log("heartbeat");
-    });
-
-    this.sse.addEventListener('shutdown', () => {
-       // console.log("Server ended session, reconnecting soon...");
-    });
-
-    this.sse.onerror = () => {
-       // console.log("Connection lost, retrying...");
+      this.sse.addEventListener('shutdown', () => {
+        console.log('[SSE] shutdown, reconnecting...');
+        connect();
+      });
+      this.sse.onerror = (e) => {
+        console.log('[SSE] error, state:', this.sse.readyState, e);
+        setTimeout(connect, 1000);
+      };
     };
+
+    connect();
   }
 }
