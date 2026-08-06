@@ -7,10 +7,9 @@ header('Connection: keep-alive');
 while (ob_get_level() > 0) ob_end_flush();
 flush();
 
-$lastSeeenRecord = '_last_context.txt';
 $dir = '_contexts';
 $endTime = time() + 25;
-$lastSeen = file_exists($lastSeeenRecord) ? file_get_contents($lastSeeenRecord) : ''; // track by filename timestamp prefix
+$lastSeen = '';
 
 while (time() < $endTime) {
   $files = glob("$dir/*.json");
@@ -24,7 +23,6 @@ while (time() < $endTime) {
     }
   }
   sse_event('ping', ['alive' => true]);
-  file_put_contents($lastSeeenRecord, $lastSeen);
   sleep(3);
 }
 

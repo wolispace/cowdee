@@ -15,9 +15,13 @@ export class SSE {
     // - do we need a Context() class?
     // remember last context key (timestamp+actorID) so we dont show the same one twice
     // process each context as it comes in as per this.app.commandManager.handle() 
+    const lastSeen = () => localStorage.getItem('lastContext') || '';
+
     this.sse.addEventListener('context', (event) => {
         const msg = JSON.parse(event.data);
-        console.log("new context:", msg);
+        if (msg.ts <= lastSeen()) return;
+        localStorage.setItem('lastContext', msg.ts);
+        console.log("process context:", msg);
     });
 
     this.sse.addEventListener('ping', () => {
