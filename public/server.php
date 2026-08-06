@@ -16,16 +16,9 @@ function handleInput($request) {
     Combination of msTimestamp + actor] is the unique key per command.
     */
     $mstimestamp = round(microtime(true) * 1000);
-    $context = "{$mstimestamp},{$request['actor']},{$request['loc']},{$request['cmd']}"; 
-
-    // TODO: wrap this into a function
-    $f = fopen('_contexts.txt', 'a');
-    if (flock($f, LOCK_EX)) {
-      fwrite($f, $context . "\n");
-      flock($f, LOCK_UN);
-    }
-    fclose($f);
-
+    $filename = "_contexts/{$mstimestamp}_{$request['actor']}.json";
+    $context = json_encode(['ts' => $mstimestamp, 'actor' => $request['actor'], 'loc' => $request['loc'], 'cmd' => $request['cmd']]);
+    file_put_contents($filename, $context);
     outputJson(['status' => "ok"]);
   } else if (!empty($request['file'])) {
     $file = shardName($request['type'], $request['key']);
