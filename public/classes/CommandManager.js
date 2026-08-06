@@ -11,6 +11,7 @@ export class CommandManager extends Queue {
     this.app = app;
   }
 
+  // TODO: remove http code as this is pure js/json now
   handle(request, result) {
     let body = '';
     request.on('data', chunk => body += chunk);

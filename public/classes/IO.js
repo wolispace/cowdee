@@ -1,7 +1,7 @@
 // for handling data to and from server
 export class IO {
   token = '';
-  types = {command: '/public/api.php', player: '/?player'};
+  types = {command: '/public/server.php', player: '/?player'};
 
   setToken(token) {
     this.token = token;

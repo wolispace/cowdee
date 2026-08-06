@@ -5,11 +5,16 @@ export class SSE {
     const url = new URL(window.location.href);
     // Override only the port and pathname
     url.port = '8881';
-    url.pathname = '/public/server.php';
+    url.pathname = '/public/sse.php';
 
-    // for dev this will be 'http://localhost:8881/public/server.php'
+    // for dev this will be 'http://localhost:8881/public/sse.php'
     this.sse = new EventSource(url.toString());
     
+
+    // TODO: convert string into a context object
+    // - do we need a Context() class?
+    // remember last context key (timestamp+actorID) so we dont show the same one twice
+    // process each context as it comes in as per this.app.commandManager.handle() 
     this.sse.addEventListener('context', (event) => {
         const msg = JSON.parse(event.data);
         console.log("new context:", msg);

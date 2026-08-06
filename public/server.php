@@ -1,59 +1,66 @@
 <?php
-// --- SSE headers ---
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET');
-header('Content-Type: text/event-stream');
-header('Cache-Control: no-cache');
-header('Connection: keep-alive');
 
-// Disable buffering
-while (ob_get_level() > 0) {
-  ob_end_flush();
-}
-flush();
+// always recieve json data
+$request = json_decode(file_get_contents('php://input'), true);
 
-// How long this SSE session should run
-$sessionDuration = 25; // stay under shared-host 30s limit
-$endTime = time() + $sessionDuration;
-$file = '_contexts.txt';
-$lastFile = '_last_context_size.txt';
-$lastSize = file_get_contents($lastFile) ?? 0;
+handleInput($request);
 
-// Main loop
-while (time() < $endTime) {
-  clearstatcache(true, $file);
-  $currentSize = file_exists($file) ? filesize($file) : 0;
-  
-  if ($currentSize > $lastSize) {
-    $f = fopen($file, 'r');
-    if (flock($f, LOCK_SH)) {
-      fseek($f, $lastSize);
-      $newContent = fread($f, $currentSize - $lastSize);
+function handleInput($request) {
+
+  if (!empty($request['cmd'])) {
+    /*
+    We are writing a context per line in our text file
+    who what where and then (sorted as when,who,where,what)
+    {timestamp},{actor},{loc},{cmd}
+    The timestamp will be microseconds
+    Combination of msTimestamp + actor] is the unique key per command.
+    */
+    $mstimestamp = round(microtime(true) * 1000);
+    $context = "{$mstimestamp},{$request['actor']},{$request['loc']},{$request['cmd']}"; 
+
+    // TODO: wrap this into a function
+    $f = fopen('_contexts.txt', 'a');
+    if (flock($f, LOCK_EX)) {
+      fwrite($f, $context . "\n");
       flock($f, LOCK_UN);
-      fclose($f);
-      $lines = explode("\n", trim($newContent));
-      foreach ($lines as $line) {
-        if ($line !== '') sse_event("context", $line);
-      }
-      $lastSize = $currentSize;
-      file_put_contents($lastFile, $lastSize);    
     }
+    fclose($f);
+
+    outputJson(['status' => "ok"]);
+  } else if (!empty($request['file'])) {
+    $file = shardName($request['type'], $request['key']);
+    if (empty($request['content'])) {
+      $json = loadJson($request['file']);
+      outputJson($json);
+    } else {
+      // write json to disk..
+      saveJson($request['file'], $request['content']);
+    }
+    return outputJson(['error' => 'invalid request']);
   }
-  //-- Heartbeat every 5 seconds ---
-  sse_event("ping", ["alive" => true]);
-  // Sleep before next cycle
-  sleep(3);
 }
 
-// Helper to send SSE events
-function sse_event($event, $data) {
-  echo "event: $event\n";
-  echo "data: " . json_encode($data) . "\n\n";
-  flush();
+/**
+ * Builts a data file name based on the type and key eg index_name_8.json
+ * @param {string} type
+ * @param {string} key
+ */
+function shardName($type = '_', $key = '_') {
+  return "_data/index_{$type}_{$key[0]}.json";
 }
 
-// Graceful shutdown message
-sse_event("shutdown", [
-    "reason" => "session ended, client should reconnect"
-]);
+function outputJson($data) {
+  header('Content-Type: application/json');
+  $data['x'] = "1";
+  echo json_encode($data);
+  exit;
+}
 
+function loadJson($file) {
+  return json_decode(file_get_contents($file), true);
+}
+
+function saveJson($file, $data) {
+  logIt('save ' . $file . ' ' . json_encode($data));
+  file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
+}
