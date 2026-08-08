@@ -1,4 +1,5 @@
 <?php
+require_once "utils.php";
 
 // always recieve json data
 $request = json_decode(file_get_contents('php://input'), true);
@@ -9,17 +10,23 @@ function handleInput($request) {
 
   if (!empty($request['cmd'])) {
     /*
-    We are writing a context per line in our text file
+    We are writing a context to disk.
     who what where and then (sorted as when,who,where,what)
     {timestamp},{actor},{loc},{cmd}
     The timestamp will be microseconds
-    Combination of msTimestamp + actor] is the unique key per command.
+    Combination of msTimestamp + actor is the unique filename  
+      1786021222321_wol.json
+      {"ts":1786021222321,"actor":"wol","loc":"2","cmd":"create a white cup"}
     */
     $mstimestamp = round(microtime(true) * 1000);
-    $filename = "_contexts/{$mstimestamp}_{$request['actor']}.json";
+    $filename = CONTEXT_DIR . "/{$mstimestamp}{$request['actor']}.json";
     $context = json_encode(['ts' => $mstimestamp, 'actor' => $request['actor'], 'loc' => $request['loc'], 'cmd' => $request['cmd']]);
     file_put_contents($filename, $context);
-    outputJson(['status' => "ok"]);
+    // get all new contexts we have not seen yet
+    $last = $request['last'] ?? '0';
+    $contexts = get_new_contexts($last);
+    outputJson(['contexts' => json_encode($contexts)]);
+
   } else if (!empty($request['file'])) {
     $file = shardName($request['type'], $request['key']);
     if (empty($request['content'])) {

@@ -5,15 +5,6 @@
 export class Utils {
 
   /**
-   * Generate a random number form 0 to max eg 0 - 10
-   * @param {int} max 
-   * @returns {int}
-   */
-  random(max = 1) {
-    return Math.floor(Math.random() * max);
-  }
-
-  /**
    * Removes wrapping quotes from the string eg '"hello"' becomes: 'hello'
    * - will work with enything like {hello} or [hello]
    * - will clobber unquoted strings so hello becomes ell 
@@ -104,23 +95,18 @@ export class Utils {
    */
   getImmediateCaller() {
     const originalFunc = Error.prepareStackTrace;
-
     // Override the stack formatter to return structured call sites
     Error.prepareStackTrace = (_, stack) => stack;
-
     const err = new Error();
     const stack = err.stack;
-
     // Restore the original formatter
     Error.prepareStackTrace = originalFunc;
-
     // stack[0] is getImmediateCaller
     // stack[1] is the function that called getImmediateCaller
     // stack[2] is the parent/immediate caller you are looking for
     if (stack && stack[2]) {
       return stack[2].getFunctionName() || 'anonymous';
     }
-
     return 'unknown';
   }
 

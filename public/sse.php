@@ -1,4 +1,7 @@
 <?php
+
+require_once "utils.php";
+
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: text/event-stream');
 header('Cache-Control: no-cache');
@@ -8,22 +11,31 @@ while (ob_get_level() > 0) ob_end_flush();
 flush();
 
 $dir = '_contexts';
-$endTime = time() + 25;
-$lastSeen = '';
+$endTime = time() + 55;
+$since = isset($_GET['since']) ? (int)$_GET['since'] : 0;
 
-while (time() < $endTime) {
+function check_files($dir, &$since) {
   $files = glob("$dir/*.json");
   if ($files) {
     sort($files);
     foreach ($files as $file) {
-      if ($file > $lastSeen) {
-        sse_event('context', json_decode(file_get_contents($file), true));
-        $lastSeen = $file;
+      $data = json_decode(file_get_contents($file), true);
+      if ($data['ts'] > $since) {
+        
+        $since = $data['ts'];
       }
     }
   }
-  sse_event('ping', ['alive' => true]);
-  sleep(3);
+}
+
+//$contexts = check_files($dir, $since);
+
+while (time() < $endTime) {
+  $contexts = check_files($dir, $since);
+  foreach ($contexts as $context) {
+    sse_event('context', $context);
+  }
+  usleep(500000);
 }
 
 sse_event('shutdown', ['reason' => 'session ended, client should reconnect']);

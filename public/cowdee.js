@@ -9,6 +9,9 @@ import { MessageManager} from './classes/MessageManager.js';
 import { CommandManager} from './classes/CommandManager.js';
 import { PlayerManager} from './classes/PlayerManager.js';
 import { LookManager} from './classes/LookManager.js';
+import { Context} from './classes/Context.js';
+
+const LAST_CONTEXT_KEY = 'lastContext'; // how we local store the last see context key
 
 class App {
 
@@ -17,6 +20,7 @@ class App {
   saveTimeout = null;
   #isProcessing = false;
   anyDirty = false; // set by pools to true the moment one pool is dirty, clear after save
+  lastContext = '0'; // last seen context.key
 
   constructor(testing) {
     this.utils = new Utils(this); // random utils
@@ -35,7 +39,8 @@ class App {
   }
 
   start() {
-    console.log('started');
+    this.lastContext = localStorage.getItem(LAST_CONTEXT_KEY);
+    console.log(`started last=${this.lastContext}`);
     // this.ui.showDialog(' Hi ', () => {alert('hmm')});
 
     // universal form submit we pass to the handler for forms
@@ -54,9 +59,33 @@ class App {
     console.log('wake player');
   }
 
+  /**
+   * Have we already see/processed this context (save in localStorage if we havent)
+   * Load lastContext from local storage on start() 
+   * @param {string} key 
+   * @returns {boolean}
+   */
+  seen(key) {
+    if (this.lastContext >= key) {
+      return true;
+    }; 
+    console.log(`setting lastContext to ${key}`);
+    this.lastContext = localStorage.setItem(LAST_CONTEXT_KEY, key);
+    return false;
+  }
+
   async sendCommand(data) {
+    data.last = localStorage.getItem(LAST_CONTEXT_KEY);
     const result = await this.io.fetchJson('command', data);
-    console.log('sendCommand', result);
+    console.log(`sendCommand last=${data.last}`, result);
+    if (result.contexts) {
+      const contexts = JSON.parse(result.contexts);
+      for ( const rawContext of contexts) {
+        rawContext.app = this; // stuff the app into the context object
+        const context = new Context(rawContext);
+        context.process();
+      }
+    }
   }
 
   async handleForm(data) {
