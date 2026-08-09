@@ -5,8 +5,6 @@ import { IO } from './classes/IO.js';
 import { UI } from './classes/UI.js';
 import { DB } from './classes/DB.js';
 import { ID } from './classes/ID.js';
-import { MessageManager} from './classes/MessageManager.js';
-import { CommandManager} from './classes/CommandManager.js';
 import { PlayerManager} from './classes/PlayerManager.js';
 import { LookManager} from './classes/LookManager.js';
 import { Context} from './classes/Context.js';
@@ -29,8 +27,6 @@ class App {
     this.ui = new UI(this); // user interface
     this.db = new DB(this); // database - read and write objects
     this.id = new ID(this); // generate unique sequential ids
-    this.messageManager = new MessageManager(this);
-    this.commandManager = new CommandManager(this);
     this.playerManager = new PlayerManager(this);
     this.lookManager = new LookManager(this);
     
@@ -57,6 +53,11 @@ class App {
 
   wakePlayer() {
     console.log('wake player');
+  }
+
+  showMsg(context) {
+    if (this.playerInfo.loc != context.loc && context.loc != '') return;
+    
   }
 
   /**

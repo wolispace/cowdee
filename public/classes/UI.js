@@ -6,7 +6,8 @@ export class UI {
   startBottomH = 0;
   splitRatio = null; // null = use CSS flex defaults; 0–1 = top's share after drag
 
-  constructor() {
+  constructor(app) {
+    this.app = app;
     this.splitter = document.getElementById('splitter');
     this.panels = document.getElementById('panels');
     this.top = document.getElementById('top');
@@ -18,7 +19,89 @@ export class UI {
     this.initDialog();
   }
 
-  
+  addMessage(context) {
+    const div = document.createElement("div");
+    const section = context.top ? '#top' : '#bottom';
+    const info = document.querySelector(section);
+    // set the last target so we can refer to it as 'it' or 'them'
+    if (context?.target) {
+      this.app.playerInfo.lastt = context.target;
+    }
+
+    // DEBUG: If the user simply includes 'logoff' in the msg then logoff - make a propper command later
+    if (context.msg.includes('logoff')) {
+      localStorage.clear(PLAYER_KEY);
+      localStorage.clear(TOKEN_KEY);
+      showDialog('You have logged off<form><menu><button class="buttonize">Ok</button></menu></form>');
+    }
+    context.playerId = this.app.playerInfo.id;
+    context.msg = this.expand(context);
+
+    if (context.msg) {
+      div.innerHTML = context.msg;
+      if (context.top) {
+        info.replaceChildren(div);
+        // auto-scroll top for new look around
+        // TODO: only scroll if the current scroll position is at the bottom before appending the content
+        info.scrollTop = 0;
+      } else {
+        info.appendChild(div);
+        // auto-scroll bottom to newest content
+        // TODO: only scroll if the current scroll position is at the bottom before appending the content
+        info.scrollTop = info.scrollHeight;
+      }
+    }
+  }
+
+  // TODO: update to read objects directl from this.app.db not context.objs
+  expand(context, format = 'html') {
+    if (context.msg) {
+      // Interpolate object templates: {ID} (defaults to longname) or {ID.attribute}
+      context.msg = context.msg.replace(/\{(\w+)(?:\.(\w+))?\}/g, (match, id, attr) => {
+        const obj = this.app.db.getById(id);
+        if (!obj) return match;
+        this.app.db.formatObject(obj);
+
+        const prop = attr || 'longname';
+        let val = obj[prop] !== undefined ? obj[prop] : '';
+
+        // Special handling if the player/actor matches the object ID (e.g. 'w' -> wolis)
+        if (prop === 'longname' && id === context.playerId) {
+          val = `${obj.name} (you)`;
+        }
+        // TODO: something in the context dictates "a bus" or "the bus"
+        // if (['pus','drop','pose','paint'].includes(context.context.trigger)) {
+        //   val = `the ${obj.longname}`;
+        // }
+
+        if (!['longname', 'name', 'shorname', 'plural'].includes(prop)) {
+          return val;
+        }
+
+        if (format == 'html') {
+          // Format value with styling if color is defined
+          const color = obj.color;
+          let styled = val;
+          if (color && val !== '') {
+            styled = `<span style="color: ${color}">${val}</span>`;
+          }
+          return `<a href="#" class="obj-link" data-id="${id}" title="Examine ${val} [${id}]">${styled}</a>`;
+        } else {
+          return val;
+        }
+      });
+
+      context.msg = context.msg.replace(/\s+/g, ' ').trim();
+    }
+    return this.capitalEachSentence(context.msg);
+  }
+
+  capitalEachSentence(text) {
+    return text.replace(/\.\s+([a-z])/g, (_, letter) => `. ${letter.toUpperCase()}`);
+  }
+
+
+
   /**
    * initlialises the dialog, linking the element as a dialog
    */

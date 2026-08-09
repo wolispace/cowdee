@@ -15,6 +15,16 @@ export class Context {
   process() {
     if (this.app.seen(this.key())) return;
     console.log('processing ', this.ts, this.actor, this.loc, this.cmd);
+    if (!this.cmd) return;
+    ({ cowmand: this.cowmand, rest: this.rest } = this.splitFirstWord(this.cmd));
+    const code = this.app.db.findCommand(this);
+    if (!code) {
+      this.msg = `{${this.actor}} tries to ${this.cmd}, but nothing happens`,        
+      this.app.addMsg(this);
+      return;
+    };
+    this.runCodeFrom(code, '__start');
+
   }
 
   /**
