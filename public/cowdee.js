@@ -31,7 +31,8 @@ class App {
     this.lookManager = new LookManager(this);
     
     if (testing) return;
-    setInterval(() => this.doNext(), this.interval);
+    // TODO: do we need to poll or process a queue.. I think not any more....
+    // setInterval(() => this.doNext(), this.interval);
   }
 
   start() {
@@ -54,7 +55,7 @@ class App {
   wakePlayer() {
     console.log('wake player');
   }
-  
+
   /**
    * Have we already see/processed this context (save in localStorage if we havent)
    * Load lastContext from local storage on start() 
@@ -72,7 +73,7 @@ class App {
 
   async sendCommand(data) {
     data.last = localStorage.getItem(LAST_CONTEXT_KEY);
-    const result = await this.io.fetchJson('command', data);
+    const result = await this.io.fetchJson('server', data);
     console.log(`sendCommand last=${data.last}`, result);
     if (result.contexts) {
       const contexts = JSON.parse(result.contexts);
@@ -86,7 +87,7 @@ class App {
 
   async handleForm(data) {
     if (data.type == 'login') {
-      const result = await this.io.fetchJson('player', data);
+      const result = await this.io.fetchJson('server', data);
       if (result.id) {
         localStorage.setItem(PLAYER_KEY, result.id);
         playerInfo.id = result.id;

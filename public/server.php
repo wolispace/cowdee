@@ -28,13 +28,13 @@ function handleInput($request) {
     outputJson(['contexts' => json_encode($contexts)]);
 
   } else if (!empty($request['file'])) {
-    $file = shardName($request['type'], $request['key']);
+    $file = shardName($request['file']);
     if (empty($request['content'])) {
-      $json = loadJson($request['file']);
+      $json = loadJson($file);
       outputJson($json);
     } else {
       // write json to disk..
-      saveJson($request['file'], $request['content']);
+      saveJson($file, $request['content']);
     }
     return outputJson(['error' => 'invalid request']);
   }
@@ -45,13 +45,12 @@ function handleInput($request) {
  * @param {string} type
  * @param {string} key
  */
-function shardName($type = '_', $key = '_') {
-  return "_data/index_{$type}_{$key[0]}.json";
+function shardName($filename) {
+  return "_db/{$filename}.json";
 }
 
 function outputJson($data) {
   header('Content-Type: application/json');
-  $data['x'] = "1";
   echo json_encode($data);
   exit;
 }

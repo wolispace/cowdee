@@ -4,6 +4,7 @@ import { PoolManager} from './PoolManager.js'
 export class DB {
   pools = {};
   keys = ['id', 'name', 'code', 'loc', 'trigger', 'info'];
+  dir = '_db';
 
   constructor(app) {
     this.app = app;

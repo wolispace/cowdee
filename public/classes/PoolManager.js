@@ -3,8 +3,7 @@ import { SetMap } from './SetMap.js';
 // a pool that loads from disk as needed and write out at intervals
 // this manages one pool so multiple poolManagers are needed for id, name, loc etc..
 export class PoolManager {
-  basename = 'index_'; // the base name of the files being read and written eg index_id_0_1999.json
-  key = ''; // keys are called 'id' 'name' etc..
+  type = ''; // type of pool 'id' 'name' etc..
   pool = new SetMap(); // pool of currently being interacted with objects
   dirtyUpdated = new Set(); // all of the modified objects
   dirtyDeleted = new Set(); // all of the deleted objects
@@ -13,13 +12,11 @@ export class PoolManager {
    * A pool manager you get and set into which loads and saves to a base62 shard file eg 'index_name_D.json' 
    * (assume linux with case sensitive filenames)
    * @param {object} app  
-   * @param {string} keyName - what this pool is storing: ids, names, code, locations etc..?
+   * @param {string} type - what this pool is storing: ids, names, code, locations etc..?
    */
-  constructor(app, keyName = 'id') {
+  constructor(app, type = 'id') {
     this.app = app;
-    this.utils = this.app.utils;
-    this.keyName = keyName;
-    this.basename += this.keyName;
+    this.type = type;
   }
 
   /**
@@ -37,9 +34,10 @@ export class PoolManager {
    * @returns {object}
    * 
    */
-  get(key) {
+  async aget(key) {
     if (this.pool.has(key)) return this.pool.get(key);
-    const items = this.app.io.loadJson(this.shardName(key));
+    const filename = `${this.type}_${key}`;
+    const items = await this.app.io.loadJson(filename);
     const item = new Set(items?.[key] ?? []);
     this.pool.replace(key, item);
     return item;
@@ -55,7 +53,7 @@ export class PoolManager {
    * @param {boolean} override 
    */
   set(key, thing, oldKey = null) {
-    if (this.utils.isObject(thing)) {
+    if (this.app.utils.isObject(thing)) {
       // 1:1 mapping: replace entirely with a single-element Set
       this.pool.replace(key, new Set([thing]));
     } else {
@@ -106,20 +104,6 @@ export class PoolManager {
     }
   }
 
-
-
-  /**
-   * Returns the case sensitive filename using the shard based on the key eg: 'mouse' = 'index_name_m.json'
-   * @param {string} key 
-   * @returns {string}
-   */
-  shardName(key) {
-    if (!key) key = '_';
-    return `${this.basename}_${key.charCodeAt(0)}`;
-    // DEBUG: esier seeing latters 
-    // return `${this.basename}_${key[0]}`;
-  }
-
   /**
    * Clears everything from this pool
    */
@@ -162,7 +146,7 @@ export class PoolManager {
 
     // Apply changes to each shard file
     for (const [filename, { updated, deleted }] of files) {
-      const json = this.app.io.loadJson(filename) ?? {};
+      const json = await this.app.io.loadJson(filename) ?? {};
       // Apply deletions
       for (const key of deleted) {
         delete json[key];

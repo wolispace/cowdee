@@ -1,10 +1,24 @@
 // for handling data to and from server
 export class IO {
   token = '';
-  types = {command: '/public/server.php', player: '/?player'};
+  types = {server: '/public/server.php', player: '/?player'};
+
+  constructor(app) {
+    this.app = app;
+  }
 
   setToken(token) {
     this.token = token;
+  }
+
+  async loadJson(filename) {
+    let json = localStorage.getItem(filename);
+    if (!json) {
+      // load json from the server
+      const payload = {filename: filename, token: this.token};
+      json = await this.fetchJson('server', payload);
+    }
+    return json;
   }
 
   async fetchJson(type, json) {
