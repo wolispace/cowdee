@@ -84,7 +84,7 @@ export class CommandManager extends Queue {
       });
       return;
     };
-    this.runCodeFrom(code, '__start');
+    await this.runCodeFrom(code, '__start');
   }
 
   /**
@@ -93,12 +93,10 @@ export class CommandManager extends Queue {
    * @param {string} block 
    * @param {object} context 
    */
-  runCodeFrom(code, block, context = this.context) {
+  async runCodeFrom(code, block, context = this.context) {
     this.context = context;
-    // Partition cowscript code into sub-blocks
     this.partitionCode(code);
-    // Execute from __start
-    this.runSub(block);
+    await this.runSub(block);
   }
 
   /**
@@ -125,7 +123,7 @@ export class CommandManager extends Queue {
   /**
    * Executes a subroutine block line-by-line (semicolon separated)
    */
-  runSub(subName) {
+  async runSub(subName) {
     const subContent = this.subs[subName];
     if (!subContent) {
       return;
@@ -134,14 +132,14 @@ export class CommandManager extends Queue {
     for (const statement of statements) {
       const trimmedStatement = statement.trim();
       if (!trimmedStatement) continue;
-      this.executeStatement(trimmedStatement);
+      await this.executeStatement(trimmedStatement);
     }
   }
 
   /**
    * Executes a single statement
    */
-  executeStatement(statement) {
+  async executeStatement(statement) {
     //console.log({ statement });
     const trimmed = statement.trim();
     if (!trimmed) return;
@@ -158,7 +156,7 @@ export class CommandManager extends Queue {
     const handler = this.statementList[firstword.toLowerCase()];
     if (handler) {
       // Pass the remaining string
-      handler(rest);
+      await handler(rest);
     } else {
       console.warn(`No handler found for statement keyword: "${firstword}"`);
     }
@@ -499,7 +497,7 @@ export class CommandManager extends Queue {
     */
 
     // SET handler - set object properties
-    set: (rest) => {
+    set: async (rest) => {
       // Match: $target's host to $second or $target's hosthow to "value"
       // match[1] = $var or chained $var's prop's prop, match[2] = prop, match[3] = value
       let match = rest.match(/^(\$[\w'\s]+)\s*'s\s+(\w+)\s+(?:to|=)\s+(.+)$/i);
@@ -514,11 +512,11 @@ export class CommandManager extends Queue {
       obj[prop] = val;
 
       // Save the updated object
-      this.app.db.save(obj, oldObj);
+      await this.app.db.save(obj, oldObj);
     },
 
     // eg: update $new_id to "worth=0, link=$exit, material='_door_', color='lightgreen'"
-    update: (rest) => {
+    update: async (rest) => {
       // match[1] = $var or chained expression, match[2] = key=val pairs
       const match = rest.match(/^(\$[\w'\s]+)\s+(?:to|=)\s+["']?(.+?)["']?$/i);
       if (!match) return;
@@ -535,10 +533,10 @@ export class CommandManager extends Queue {
         obj[prop] = val;
       }
 
-      this.app.db.save(obj, oldObj);
+      await this.app.db.save(obj, oldObj);
     },
 
-    clear: (rest) => {
+    clear: async (rest) => {
       // match[1] = $var or chained expression, match[2] = params
       const match = rest.match(/^(.+)\s*,\s*(.+)$/i);
       if (!match) return;
@@ -555,7 +553,7 @@ export class CommandManager extends Queue {
       // TODO: clear the x, y and z and maybe other positional things
 
       // Save the updated object
-      this.app.db.save(obj, oldObj);
+      await this.app.db.save(obj, oldObj);
     },
 
     // SAY handler
@@ -592,7 +590,7 @@ export class CommandManager extends Queue {
     },
 
 
-    new: (rest) => {
+    new: async (rest) => {
       const parsed = this.parseObj(this.resolveValue(rest.trim()));
       const db = this.app.db;
       const loc = this.context.loc;
@@ -616,7 +614,7 @@ export class CommandManager extends Queue {
       // quick and simple object creator
       const obj = { loc, ...parsed };
       obj.id = this.app.id.new();
-      db.addToPools(obj);
+      await db.addToPools(obj);
       this.context.target = obj.id;   // set target to the new object's ID
       this.context.lastt = obj.id;    // update lastt so 'it' works in follow-up commands
       this.context.new_id = obj.id;
@@ -638,12 +636,12 @@ export class CommandManager extends Queue {
       this.app.db.flush();
     },
 
-    unhost: (rest) => {
+    unhost: async (rest) => {
       // unhost everything hosted by this object.
       // Supports simple vars ($target) and chained expressions ($target's link's host)
       const obj = this.resolveObj(rest.trim());
       if (!obj) return;
-      const hosted = this.app.db.findInLoc(obj.id);
+      const hosted = await this.app.db.findInLoc(obj.id);
       for (const subId of hosted) {
         const sub = this.app.db.getById(subId);
         if (!sub) continue;
@@ -651,7 +649,7 @@ export class CommandManager extends Queue {
         sub.host = '';
         sub.hosthow = '';
         sub.pose = '';
-        this.app.db.save(sub, oldObj);
+        await this.app.db.save(sub, oldObj);
       }
     },
 

@@ -34,7 +34,7 @@ export class PoolManager {
    * @returns {object}
    * 
    */
-  async aget(key) {
+  async get(key) {
     if (this.pool.has(key)) return this.pool.get(key);
     const filename = `${this.type}_${key}`;
     const items = await this.app.io.loadJson(filename);
@@ -52,13 +52,13 @@ export class PoolManager {
    * @param {string} oldKey
    * @param {boolean} override 
    */
-  set(key, thing, oldKey = null) {
+  async set(key, thing, oldKey = null) {
     if (this.app.utils.isObject(thing)) {
       // 1:1 mapping: replace entirely with a single-element Set
       this.pool.replace(key, new Set([thing]));
     } else {
       if (!this.pool.has(key)) {
-        this.get(key);
+        await this.aget(key);
       }
       this.pool.add(key, thing);
     }
@@ -68,7 +68,7 @@ export class PoolManager {
     // if loc is empty then flag it as deleted
     if (!oldKey || oldKey === key) return;
     if (!this.pool.has(oldKey)) {
-      this.get(oldKey);
+      await this.aget(oldKey);
     }
     const isEmpty = this.pool.deleteValue(oldKey, thing);
     if (isEmpty) {
@@ -124,7 +124,7 @@ export class PoolManager {
    * Saves the dirty pool, merging whats on disk so we dont stomp over it
    * @returns 
    */
-  saveDirty() {
+  async saveDirty() {
     if (!this.isDirty()) return;
 
     const files = new Map();
@@ -146,7 +146,7 @@ export class PoolManager {
 
     // Apply changes to each shard file
     for (const [filename, { updated, deleted }] of files) {
-      const json = await this.app.io.loadJson(filename) ?? {};
+      const json = (await this.app.io.loadJson(filename)) ?? {};
       // Apply deletions
       for (const key of deleted) {
         delete json[key];

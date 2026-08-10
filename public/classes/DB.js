@@ -108,10 +108,10 @@ export class DB {
    * @param {string} key 
    * @returns {set}
    */
-  findInLoc(key) {
+  async findInLoc(key) {
     //  so we load fresh merged data
     if (this.pools.loc.isDirty()) {
-      this.pools.loc.saveDirty();
+      await this.pools.loc.saveDirty();
       this.pools.loc.clear();
     }
     return this.pools.loc.get(key);
@@ -203,8 +203,8 @@ export class DB {
    * @param {object} obj 
    * @param {object} old 
    */
-  save(obj, old) {
-    this.addToPools(obj, old);
+  async save(obj, old) {
+    await this.addToPools(obj, old);
   }
 
   /**
@@ -212,30 +212,30 @@ export class DB {
    * @param {obj} obj 
    * @param {object} old 
    */
-  addToPools(obj, old) {
+  async addToPools(obj, old) {
     // if there is already an obj, we maybe changing existing values like its loc from one to another
     // so clear from all pools
     if (obj.code) {
-      this.pools.code.set(obj.id, { id: obj.id, loc: obj.loc, code: obj.code }, null, true);
+      await this.pools.code.set(obj.id, { id: obj.id, loc: obj.loc, code: obj.code }, null, true);
       this.addTriggers(obj);
       delete obj.code; // const { code, ...rest } = obj; // delete obj.code using destructuring
     }
     if (obj.info) {
-      this.pools.info.set(obj.id, obj.info, null, true);
+      await this.pools.info.set(obj.id, obj.info, null, true);
       delete obj.info; // delete const { info, ...rest } = obj; // delete obj.info using destructuring
     }
     this.formatObject(obj);
-    this.pools.id.set(obj.id, obj, null, true);
+    await this.pools.id.set(obj.id, obj, null, true);
     const oldLongName = `${old?.class ?? ''} ${old?.name ?? ''}`.trim().toLowerCase();
     const objLongName = `${obj?.class ?? ''} ${obj?.name ?? ''}`.trim().toLowerCase();
 
     if (oldLongName != objLongName) {
       for (const name of objLongName.split(' ').filter(Boolean)) {
-        this.pools.name.set(name, obj.id);
+        await this.pools.name.set(name, obj.id);
       }
     }
     if (!old || obj.loc !== old.loc) {
-      this.pools.loc.set(obj.loc, obj.id, old?.loc);
+      await this.pools.loc.set(obj.loc, obj.id, old?.loc);
     }
   }
 
@@ -259,13 +259,13 @@ export class DB {
    * Write to disk all of the changed pools
    * - merging the objects with existing json on disk
    */
-  savePoolsToDisk() {
+  async savePoolsToDisk() {
 
     const caller = this.utils.getImmediateCaller();
     // console.log(caller, '--- save pool ---');
     // save changed pools to disk
     for (const pool of Object.values(this.pools)) {
-      pool.saveDirty();
+      await pool.saveDirty();
     }
   }
 
