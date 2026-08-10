@@ -46,18 +46,7 @@ export class CommandManager extends Queue {
     });
   }
 
-  /**
-   * Splits off the first word, leaving the rest
-   * @param {string} whole 
-   * @returns {firstword, rest, whole}
-   */
-  splitFirstWord(whole) {
-    const trimmed = whole.trim();
-    const spaceIndex = trimmed.indexOf(' ');
-    let firstword = spaceIndex === -1 ? trimmed : trimmed.substring(0, spaceIndex);
-    let rest = spaceIndex === -1 ? '' : trimmed.substring(spaceIndex + 1).trim();
-    return { firstword, rest };
-  }
+
   /**
    * parse user input (specifically focusing on 'say')
    * @param {object} commandObj { cmd: "say hello everyone", actor: "w", loc: "A", niceness: 0 }

@@ -3,12 +3,15 @@ export class Cowmands {
   /**
    * Create a Cowmands helper. Pass the main app instance so handlers can access DB, utils, etc.
    */
-  constructor(app) {
+  constructor(app, context) {
     this.app = app;
+    this.context = context;
   }
+
   // Statement handlers – copied from CommandManager.statementList
   statementList = {
     // GET handler – identical to CommandManager's implementation
+    // get is different from other cowmands as it sets up the context, other commands manipluate the context.
     get: (rest) => {
       // --- Step 1: Extract and clean input ---
       let firstword = rest.trim();
@@ -173,7 +176,7 @@ export class Cowmands {
         if (elseSub) this.runSub(elseSub);
       }
     },
-    // VAR handler (copied)
+    // VAR handler
     var: (rest) => {
       const cleanRest = rest.replace(/^var\s+/i, '');
       let match = cleanRest.match(/^(\$\w+)\s+(?:to|=)\s+(.+)$/i);
@@ -188,7 +191,7 @@ export class Cowmands {
         this.context[varName] = this.resolveValue(rawVal);
       }
     },
-    // SET handler (copied)
+    // SET handler
     set: (rest) => {
       let match = rest.match(/^(\$[\w'\s]+)\s*'s\s+(\w+)\s+(?:to|=)\s+(.+)$/i);
       if (!match) return;
@@ -200,7 +203,7 @@ export class Cowmands {
       obj[prop] = val;
       this.app.db.save(obj, oldObj);
     },
-    // UPDATE handler (copied)
+    // UPDATE handler
     update: (rest) => {
       const match = rest.match(/^(\$[\w'\s]+)\s+(?:to|=)\s+["']?(.+?)["']?$/i);
       if (!match) return;
@@ -216,18 +219,13 @@ export class Cowmands {
       }
       this.app.db.save(obj, oldObj);
     },
-    // SAY handler (copied)
+    // SAY handler
     say: (rest) => {
-      const match =.match(/^['"](\w+)['"]\s*,\s*(.+)$/i);
+      const match = rest.match(/^['"](\w+)['"]\s*,\s*(.+)$/i);
       if (!match) return;
       this.context.trigger = match[1];
-      let msg = this.app.utils.trimQuotes(match[2].trim());
-      this.app.messageManager.add({
-        msg,
-        brief: true,
-        objs: this.objs,
-        context: { ...this.context }
-      });
+      this.context.msg = this.app.utils.trimQuotes(match[2].trim());
+      this.app.ui.addMessage(this.context);
     },
     // Additional handlers (new, runsub, etc.) can be added here as needed.
     new: (rest) => {

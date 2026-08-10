@@ -142,8 +142,8 @@ export class DB {
    * @param {object} context 
    * @returns {string} return the code from the bext match object
    */
-  findCommand(firstword, context) {
-    const ids = this.findByName(firstword);
+  findCommand(context) {
+    const ids = this.findByName(context.cowmand);
 
     if (!ids || ids.size < 1) return '';
     if (ids.size === 1) {

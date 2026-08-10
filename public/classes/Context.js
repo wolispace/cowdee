@@ -1,3 +1,5 @@
+import { Cowmands } from './Cowmands.js';
+
 export class Context {
   seed = 1;
 
@@ -16,15 +18,91 @@ export class Context {
     if (this.app.seen(this.key())) return;
     console.log('processing ', this.ts, this.actor, this.loc, this.cmd);
     if (!this.cmd) return;
-    ({ cowmand: this.cowmand, rest: this.rest } = this.splitFirstWord(this.cmd));
+    const { firstword, rest } = this.app.utils.splitFirstWord(this.cmd);
+    this.cowmand = firstword;
+    this.rest = rest;
     const code = this.app.db.findCommand(this);
     if (!code) {
       this.msg = `{${this.actor}} tries to ${this.cmd}, but nothing happens`,        
-      this.app.addMsg(this);
+      this.app.ui.addMessage(this);
       return;
     };
     this.runCodeFrom(code, '__start');
 
+  }
+
+    /**
+   * Sets up the context to run the code from the block
+   * @param {string} code 
+   * @param {string} block 
+   */
+  runCodeFrom(code, block) {
+    // Partition cowscript code into sub-blocks
+    this.partitionCode(code);
+    // Execute from __start
+    this.runSub(block);
+  }
+
+    /**
+   * Partitions the cowscript code by ## into subroutines
+   */
+  partitionCode(code) {
+    // Split on ##
+    // We prefix with ##__start: to catch the initial statements
+    const blocks = ('##__start:' + code).split('##');
+    for (const block of blocks) {
+      if (!block.trim()) continue;
+      const colonIndex = block.indexOf(':');
+      if (colonIndex !== -1) {
+        const subName = block.substring(0, colonIndex).trim();
+        const subContent = block.substring(colonIndex + 1).trim();
+        this.subs[subName] = subContent;
+      }
+    }
+  }
+
+    /**
+   * Executes a subroutine block line-by-line (semicolon separated)
+   */
+  runSub(subName) {
+    const subContent = this.subs[subName];
+    if (!subContent) {
+      return;
+    }
+    const statements = subContent.split(';');
+    for (const statement of statements) {
+      const trimmedStatement = statement.trim();
+      if (!trimmedStatement) continue;
+      this.executeStatement(trimmedStatement);
+    }
+  }
+
+    /**
+   * Executes a single statement
+   */
+  executeStatement(statement) {
+    //console.log({ statement });
+    const trimmed = statement.trim();
+    if (!trimmed) return;
+
+    const { firstword, rest } = this.splitFirstWord(trimmed);
+
+    // Flexible handling for variable assignments without the "var" keyword
+    // e.g. `$prefix to (sweetly, nicely)` -> rewritten as `var $prefix to ...`
+    if (firstword.startsWith('$')) {
+      rest = `${firstword} ${rest}`;
+      firstword = 'var';
+    }
+
+    const cowmands = new Cowmands(this.app, this);
+
+    const handler = cowmands.statementList[firstword.toLowerCase()];
+    if (handler) {
+      // Pass the remaining string
+      handler(rest);
+    } else {
+      console.warn(`No handler found for statement keyword: "${firstword}"`);
+    }
   }
 
   /**

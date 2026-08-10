@@ -54,12 +54,7 @@ class App {
   wakePlayer() {
     console.log('wake player');
   }
-
-  showMsg(context) {
-    if (this.playerInfo.loc != context.loc && context.loc != '') return;
-    
-  }
-
+  
   /**
    * Have we already see/processed this context (save in localStorage if we havent)
    * Load lastContext from local storage on start() 

@@ -22,6 +22,20 @@ export class Utils {
   isObject(v) {
     return v !== null && typeof v === "object" && !this.isString(v);
   }
+
+  /**
+   * Splits off the first word, leaving the rest
+   * @param {string} whole 
+   * @returns {firstword, rest, whole}
+   */
+  splitFirstWord(whole) {
+    const trimmed = whole.trim();
+    const spaceIndex = trimmed.indexOf(' ');
+    let firstword = spaceIndex === -1 ? trimmed : trimmed.substring(0, spaceIndex);
+    let rest = spaceIndex === -1 ? '' : trimmed.substring(spaceIndex + 1).trim();
+    return { firstword, rest };
+  }
+
    
   /**
    * Replace all key in {} with their value eg "Hi {w}" + {w: "wolis"} = "Hi wolis"
