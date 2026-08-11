@@ -46,7 +46,7 @@ function handleInput($request) {
  * @param {string} key
  */
 function shardName($filename) {
-  return "_db/{$filename}.json";
+  return "../_db/{$filename}.json";
 }
 
 function outputJson($data) {

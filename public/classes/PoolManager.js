@@ -36,7 +36,7 @@ export class PoolManager {
    */
   async get(key) {
     if (this.pool.has(key)) return this.pool.get(key);
-    const filename = `${this.type}_${key}`;
+    const filename = this.app.io.makeShardFilename(this.type, key);
     const items = await this.app.io.loadJson(filename);
     const item = new Set(items?.[key] ?? []);
     this.pool.replace(key, item);

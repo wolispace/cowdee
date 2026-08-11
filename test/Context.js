@@ -3,7 +3,7 @@ import fs from "fs";
 
 const contexts = [];
 
-const dir = 'public/_contexts';
+const dir = '_contexts';
   for (const filename of fs.readdirSync(dir)) {
     
     const content = JSON.parse(fs.readFileSync(`${dir}/${filename}`, `utf8`));

@@ -10,7 +10,7 @@ export class DB {
     this.app = app;
     
     for (const key of this.keys) {
-      this.pools[key] = new PoolManager(this, key);
+      this.pools[key] = new PoolManager(this.app, key);
     }
   }
 

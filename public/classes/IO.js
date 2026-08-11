@@ -1,7 +1,7 @@
 // for handling data to and from server
 export class IO {
   token = '';
-  types = {server: '/public/server.php', player: '/?player'};
+  types = {server: 'http://localhost:8880/public/server.php', player: 'http://localhost/?player'};
 
   constructor(app) {
     this.app = app;
@@ -11,25 +11,31 @@ export class IO {
     this.token = token;
   }
 
-  async loadJson(filename) {
-    let json = localStorage.getItem(filename);
-    if (!json) {
-      // load json from the server
-      const payload = {filename: filename, token: this.token};
-      json = await this.fetchJson('server', payload);
-    }
+  async loadJson(file) {
+    const cached = localStorage.getItem(file);
+    if (cached) return JSON.parse(cached);
+    const json = await this.fetchJson('server', {file, token: this.token});
+    localStorage.setItem(file, JSON.stringify(json));
     return json;
   }
 
-  async fetchJson(type, json) {
-    json.token = this.token;
-
+  async fetchJson(type, payload) {
+    payload.token = this.token;
+console.log(`fetchJson ${type} payload=`, payload);
     const response = await fetch(this.types[type], {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(json),
+      body: JSON.stringify(payload),
     });
 
     return await response.json();
+  }
+
+  flush() {
+    localStorage.clear();
+  }
+
+  makeShardFilename(type = '_', key = '_') {
+    return `${type}_${key[0]}`;
   }
 }
