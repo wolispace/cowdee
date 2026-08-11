@@ -2,6 +2,7 @@ import { Cowmands } from './Cowmands.js';
 
 export class Context {
   seed = 1;
+  subs = {};
 
   constructor(context) {
     // expand the context into this object eg: this.ts = context.ts;

@@ -243,17 +243,87 @@ export class Cowmands {
       await this.runSub(rest);
     }
   };
-  // Helper methods needed for handlers – these delegate to the original CommandManager implementations
+  /**
+   * Resolve a value: literal, $var, or $actor's loc's host's loc chain
+   */
   async resolveValue(token) {
-    return await CommandManager.prototype.resolveValue.call(this, token);
+    let t = token.trim();
+    if ((t.startsWith('"') && t.endsWith('"')) ||
+      (t.startsWith("'") && t.endsWith("'"))) {
+      if (t.includes('$')) {
+        t = t.replace(/[$"']/g, '');
+        return this.context[t];
+      } else {
+        return t.replace(/["']/g, '');
+      }
+    }
+    if (!t.startsWith('$')) return t;
+
+    const parts = t.split("'s ");
+    const varName = parts[0].substring(1);
+    let value = this.context[varName] ?? '';
+
+    for (let i = 1; i < parts.length; i++) {
+      const obj = await this.app.db.getById(value);
+      if (!obj) return '';
+      value = obj[parts[i]] ?? '';
+    }
+
+    return value;
   }
+
+  /**
+   * Resolve a $var or chained expression (e.g. $target's link's host) to an object.
+   * Returns the object, or null if the ID can't be resolved.
+   * @param {string} token  - e.g. '$target' or "$target's link's host"
+   * @returns {object|null}
+   */
   async resolveObj(token) {
-    return await CommandManager.prototype.resolveObj.call(this, token);
+    const id = await this.resolveValue(token);
+    if (!id) return null;
+    return (await this.app.db.getById(id)) || null;
   }
+
+  /**
+   * Parse a natural language object description into its components
+   * e.g. "3 small black fluffy mice" → { qty, color, attribs, class, name }
+   */
   parseObj(str) {
-    return CommandManager.prototype.parseObj.call(this, str);
+    const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'black', 'white', 'grey', 'gray', 'brown', 'silver', 'gold'];
+    const sizes = ['tiny', 'small', 'little', 'large', 'big', 'huge', 'giant', 'massive'];
+    const words = str.trim().replace(/^["']|["']$/g, '').split(/\s+/);
+    let qty = 1;
+    let color = '', attribs = [], cls = '', name = '';
+    let i = 0;
+    if (/^\d+$/.test(words[0])) { qty = parseInt(words[i++]); }
+    const articles = ['a', 'an', 'the', 'some'];
+    if (articles.includes(words[i]?.toLowerCase())) i++;
+    while (i < words.length) {
+      const w = words[i].toLowerCase();
+      if (!color && colors.includes(w)) { color = w; i++; }
+      else if (sizes.includes(w)) { attribs.push(w); i++; }
+      else { break; }
+    }
+    cls = words[i] || '';
+    name = words.slice(i + 1).join(' ');
+    return { qty, color, attribs: attribs.join(' '), class: cls, name };
   }
-  async runSub(sub) {
-    return await CommandManager.prototype.runSub.call(this, sub);
+
+
+  /**
+   * Executes a subroutine block line-by-line (semicolon separated)
+   */
+  async runSub(subName) {
+    const subContent = this.subs[subName];
+    if (!subContent) {
+      return;
+    }
+    const statements = subContent.split(';');
+    for (const statement of statements) {
+      const trimmedStatement = statement.trim();
+      if (!trimmedStatement) continue;
+      await this.executeStatement(trimmedStatement);
+    }
   }
+
 }
