@@ -4,7 +4,7 @@
  */
 export class ID {
   filename = '_data/id_counter.json';
-  counter = 0;
+  counter = 1; // first object is 1, anything without a loc is in the void = 0
   // if alphabet is 62 char long then we are doing base62 encoding
   alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   chunkSize = 500; // how many objects per file

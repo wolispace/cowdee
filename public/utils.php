@@ -3,6 +3,11 @@
  
 define('CONTEXT_DIR', '../_contexts'); // root level folder for context files
 
+function logIt($str) {
+  $dateTime = date('Ymd H:i:s');
+  file_put_contents('_log.txt', "{$dateTime},{$_SERVER['REMOTE_ADDR']},{$str}\n", FILE_APPEND | LOCK_EX);
+}
+
 function get_new_contexts($last) {
     $files = glob(CONTEXT_DIR . '/*.json');
     if (!$files) return [];

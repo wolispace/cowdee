@@ -12,6 +12,7 @@ app.io = new IO(app);
 app.db = new DB(app);
 app.id = new ID(app);
 
+const context = new Context(app);
 
 const generate = true;
 const max = 10;
@@ -27,7 +28,7 @@ if (generate) {
       id: app.id.new(),
       class: randomName(),
       qty: 1,
-      loc: app.id.encodeInt(app.utils.random(max)),
+      loc: app.id.encodeInt(context.random(max)),
       color: randomColor()
     };
     //  obj.info = `It's a pretty ordinary ${obj.class}`;
@@ -36,6 +37,7 @@ if (generate) {
       process.stdout.write(":");
     }
   }
+  app.db.savePoolsToDisk();
 }
 
 
@@ -52,10 +54,10 @@ function deleteTestFiles() {
 
 function randomName() {
   const names = ['mouse', 'hat', 'card', 'book', 'pen', 'frog', 'table', 'chair', 'basket']
-  return names[app.utils.random(names.length)];
+  return names[context.random(names.length)];
 }
 
 function randomColor() {
   const names = ['wheat', 'seagreen', 'teal', 'tomato', 'dodgerblue', 'slategrey', 'plum', 'brick']
-  return names[app.utils.random(names.length)];
+  return names[context.random(names.length)];
 }

@@ -218,7 +218,6 @@ export class DB {
     }
     this.formatObject(obj);
     await this.pools.id.set(obj.id, obj, null, true);
-    this.savePoolsToDisk();
     const oldLongName = `${old?.class ?? ''} ${old?.name ?? ''}`.trim().toLowerCase();
     const objLongName = `${obj?.class ?? ''} ${obj?.name ?? ''}`.trim().toLowerCase();
 

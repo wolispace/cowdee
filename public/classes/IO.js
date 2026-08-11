@@ -15,30 +15,17 @@ export class IO {
     const cached = localStorage.getItem(file);
     if (cached) return JSON.parse(cached);
     const json = await this.fetchJson('server', {file, token: this.token});
-    if (!json) {
-      console.log('fetched nothing');
-      return {};
-    } else {
-      console.log('fetched', json);
-    }
+    if (!json) return {};
     localStorage.setItem(file, JSON.stringify(json));
     return json;
   }
 
   async saveJson(file, json) {
-    const result = await this.fetchJson('server', {file: file, token: this.token, content: JSON.stringify(json)});
-    if (!result) {
-      console.log('failed to send');
-      return false;
-    } else {
-      console.log('sent', json);
-      return true;
-    }
+    return await this.fetchJson('server', {file, token: this.token, content: JSON.stringify(json)});
   }
 
-async fetchJson(type, payload) {
+  async fetchJson(type, payload) {
     payload.token = this.token;
-    console.log(`fetchJson ${type} payload=`, payload);
     const response = await fetch(this.types[type], {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

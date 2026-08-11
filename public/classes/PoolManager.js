@@ -68,7 +68,7 @@ export class PoolManager {
     // if loc is empty then flag it as deleted
     if (!oldKey || oldKey === key) return;
     if (!this.pool.has(oldKey)) {
-      await this.aget(oldKey);
+      await this.get(oldKey);
     }
     const isEmpty = this.pool.deleteValue(oldKey, thing);
     if (isEmpty) {
@@ -163,7 +163,7 @@ export class PoolManager {
         const item = new Set(json?.[key] ?? undefined);
         this.pool.replace(key, item);
       }
-      this.app.io.saveJson(filename, json);
+      await this.app.io.saveJson(filename, json);
     }
 
     this.dirtyUpdated.clear();
