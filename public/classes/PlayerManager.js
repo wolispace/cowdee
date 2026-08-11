@@ -9,20 +9,20 @@ export class PlayerManager {
   handle(request, result) {
     let body = '';
     request.on('data', chunk => body += chunk);
-    request.on('end', () => {
+    request.on('end', async () => {
       const data = JSON.parse(body);
       let playerState = {};
       if (!data) { result.writeHead(401); result.end(); return({type: "empty"}); }
 
       if (data.type == 'return') {
-        const obj = this.app.db.getById(data.id);
+        const obj = await this.app.db.getById(data.id);
         if (!obj) {
           return {type: "no obj ", data: {data}};
         }
         //console.log(`get data.id`, data.id, obj);
          playerState = { type: "return", id: obj.id, playername: obj.name, loc: obj.loc };
       } else if (data.type == 'login') {
-        const obj = this.app.db.findPlayer(data);
+        const obj = await this.app.db.findPlayer(data);
         if (!obj) {
           playerState = {type: "login"};
         } else {
@@ -48,9 +48,9 @@ export class PlayerManager {
     return token ? this.#sessions[token] : null;
   }
 
-  #validate(user, pw) {
+  async #validate(user, pw) {
     // TODO: check DB with hashed pw
-    const obj = this.app.db.findUser(user, pw);
+    const obj = await this.app.db.findPlayer({ playername: user, pw: pw });
     return (obj) ? true : false;
   }
 
@@ -59,9 +59,9 @@ export class PlayerManager {
    * @param {string} user 
    * @param {string} pw 
    */
-  add(user, pw) {
-    const obj = this.app.db.findUser(user, pw);
+  async add(user, pw) {
+    const obj = await this.app.db.findPlayer({ playername: user, pw: pw });
     const token = crypto.randomUUID();
-    this.#sessions.set(token) = {user: user, pw: pw};
+    this.#sessions.set(token, {user: user, pw: pw});
   }
 }

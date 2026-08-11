@@ -12,7 +12,7 @@ export class Cowmands {
   statementList = {
     // GET handler – identical to CommandManager's implementation
     // get is different from other cowmands as it sets up the context, other commands manipluate the context.
-    get: (rest) => {
+    get: async (rest) => {
       // --- Step 1: Extract and clean input ---
       let firstword = rest.trim();
       firstword = firstword.replace(/`/g, "'");
@@ -27,8 +27,8 @@ export class Cowmands {
         firstword = inMatch[1].trim();
         const locParts = inMatch[2].split(',', 2).map(s => s.trim());
         // Resolve each $loc variable
-        getLocValue = this.resolveValue(locParts[0]);
-        getSecondLocValue = locParts[1] ? this.resolveValue(locParts[1]) : getLocValue;
+        getLocValue = await this.resolveValue(locParts[0]);
+        getSecondLocValue = locParts[1] ? await this.resolveValue(locParts[1]) : getLocValue;
       } else {
         // Default to looking everywhere
         getLocValue = 'all';
@@ -118,34 +118,34 @@ export class Cowmands {
       // Restore previous target/second before resolving
       this.context.target = ltarget;
       this.context.second = lsecond;
-      const isAlreadyId = (val) => !!this.app.db.getById(val);
+      const isAlreadyId = async (val) => !!(await this.app.db.getById(val));
       if (ntarget) {
-        if (isAlreadyId(ntarget)) {
+        if (await isAlreadyId(ntarget)) {
           this.context.target = ntarget;
         } else {
-          const resolved = this.app.db.findByNameInLoc(ntarget, getLocValue);
+          const resolved = await this.app.db.findByNameInLoc(ntarget, getLocValue);
           this.context.target = resolved || ntarget;
         }
       }
       if (nsecond) {
-        if (isAlreadyId(nsecond)) {
+        if (await isAlreadyId(nsecond)) {
           this.context.second = nsecond;
         } else {
-          const resolved = this.app.db.findByNameInLoc(nsecond, getSecondLocValue);
+          const resolved = await this.app.db.findByNameInLoc(nsecond, getSecondLocValue);
           this.context.second = resolved || nsecond;
         }
       }
     },
-    // IF/THEN/ELSE handler (copied verbatim)
-    if: (rest) => {
+    // IF/THEN/ELSE handler
+    if: async (rest) => {
       let match = rest.match(/^(.+?)\s+(equals|is|like|in|eq|ne|>||<|!=|>=|<=|=|==)\s+(.+?)\s+then\s+(.+)$/i);
       if (!match) return;
       const op1Raw = match[1].trim();
       const operator = match[2].toLowerCase();
       const op2Raw = match[3].trim();
       const actionsPart = match[4].trim();
-      const val1 = this.resolveValue(op1Raw);
-      const val2 = this.resolveValue(op2Raw);
+      const val1 = await this.resolveValue(op1Raw);
+      const val2 = await this.resolveValue(op2Raw);
       let conditionMet = false;
       if ([ '>', '<', '>=', '<=' ].includes(operator)) {
         const num1 = parseFloat(val1) || 0;
@@ -171,13 +171,13 @@ export class Cowmands {
         elseSub = '';
       }
       if (conditionMet) {
-        if (thenSub) this.runSub(thenSub);
+        if (thenSub) await this.runSub(thenSub);
       } else {
-        if (elseSub) this.runSub(elseSub);
+        if (elseSub) await this.runSub(elseSub);
       }
     },
     // VAR handler
-    var: (rest) => {
+    var: async (rest) => {
       const cleanRest = rest.replace(/^var\s+/i, '');
       let match = cleanRest.match(/^(\$\w+)\s+(?:to|=)\s+(.+)$/i);
       if (!match) return;
@@ -188,36 +188,36 @@ export class Cowmands {
         const selected = choices[Math.floor(Math.random() * choices.length)];
         this.context[varName] = selected;
       } else {
-        this.context[varName] = this.resolveValue(rawVal);
+        this.context[varName] = await this.resolveValue(rawVal);
       }
     },
     // SET handler
-    set: (rest) => {
+    set: async (rest) => {
       let match = rest.match(/^(\$[\w'\s]+)\s*'s\s+(\w+)\s+(?:to|=)\s+(.+)$/i);
       if (!match) return;
-      const obj = this.resolveObj(match[1].trim());
+      const obj = await this.resolveObj(match[1].trim());
       if (!obj) return;
       const prop = match[2].toLowerCase();
-      const val = this.resolveValue(match[3].trim());
+      const val = await this.resolveValue(match[3].trim());
       const oldObj = { ...obj };
       obj[prop] = val;
-      this.app.db.save(obj, oldObj);
+      await this.app.db.save(obj, oldObj);
     },
     // UPDATE handler
-    update: (rest) => {
+    update: async (rest) => {
       const match = rest.match(/^(\$[\w'\s]+)\s+(?:to|=)\s+["']?(.+?)["']?$/i);
       if (!match) return;
-      const obj = this.resolveObj(match[1].trim());
+      const obj = await this.resolveObj(match[1].trim());
       if (!obj) return;
       const oldObj = { ...obj };
       for (const pair of match[2].split(',')) {
         const eqIdx = pair.indexOf('=');
         if (eqIdx === -1) continue;
         const prop = pair.substring(0, eqIdx).trim();
-        const val = this.resolveValue(pair.substring(eqIdx + 1).trim());
+        const val = await this.resolveValue(pair.substring(eqIdx + 1).trim());
         obj[prop] = val;
       }
-      this.app.db.save(obj, oldObj);
+      await this.app.db.save(obj, oldObj);
     },
     // SAY handler
     say: (rest) => {
@@ -228,33 +228,32 @@ export class Cowmands {
       this.app.ui.addMessage(this.context);
     },
     // Additional handlers (new, runsub, etc.) can be added here as needed.
-    new: (rest) => {
-      const parsed = this.parseObj(this.resolveValue(rest.trim()));
+    new: async (rest) => {
+      const parsed = this.parseObj(await this.resolveValue(rest.trim()));
       const db = this.app.db;
       const loc = this.context.loc;
       const obj = { loc, ...parsed };
       obj.id = this.app.id.new();
-      db.save(obj);
+      await db.save(obj);
       this.context.target = obj.id;
       this.context.lastt = obj.id;
       this.context.new_id = obj.id;
     },
-    runsub: (rest) => {
-      this.runSub(rest);
+    runsub: async (rest) => {
+      await this.runSub(rest);
     }
-    // ... other handlers can be added similarly ...
   };
   // Helper methods needed for handlers – these delegate to the original CommandManager implementations
-  resolveValue(token) {
-    return CommandManager.prototype.resolveValue.call(this, token);
+  async resolveValue(token) {
+    return await CommandManager.prototype.resolveValue.call(this, token);
   }
-  resolveObj(token) {
-    return CommandManager.prototype.resolveObj.call(this, token);
+  async resolveObj(token) {
+    return await CommandManager.prototype.resolveObj.call(this, token);
   }
   parseObj(str) {
     return CommandManager.prototype.parseObj.call(this, str);
   }
-  runSub(sub) {
-    return CommandManager.prototype.runSub.call(this, sub);
+  async runSub(sub) {
+    return await CommandManager.prototype.runSub.call(this, sub);
   }
 }

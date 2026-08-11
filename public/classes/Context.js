@@ -14,20 +14,20 @@ export class Context {
     return `${this.ts}${this.actor}`;
   }
 
-  process() {
+  async process() {
     if (this.app.seen(this.key())) return;
     console.log('processing ', this.ts, this.actor, this.loc, this.cmd);
     if (!this.cmd) return;
     const { firstword, rest } = this.app.utils.splitFirstWord(this.cmd);
     this.cowmand = firstword;
     this.rest = rest;
-    const code = this.app.db.findCommand(this);
+    const code = await this.app.db.findCommand(this);
     if (!code) {
       this.msg = `{${this.actor}} tries to ${this.cmd}, but nothing happens`,        
       this.app.ui.addMessage(this);
       return;
     };
-    this.runCodeFrom(code, '__start');
+    await this.runCodeFrom(code, '__start');
 
   }
 
@@ -36,11 +36,11 @@ export class Context {
    * @param {string} code 
    * @param {string} block 
    */
-  runCodeFrom(code, block) {
+  async runCodeFrom(code, block) {
     // Partition cowscript code into sub-blocks
     this.partitionCode(code);
     // Execute from __start
-    this.runSub(block);
+    await this.runSub(block);
   }
 
     /**
@@ -64,7 +64,7 @@ export class Context {
     /**
    * Executes a subroutine block line-by-line (semicolon separated)
    */
-  runSub(subName) {
+  async runSub(subName) {
     const subContent = this.subs[subName];
     if (!subContent) {
       return;
@@ -73,19 +73,19 @@ export class Context {
     for (const statement of statements) {
       const trimmedStatement = statement.trim();
       if (!trimmedStatement) continue;
-      this.executeStatement(trimmedStatement);
+      await this.executeStatement(trimmedStatement);
     }
   }
 
     /**
    * Executes a single statement
    */
-  executeStatement(statement) {
+  async executeStatement(statement) {
     //console.log({ statement });
     const trimmed = statement.trim();
     if (!trimmed) return;
 
-    const { firstword, rest } = this.splitFirstWord(trimmed);
+    const { firstword, rest } = this.app.utils.splitFirstWord(trimmed);
 
     // Flexible handling for variable assignments without the "var" keyword
     // e.g. `$prefix to (sweetly, nicely)` -> rewritten as `var $prefix to ...`
@@ -99,7 +99,7 @@ export class Context {
     const handler = cowmands.statementList[firstword.toLowerCase()];
     if (handler) {
       // Pass the remaining string
-      handler(rest);
+      await handler(rest);
     } else {
       console.warn(`No handler found for statement keyword: "${firstword}"`);
     }

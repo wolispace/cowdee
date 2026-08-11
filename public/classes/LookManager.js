@@ -15,24 +15,32 @@ export class LookManager {
     this.app = app;
   }
 
+  get db() {
+    return this.app.db;
+  }
+
   /**
    * Returns an object for adding to the msg queue with a list of all obj
    * @param {object} context 
    */
-  list(context) {
+  async list(context) {
     this.context = context;
     this.sentences = [];
     
-    const loc = this.db.getById(this.context.loc);
-    this.found = this.db.findInLoc(loc.id);
+    const loc = await this.db.getById(this.context.loc);
+    if (!loc) {
+      this.sentences.push('Nothing interesting here');
+      return this.returnData();
+    }
+    this.found = await this.db.findInLoc(loc.id);
 
     this.sentences = [`In {${loc.id}} you see: `];
-    if (this.found.size < 1) {
+    if (!this.found || this.found.size < 1) {
       this.sentences.push('Nothing interesting here');
       return this.returnData();
     }
 
-    this.objs = this.populateObjs();
+    this.objs = await this.populateObjs();
     this.objs[loc.id] = loc;
     let list = '';
     for (const id of this.found) {
@@ -46,7 +54,7 @@ export class LookManager {
    * Returns an object for adding to the msg queue with a paragraph of all obj
    * @param {object} context 
    */
-  look(context) {
+  async look(context) {
     this.seen = new Set();
     this.groups = new SetMap();
     this.sentenceCounter = 0;
@@ -58,14 +66,18 @@ export class LookManager {
       this.sentences.push('You are nowhere');
       return this.returnData();
     }
-    let loc = this.db.getById(this.context.loc);
+    let loc = await this.db.getById(this.context.loc);
     if (!loc) {
-      loc = this.db.getById(0);
+      loc = await this.db.getById(0);
     }
     if (loc) {
       this.db.formatObject(loc);
     }
-    this.found = this.db.findInLoc(loc.id);
+    if (!loc) {
+      this.sentences.push('You are nowhere');
+      return this.returnData();
+    }
+    this.found = await this.db.findInLoc(loc.id);
     // console.log(`found in ${loc.id}`, this.found);
     const inon = 'in';
     this.sentences = [`You are ${inon} {${loc.id}}`];
@@ -74,7 +86,7 @@ export class LookManager {
       if (loc) this.objs[loc.id] = loc;
       return this.returnData();
     }
-    this.objs = this.populateObjs();
+    this.objs = await this.populateObjs();
     this.hosted = this.buildHosted();
     // console.log(this.hosted.entries);
     // console.dir(this.hosted, { depth: null, colors: true });
@@ -93,10 +105,10 @@ export class LookManager {
    * Returns a list of all visible objects 
    * @returns {object}
    */
-  populateObjs() {
+  async populateObjs() {
     const objs = {};
     for (const id of this.found) {
-      const obj = this.db.getById(id);
+      const obj = await this.db.getById(id);
       if (!obj || obj.pose == 'hidden') continue;
       objs[id] = obj;
       this.db.formatObject(objs[id]);

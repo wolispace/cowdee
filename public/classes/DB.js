@@ -21,7 +21,9 @@ export class DB {
     for (const key of this.keys) {
       this.pools[key].clear();
     }
-    localStorage.clear();
+    if (typeof localStorage !== 'undefined') {
+      localStorage.clear();
+    }
   }
 
   /**
@@ -39,15 +41,15 @@ export class DB {
    * @param {string} id 
    * @returns {object}
    */
-  getById(id) {
-    const set = this.pools.id.get(id);
+  async getById(id) {
+    const set = await this.pools.id.get(id);
     if (!set || set.size === 0) return undefined;
     const obj = set.values().next().value;
     return obj;
   };
 
-  getFormattedById(id) {
-    const obj = this.getById(id);
+ async getFormattedById(id) {
+    const obj = await this.getById(id);
     if (obj) {
       this.formatObject(obj);
       return obj; 
@@ -59,9 +61,9 @@ export class DB {
    * @param {string} key 
    * @returns {set} of IDs with this name
    */
-  findByName(key) {
+  async findByName(key) {
     const name = key.replace(/^(?:the|an|a)\b/i, '').trim().toLocaleLowerCase();
-    return this.pools.name.get(name);
+    return await this.pools.name.get(name);
   };
 
   /**
@@ -70,13 +72,14 @@ export class DB {
    * @param {object} data with data.username and data.pw
    * @returns {object}
    */
-  findPlayer(data) {
-    const candidates = this.pools.name.get(data.playername.toLocaleLowerCase());
+ async findPlayer(data) {
+    const candidates = await this.pools.name.get(data.playername.toLocaleLowerCase());
+    if (!candidates) return undefined;
     // check all candidates to ensure they are class='player'
     // TODO: worry about password later
     for (const id of candidates) {
-      const obj = this.getById(id);
-      if (obj.class == 'player') {
+      const obj = await this.getById(id);
+      if (obj?.class == 'player') {
         // first player with matching name..
         // TODO: compare passwords too
         return obj; 
@@ -92,11 +95,13 @@ export class DB {
    */
   async findByNameInLoc(name, loc) {
     const inName = await this.findByName(name);
+    if (!inName || inName.size === 0) return undefined;
     if (loc == 'all') {
       return inName.values().next().value;
     }
 
     const inLoc = await this.findInLoc(loc);
+    if (!inLoc) return undefined;
     for (const key of inLoc) {
       if (inName.has(key)) {
         return key;
@@ -115,7 +120,7 @@ export class DB {
       await this.pools.loc.saveDirty();
       this.pools.loc.clear();
     }
-    return this.pools.loc.get(key);
+    return await this.pools.loc.get(key);
   }
 
   findMatchInLoc(obj, context) {
@@ -133,20 +138,30 @@ export class DB {
   async getCode(id) {
     const set = await this.pools.code.get(id);
     if (!set || set.size === 0) return '';
-    console.log('getCode', id, set);
     const codeObj = set.values().next().value;
+    console.log('getCode', id, set, codeObj);
     return codeObj?.code ?? '';
   };
 
   /**
    * Find the first named command (look in player then location then globaly so long as its a command)
    * "find" means look for it somewhere, where as "get" means we know it so get it.
-   * @param {string} firstword 
-   * @param {object} context 
+   * @param {string|object} firstword 
+   * @param {object} [context] 
    * @returns {string} return the code from the bext match object
    */
-  async findCommand(context) {
-    const ids = await this.findByName(context.cowmand);
+  async findCommand(firstword, context) {
+    let cowmand = '';
+    let ctx = null;
+    if (typeof firstword === 'object') {
+      ctx = firstword;
+      cowmand = ctx.cowmand;
+    } else {
+      cowmand = firstword;
+      ctx = context || {};
+    }
+
+    const ids = await this.findByName(cowmand);
 
     if (!ids || ids.size < 1) return '';
     if (ids.size === 1) {
@@ -154,16 +169,16 @@ export class DB {
       return await this.getCode(id);
     }
     for (const id of ids) {
-      const obj = this.getById(id);
+      const obj = await this.getById(id);
       if (!obj) continue;
-      if (obj.loc === context.actor) {
-        return this.getCode(id);
+      if (obj.loc === ctx.actor) {
+        return await this.getCode(id);
       }
-      if (obj.loc === context.loc) {
-        return this.getCode(id);
+      if (obj.loc === ctx.loc) {
+        return await this.getCode(id);
       }
       if (obj.class === 'command') {
-        return this.getCode(id);
+        return await this.getCode(id);
       }
     }
     return '';
@@ -174,12 +189,12 @@ export class DB {
    * @param {object} context 
    * @returns 
    */
-  findTrigger(context) {
+  async findTrigger(context) {
     if (!context) return;
-    const found = this.pools.trigger.get(context.trigger);
+    const found = await this.pools.trigger.get(context.trigger);
     if (!found || found.size < 1) return;
     // loop through these to see if they are in the context.loc
-    const inLoc = this.pools.loc.get(context.loc);
+    const inLoc = await this.pools.loc.get(context.loc);
     if (!inLoc || inLoc.size < 1) return;
     const triggerable = new Set(
       [...found].filter(obj => inLoc.has(obj.id))
@@ -191,12 +206,12 @@ export class DB {
     if (this.reactions++ >= this.maxReactions) return;
 
     for (const triggered of triggerable) {
-      const obj = this.getById(triggered.id);
+      const obj = await this.getById(triggered.id);
       if (!obj) continue;
       // prepare the context for this execution
       context.actor = obj.id;
-      obj.code = this.getCode(obj.id);
-      this.app.commandManager.runCodeFrom(obj.code, triggered.block, context);
+      obj.code = await this.getCode(obj.id);
+      await this.app.commandManager.runCodeFrom(obj.code, triggered.block, context);
     }
   }
 
@@ -210,7 +225,7 @@ export class DB {
     // so clear from all pools
     if (obj.code) {
       await this.pools.code.set(obj.id, { id: obj.id, loc: obj.loc, code: obj.code }, null, true);
-      this.addTriggers(obj);
+     await  this.addTriggers(obj);
       delete obj.code; // const { code, ...rest } = obj; // delete obj.code using destructuring
     }
     if (obj.info) {
@@ -237,7 +252,7 @@ export class DB {
    * @param {object} obj 
    * @returns 
    */
-  addTriggers(obj) {
+  async addTriggers(obj) {
     // combined
     const pattern = /\bif\s+(reacting\s+to|target\s+of)\s+(\w+)\s+then\s+(\w+);/i;
     const match = obj.code.match(pattern);
@@ -245,7 +260,7 @@ export class DB {
     const type = match[1].includes('target') ? 'target' : 'reacts';
     const trigger = match[2];
     const block = match[3];
-    this.pools.trigger.set(trigger, { id: obj.id, block: block });
+    await this.pools.trigger.set(trigger, { id: obj.id, block: block });
   }
 
   /**
@@ -267,41 +282,44 @@ export class DB {
    * @param {object} data 
    * @returns nothing, updates obj
    */
-  prepContext(data) {
+  async prepContext(data) {
     data.objs = data.objs ?? {};
 
-    
     // Phase 1: Process [$var] (bracketed = linkable objects)
-    data.msg = data.msg.replace(/\[\$(\w+)\]/g, (_, varName) => {
+    const matches1 = [...data.msg.matchAll(/\[\$(\w+)\]/g)];
+    for (const m of matches1) {
+      const varName = m[1];
       const value = data.context[varName] ?? '';
-      const obj = this.getById(value);
+      const obj = await this.getById(value);
       if (obj) {
         data.objs[value] = { id: obj.id, loc: obj.loc, name: obj.name, longname: obj.longname, color: obj.color, link: true };
-        return `{${value}}`;
       }
-      return value; // fallback: plain text substitution
+    }
+    data.msg = data.msg.replace(/\[\$(\w+)\]/g, (_, varName) => {
+      const value = data.context[varName] ?? '';
+      return data.objs[value] ? `{${value}}` : value;
     });
 
     // Phase 2: Process $var (non-bracketed = styled but not linked)
+    const matches2 = [...data.msg.matchAll(/\$(\w+)/g)];
+    for (const m of matches2) {
+      const varName = m[1];
+      const value = data.context[varName] ?? '';
+      const obj = await this.getById(value);
+      if (obj && !data.objs[value]) {
+        data.objs[value] = { longname: obj.longname, color: obj.color };
+      }
+    }
     data.msg = data.msg.replace(/\$(\w+)/g, (_, varName) => {
       const value = data.context[varName] ?? '';
-      const obj = this.getById(value);
-      if (obj) {
-        if (!data.objs[value]) {
-          data.objs[value] = { longname: obj.longname, color: obj.color };
-        }
-        return `{${value}}`;
-      }
-      return value; // plain text: substitute literally
+      return data.objs[value] ? `{${value}}` : value;
     });
 
-    //    console.log(data.brief);
     if (data.brief) {
-      for (const obj of Object.entries(data.objs)) {
+      for (const obj of Object.values(data.objs)) {
         obj.longname = `the ${obj.class}`;
         console.log(obj.longname);
       }
-      //console.log(data.objs);
     }
   }
 
@@ -385,8 +403,8 @@ export class DB {
    * @param {object} context 
    * @returns {object}
    */
-  lookLoc(context) {
-    const data = this.app.lookManager.look(context);
+  async lookLoc(context) {
+    const data = await this.app.lookManager.look(context);
     // messageManager.add(data);
     return data;
   }
@@ -396,10 +414,8 @@ export class DB {
    * @param {object} context 
    * @returns {object}
    */
-  listLoc(context) {
-    const data = this.app.lookManager.list(context);
+  async listLoc(context) {
+    const data = await this.app.lookManager.list(context);
     return data;
   }
-
-
 }

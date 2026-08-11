@@ -19,7 +19,7 @@ export class UI {
     this.initDialog();
   }
 
-  addMessage(context) {
+  async addMessage(context) {
     const div = document.createElement("div");
     const section = context.top ? '#top' : '#bottom';
     const info = document.querySelector(section);
@@ -29,13 +29,13 @@ export class UI {
     }
 
     // DEBUG: If the user simply includes 'logoff' in the msg then logoff - make a propper command later
-    if (context.msg.includes('logoff')) {
+    if (context?.msg?.includes('logoff')) {
       localStorage.clear(PLAYER_KEY);
       localStorage.clear(TOKEN_KEY);
       showDialog('You have logged off<form><menu><button class="buttonize">Ok</button></menu></form>');
     }
     context.playerId = this.app.playerInfo.id;
-    context.msg = this.expand(context);
+    context.msg = await this.expand(context);
 
     if (context.msg) {
       div.innerHTML = context.msg;
@@ -54,11 +54,20 @@ export class UI {
   }
 
   // TODO: update to read objects directl from this.app.db not context.objs
-  expand(context, format = 'html') {
+  async expand(context, format = 'html') {
     if (context.msg) {
+      const matches = [...context.msg.matchAll(/\{(\w+)(?:\.(\w+))?\}/g)];
+      const loadedObjs = {};
+      for (const match of matches) {
+        const id = match[1];
+        if (!loadedObjs[id]) {
+          loadedObjs[id] = await this.app.db.getById(id);
+        }
+      }
+
       // Interpolate object templates: {ID} (defaults to longname) or {ID.attribute}
       context.msg = context.msg.replace(/\{(\w+)(?:\.(\w+))?\}/g, (match, id, attr) => {
-        const obj = this.app.db.getById(id);
+        const obj = loadedObjs[id];
         if (!obj) return match;
         this.app.db.formatObject(obj);
 

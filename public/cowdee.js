@@ -80,7 +80,7 @@ class App {
       for ( const rawContext of contexts) {
         rawContext.app = this; // stuff the app into the context object
         const context = new Context(rawContext);
-        context.process();
+        await context.process();
       }
     }
   }

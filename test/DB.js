@@ -30,10 +30,13 @@ if (settings.generate) {
   await app.db.savePoolsToDisk();
 }
 
+const poseIds = await app.db.findByName('pose');
+console.log('pose ids', poseIds); // Set(1) { 'E' }
+const poseId = poseIds.values().next().value;
+const commandPose = await app.db.getById(poseId);
+commandPose.code = await app.db.getCode(poseId);
+console.log('command pose', commandPose);
 
-// const commandPose = await app.db.findByName('pose');
-// commandPose.code = await app.db.getCode(commandPose.id);
-// console.log('command pose', commandPose);
 
 const playerWolis = await app.db.findByNameInLoc('wol', '2');
 console.log('player Wolis', playerWolis);

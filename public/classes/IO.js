@@ -12,11 +12,15 @@ export class IO {
   }
 
   async loadJson(file) {
-    const cached = localStorage.getItem(file);
-    if (cached) return JSON.parse(cached);
+    if (typeof localStorage !== 'undefined') {
+      const cached = localStorage.getItem(file);
+      if (cached) return JSON.parse(cached);
+    }
     const json = await this.fetchJson('server', {file, token: this.token});
     if (!json) return {};
-    localStorage.setItem(file, JSON.stringify(json));
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(file, JSON.stringify(json));
+    }
     return json;
   }
 
@@ -36,7 +40,9 @@ export class IO {
   }
 
   flush() {
-    localStorage.clear();
+    if (typeof localStorage !== 'undefined') {
+      localStorage.clear();
+    }
   }
 
   makeShardFilename(type = '_', key = '_') {

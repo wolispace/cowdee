@@ -32,10 +32,10 @@ export class CommandManager extends Queue {
   /**
    * Take the next userCommand off the queue and parse it and process the bits
    */
-  doNext() {
+  async doNext() {
     if (this.pending()) {
       const userCommand = this.get();
-      this.parse(userCommand);
+      await this.parse(userCommand);
     }
   }
 
@@ -51,7 +51,7 @@ export class CommandManager extends Queue {
    * parse user input (specifically focusing on 'say')
    * @param {object} commandObj { cmd: "say hello everyone", actor: "w", loc: "A", niceness: 0 }
    */
-  parse(commandObj) {
+  async parse(commandObj) {
     //console.log({commandObj});
     // reset reactions after a human sends something
     this.app.db.reactions = 0;
@@ -73,9 +73,9 @@ export class CommandManager extends Queue {
     };
     // add
     const objs = {}
-    objs[this.context.actor] = this.app.db.getFormattedById(this.context.actor);
+    objs[this.context.actor] = await this.app.db.getFormattedById(this.context.actor);
 
-    const code = this.app.db.findCommand(firstword, this.context);
+    const code = await this.app.db.findCommand(firstword, this.context);
     if (!code) {
       this.app.messageManager.add({
         msg: `{${this.context.actor}} tries to ${rawCmd}, but nothing happens`,
@@ -165,7 +165,7 @@ export class CommandManager extends Queue {
   /**
    * Resolve a value: literal, $var, or $actor's loc's host's loc chain
    */
-  resolveValue(token) {
+  async resolveValue(token) {
     let t = token.trim();
     if ((t.startsWith('"') && t.endsWith('"')) ||
       (t.startsWith("'") && t.endsWith("'"))) {
@@ -183,7 +183,7 @@ export class CommandManager extends Queue {
     let value = this.context[varName] ?? '';
 
     for (let i = 1; i < parts.length; i++) {
-      const obj = this.app.db.getById(value);
+      const obj = await this.app.db.getById(value);
       if (!obj) return '';
       value = obj[parts[i]] ?? '';
     }
@@ -197,10 +197,10 @@ export class CommandManager extends Queue {
    * @param {string} token  - e.g. '$target' or "$target's link's host"
    * @returns {object|null}
    */
-  resolveObj(token) {
-    const id = this.resolveValue(token);
+  async resolveObj(token) {
+    const id = await this.resolveValue(token);
     if (!id) return null;
-    return this.app.db.getById(id) || null;
+    return (await this.app.db.getById(id)) || null;
   }
 
   /**
@@ -243,7 +243,7 @@ export class CommandManager extends Queue {
       - the double $loc,$loc allows finding $target in $loc and Second in $actor
       - second $loc is optional, defaults to $loc 
     */
-    get: (rest) => {
+    get: async (rest) => {
       // --- Step 1: Extract and clean input ---
       let firstword = rest.trim();
       firstword = firstword.replace(/`/g, "'");
@@ -261,8 +261,8 @@ export class CommandManager extends Queue {
         firstword = inMatch[1].trim();
         const locParts = inMatch[2].split(',', 2).map(s => s.trim());
         // Resolve each $loc variable
-        getLocValue = this.resolveValue(locParts[0]);
-        getSecondLocValue = locParts[1] ? this.resolveValue(locParts[1]) : getLocValue;
+        getLocValue = await this.resolveValue(locParts[0]);
+        getSecondLocValue = locParts[1] ? await this.resolveValue(locParts[1]) : getLocValue;
       } else {
         // Default to looking everywhere
         getLocValue = 'all';
@@ -283,7 +283,6 @@ export class CommandManager extends Queue {
         // Any text in the 4th position triggers non-greedy matching
         nonGreedy = true;
       }
-      //console.log({ gCount }, getBits);
 
       // Helper: determine if a bit is a quoted literal (e.g., "as", "to")
       const isQuotedLiteral = (bit) => {
@@ -303,7 +302,6 @@ export class CommandManager extends Queue {
       if (gCount === 1) {
         // get $target  →  $target = cmd_text
         this.context[varName(getBits[0])] = cmdText;
-        //console.log(`get`, varName(getBits[0]), getBits[0], this.context[varName(getBits[0])]);
 
       } else if (gCount === 2) {
         if (firstword.toLowerCase().includes('lastword')) {
@@ -327,8 +325,6 @@ export class CommandManager extends Queue {
             this.context[varName(getBits[1])] = '';
           }
         }
-        //console.log(`get2`, varName(getBits[0]), getBits[0], this.context[varName(getBits[0])]);
-        //console.log(`get2`, varName(getBits[1]), getBits[1], this.context[varName(getBits[1])]);
 
       } else if (gCount >= 3) {
         // 3 or 4 variables: split cmd_text on relationship word
@@ -339,7 +335,7 @@ export class CommandManager extends Queue {
           relWords = unquote(getBits[1]);
         } else {
           // Dynamic: use standard relationship words
-          relWords = this.relWords; //'to|on|in|at|under|towards|from|with|into|as';
+          relWords = this.relWords;
         }
 
         let splitMatch;
@@ -362,16 +358,12 @@ export class CommandManager extends Queue {
           this.context[varName(getBits[0])] = part1;
           this.context[varName(getBits[1])] = relPart;
           this.context[varName(getBits[2])] = part3;
-          //console.log(splitMatch, this.context);
         } else {
           // No rel word found — put everything in the first variable
           this.context[varName(getBits[0])] = cmdText;
           this.context[varName(getBits[1])] = '';
           this.context[varName(getBits[2])] = '';
         }
-        //console.log(`get3`, varName(getBits[0]), getBits[0], this.context[varName(getBits[0])]);
-        //console.log(`get3`, varName(getBits[1]), getBits[1], this.context[varName(getBits[1])]);
-        //console.log(`get3`, varName(getBits[2]), getBits[2], this.context[varName(getBits[2])]);
       }
 
       // treat 'it' and 'them' as the last target — resolve BEFORE object lookup below
@@ -381,7 +373,6 @@ export class CommandManager extends Queue {
       if (['it', 'them'].includes((this.context.second || '').toLowerCase())) {
         this.context.second = this.context.lastt;
       }
-      //console.log(this.context);
 
       // --- Step 7: Resolve objects (like perl's get_resolve) ---
       // Save the raw text values, then resolve named objects to IDs
@@ -393,31 +384,30 @@ export class CommandManager extends Queue {
       this.context.second = lsecond;
 
       // Helper: returns true if the value is already a known object ID (skip name lookup)
-      const isAlreadyId = (val) => !!this.app.db.getById(val);
+      const isAlreadyId = async (val) => !!(await this.app.db.getById(val));
 
       // Resolve: if the variable is 'target' or 'second', look up the object ID
       if (ntarget) {
-        if (isAlreadyId(ntarget)) {
+        if (await isAlreadyId(ntarget)) {
           // Already an ID (e.g. resolved from 'it') — use directly
           this.context.target = ntarget;
         } else {
-          const resolved = this.app.db.findByNameInLoc(ntarget, getLocValue);
+          const resolved = await this.app.db.findByNameInLoc(ntarget, getLocValue);
           this.context.target = resolved || ntarget; // keep raw text if no object found
         }
       }
       if (nsecond) {
-        if (isAlreadyId(nsecond)) {
+        if (await isAlreadyId(nsecond)) {
           this.context.second = nsecond;
         } else {
-          const resolved = this.app.db.findByNameInLoc(nsecond, getSecondLocValue);
+          const resolved = await this.app.db.findByNameInLoc(nsecond, getSecondLocValue);
           this.context.second = resolved || nsecond; // keep raw text if no object found
         }
       }
-      //console.log('final', this.context);
     },
 
     // IF/THEN/ELSE handler
-    if: (rest) => {
+    if: async (rest) => {
       let match = rest.match(/^(.+?)\s+(equals|is|like|in|eq|ne|>|<|!=|>=|<=|=|==)\s+(.+?)\s+then\s+(.+)$/i);
       if (!match) return;
 
@@ -426,8 +416,8 @@ export class CommandManager extends Queue {
       const op2Raw = match[3].trim();
       const actionsPart = match[4].trim();
 
-      const val1 = this.resolveValue(op1Raw);
-      const val2 = this.resolveValue(op2Raw);
+      const val1 = await this.resolveValue(op1Raw);
+      const val2 = await this.resolveValue(op2Raw);
 
       let conditionMet = false;
       if (['>', '<', '>=', '<='].includes(operator)) {
@@ -456,14 +446,14 @@ export class CommandManager extends Queue {
       }
 
       if (conditionMet) {
-        if (thenSub) this.runSub(thenSub);
+        if (thenSub) await this.runSub(thenSub);
       } else {
-        if (elseSub) this.runSub(elseSub);
+        if (elseSub) await this.runSub(elseSub);
       }
     },
 
     // VAR handler
-    var: (rest) => {
+    var: async (rest) => {
       const cleanRest = rest.replace(/^var\s+/i, '');
       let match = cleanRest.match(/^(\$\w+)\s+(?:to|=)\s+(.+)$/i);
       if (!match) return;
@@ -476,38 +466,20 @@ export class CommandManager extends Queue {
         const selected = choices[Math.floor(Math.random() * choices.length)];
         this.context[varName] = selected;
       } else {
-        this.context[varName] = this.resolveValue(rawVal);
+        this.context[varName] = await this.resolveValue(rawVal);
       }
-      //console.log(`var`, varName, rawVal, this.context[varName]);
     },
-
-    /*
-    "put the cat on the box"
-
-    get $target,$rel,$second in $loc,$loc;
-
-    $target="the cat on the box"
-
-    $target's host to $second
-    $target's hosthow to \"$rel\"
-    $target's pose to ''
-
-    let match = rest.match(/^(\$\w+)\s+'s\s+(\w+)\s+(?:to|=)\s+(.+)$/i);
-
-    */
 
     // SET handler - set object properties
     set: async (rest) => {
-      // Match: $target's host to $second or $target's hosthow to "value"
-      // match[1] = $var or chained $var's prop's prop, match[2] = prop, match[3] = value
       let match = rest.match(/^(\$[\w'\s]+)\s*'s\s+(\w+)\s+(?:to|=)\s+(.+)$/i);
       if (!match) return;
 
-      const obj = this.resolveObj(match[1].trim());
+      const obj = await this.resolveObj(match[1].trim());
       if (!obj) return;
 
       const prop = match[2].toLowerCase();           // host, hosthow, pose, etc.
-      const val = this.resolveValue(match[3].trim()); // handles $vars and quoted strings
+      const val = await this.resolveValue(match[3].trim()); // handles $vars and quoted strings
       const oldObj = { ...obj };
       obj[prop] = val;
 
@@ -517,11 +489,10 @@ export class CommandManager extends Queue {
 
     // eg: update $new_id to "worth=0, link=$exit, material='_door_', color='lightgreen'"
     update: async (rest) => {
-      // match[1] = $var or chained expression, match[2] = key=val pairs
       const match = rest.match(/^(\$[\w'\s]+)\s+(?:to|=)\s+["']?(.+?)["']?$/i);
       if (!match) return;
 
-      const obj = this.resolveObj(match[1].trim());
+      const obj = await this.resolveObj(match[1].trim());
       if (!obj) return;
 
       const oldObj = { ...obj };
@@ -529,7 +500,7 @@ export class CommandManager extends Queue {
         const eqIdx = pair.indexOf('=');
         if (eqIdx === -1) continue;
         const prop = pair.substring(0, eqIdx).trim();
-        const val = this.resolveValue(pair.substring(eqIdx + 1).trim());
+        const val = await this.resolveValue(pair.substring(eqIdx + 1).trim());
         obj[prop] = val;
       }
 
@@ -537,20 +508,16 @@ export class CommandManager extends Queue {
     },
 
     clear: async (rest) => {
-      // match[1] = $var or chained expression, match[2] = params
       const match = rest.match(/^(.+)\s*,\s*(.+)$/i);
       if (!match) return;
 
-      const obj = this.resolveObj(match[1].trim());
+      const obj = await this.resolveObj(match[1].trim());
       if (!obj) return;
       const oldObj = { ...obj };
 
-      const params = match[2];
-      // TODO: if params == 'xyz' we only clear those
       delete obj.host;
       delete obj.hosthow;
       delete obj.pose;
-      // TODO: clear the x, y and z and maybe other positional things
 
       // Save the updated object
       await this.app.db.save(obj, oldObj);
@@ -560,7 +527,6 @@ export class CommandManager extends Queue {
     say: (rest) => {
       const match = rest.match(/^['"](\w+)['"]\s*,\s*(.+)$/i);
       if (!match) return;
-      // include the trigger word 'say' or 'ask' into the context so we can find which objects react to it
       this.context.trigger = (match[1]);
 
       let msg = this.app.utils.trimQuotes(match[2].trim());
@@ -573,63 +539,39 @@ export class CommandManager extends Queue {
       });
     },
 
-    relook: (rest) => {
-      const loc = this.resolveValue(rest.trim());
+    relook: async (rest) => {
+      const loc = await this.resolveValue(rest.trim());
       this.context.loc = loc;
-      const data = this.app.db.lookLoc({ ...this.context });
+      const data = await this.app.db.lookLoc({ ...this.context });
       this.app.messageManager.add(data);
     },
 
-    
-    list: (rest) => {
-      const loc = this.resolveValue(rest.trim());
+    list: async (rest) => {
+      const loc = await this.resolveValue(rest.trim());
       this.context.loc = loc;
-      const data = this.app.db.listLoc({ ...this.context });
+      const data = await this.app.db.listLoc({ ...this.context });
       this.app.messageManager.add(data);
-
     },
-
 
     new: async (rest) => {
-      const parsed = this.parseObj(this.resolveValue(rest.trim()));
+      const parsed = this.parseObj(await this.resolveValue(rest.trim()));
       const db = this.app.db;
       const loc = this.context.loc;
-      // find existing object with same class+name in this loc to stack onto
-      // let existing = null;
-      // for (const [id, obj] of om.pool) {
-      //   if (obj.loc === loc && obj.class === parsed.class && obj.name === parsed.name) {
-      //     existing = obj; break;
-      //   }
-      // }
-      // if (existing) {
-      //   existing.qty = (existing.qty || 1) + parsed.qty;
-      //   om.save(existing);
-      //   this.context.target = existing.id;
-      // } else {
-      //   const obj = { loc, ...parsed };
-      //   om.save(obj);
-      //   this.context.target = obj.id;
-      // }
 
-      // quick and simple object creator
       const obj = { loc, ...parsed };
       obj.id = this.app.id.new();
-      await db.addToPools(obj);
+      await db.save(obj);
       this.context.target = obj.id;   // set target to the new object's ID
       this.context.lastt = obj.id;    // update lastt so 'it' works in follow-up commands
       this.context.new_id = obj.id;
     },
 
-    runsub: (rest) => {
-      this.runSub(rest);
+    runsub: async (rest) => {
+      await this.runSub(rest);
     },
 
     msg: (rest) => {
       console.log(`msg`);
-      // if($this_cmd =~ m/^msg (.+)/i){
-      // &add_msg(eval($1)); # $loc,$actor,$target,$second,$action,$msg,$init_obj,$init_cmd
-
-
     },
 
     flush: ($rest) => {
@@ -637,13 +579,11 @@ export class CommandManager extends Queue {
     },
 
     unhost: async (rest) => {
-      // unhost everything hosted by this object.
-      // Supports simple vars ($target) and chained expressions ($target's link's host)
-      const obj = this.resolveObj(rest.trim());
+      const obj = await this.resolveObj(rest.trim());
       if (!obj) return;
       const hosted = await this.app.db.findInLoc(obj.id);
       for (const subId of hosted) {
-        const sub = this.app.db.getById(subId);
+        const sub = await this.app.db.getById(subId);
         if (!sub) continue;
         const oldObj = { ...sub };
         sub.host = '';
@@ -689,9 +629,8 @@ export class CommandManager extends Queue {
    * loop through each and see if they are triggered in this context
    * @param {object} data 
    */
-  reactions(data) {
+  async reactions(data) {
     // eg 'ask', there is a robot in your location that "has statement "if taget of 'say' then answer;
-    this.app.db.findTrigger(data.context);
-
+    await this.app.db.findTrigger(data.context);
   }
 }
