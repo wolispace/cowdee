@@ -1,4 +1,6 @@
 <?php
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
 require_once "utils.php";
 
 // always recieve json data
@@ -30,13 +32,11 @@ function handleInput($request) {
   } else if (!empty($request['file'])) {
     $file = shardName($request['file']);
     if (empty($request['content'])) {
-      $json = loadJson($file);
-      outputJson($json);
+      outputJson(loadJson($file));
     } else {
-      // write json to disk..
-      saveJson($file, $request['content']);
+      saveJson($file, json_decode($request['content'], true));
+      outputJson(['ok' => true]);
     }
-    return outputJson(['error' => 'invalid request']);
   }
 }
 
@@ -56,6 +56,7 @@ function outputJson($data) {
 }
 
 function loadJson($file) {
+  if (!file_exists($file)) return null;
   return json_decode(file_get_contents($file), true);
 }
 

@@ -234,7 +234,7 @@ export class Cowmands {
       const loc = this.context.loc;
       const obj = { loc, ...parsed };
       obj.id = this.app.id.new();
-      db.addToPools(obj);
+      db.save(obj);
       this.context.target = obj.id;
       this.context.lastt = obj.id;
       this.context.new_id = obj.id;

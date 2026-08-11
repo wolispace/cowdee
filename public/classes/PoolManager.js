@@ -58,7 +58,7 @@ export class PoolManager {
       this.pool.replace(key, new Set([thing]));
     } else {
       if (!this.pool.has(key)) {
-        await this.aget(key);
+        await this.get(key);
       }
       this.pool.add(key, thing);
     }
@@ -131,14 +131,14 @@ export class PoolManager {
     // Group updated keys by shard file
     for (const key of this.dirtyUpdated) {
       if (!key) continue;
-      const filename = this.shardName(key);
+      const filename = this.app.io.makeShardFilename(this.type, key);
       const set = files.get(filename) ?? { updated: new Set(), deleted: new Set() };
       set.updated.add(key);
       files.set(filename, set);
     }
     // Group deleted keys by shard file
     for (const key of this.dirtyDeleted) {
-      const filename = this.shardName(key);
+      const filename = this.app.io.makeShardFilename(this.type, key);
       const set = files.get(filename) ?? { updated: new Set(), deleted: new Set() };
       set.deleted.add(key);
       files.set(filename, set);

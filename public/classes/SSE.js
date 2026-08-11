@@ -10,6 +10,7 @@ export class SSE {
     const lastSeen = () => localStorage.getItem('lastContext') || '';
 
     const connect = () => {
+      return;
       const url = new URL(window.location.href);
       url.port = '8881';
       url.pathname = '/public/sse.php';

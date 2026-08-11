@@ -1,2 +1,2 @@
-node --localstorage-file=_local.json test/IO.js
+node --localstorage-file=_storage/local.sqlite test/%1.js
 

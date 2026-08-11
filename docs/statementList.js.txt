@@ -384,7 +384,7 @@
       // quick and simple object creator
       const obj = { loc, ...parsed };
       obj.id = this.app.id.new();
-      db.addToPools(obj);
+      db.save(obj);
       this.context.target = obj.id;   // set target to the new object's ID
       this.context.lastt = obj.id;    // update lastt so 'it' works in follow-up commands
       this.context.new_id = obj.id;

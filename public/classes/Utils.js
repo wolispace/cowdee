@@ -5,6 +5,15 @@
 export class Utils {
 
   /**
+   * Generate a random number form 0 to max eg 0 - 10 without a seed (unlike ID.random())
+   * @param {int} max 
+   * @returns {int}
+   */
+  random(max = 1) {
+    return Math.floor(Math.random() * max);
+  }
+
+  /**
    * Removes wrapping quotes from the string eg '"hello"' becomes: 'hello'
    * - will work with enything like {hello} or [hello]
    * - will clobber unquoted strings so hello becomes ell 

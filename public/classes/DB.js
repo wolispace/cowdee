@@ -21,6 +21,7 @@ export class DB {
     for (const key of this.keys) {
       this.pools[key].clear();
     }
+    localStorage.clear();
   }
 
   /**
@@ -199,20 +200,11 @@ export class DB {
   }
 
   /**
-   * Saves changes (back to the pool which eventually end up on disk)
-   * @param {object} obj 
-   * @param {object} old 
-   */
-  async save(obj, old) {
-    await this.addToPools(obj, old);
-  }
-
-  /**
    * Add the object to all of the pools updaing and old pools
    * @param {obj} obj 
    * @param {object} old 
    */
-  async addToPools(obj, old) {
+  async save(obj, old) {
     // if there is already an obj, we maybe changing existing values like its loc from one to another
     // so clear from all pools
     if (obj.code) {
@@ -226,6 +218,7 @@ export class DB {
     }
     this.formatObject(obj);
     await this.pools.id.set(obj.id, obj, null, true);
+    this.savePoolsToDisk();
     const oldLongName = `${old?.class ?? ''} ${old?.name ?? ''}`.trim().toLowerCase();
     const objLongName = `${obj?.class ?? ''} ${obj?.name ?? ''}`.trim().toLowerCase();
 
@@ -260,8 +253,7 @@ export class DB {
    * - merging the objects with existing json on disk
    */
   async savePoolsToDisk() {
-
-    const caller = this.utils.getImmediateCaller();
+    const caller = this.app.utils.getImmediateCaller();
     // console.log(caller, '--- save pool ---');
     // save changed pools to disk
     for (const pool of Object.values(this.pools)) {
