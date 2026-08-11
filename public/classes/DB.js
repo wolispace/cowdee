@@ -90,13 +90,13 @@ export class DB {
    * @param {string} loc 
    * @returns {string} the ID of the found object
    */
-  findByNameInLoc(name, loc) {
-    const inName = this.findByName(name);
+  async findByNameInLoc(name, loc) {
+    const inName = await this.findByName(name);
     if (loc == 'all') {
       return inName.values().next().value;
     }
 
-    const inLoc = this.findInLoc(loc);
+    const inLoc = await this.findInLoc(loc);
     for (const key of inLoc) {
       if (inName.has(key)) {
         return key;
@@ -130,9 +130,10 @@ export class DB {
    * @param {id} id 
    * @returns {string}
    */
-  getCode(id) {
-    const set = this.pools.code.get(id);
+  async getCode(id) {
+    const set = await this.pools.code.get(id);
     if (!set || set.size === 0) return '';
+    console.log('getCode', id, set);
     const codeObj = set.values().next().value;
     return codeObj?.code ?? '';
   };
@@ -144,13 +145,13 @@ export class DB {
    * @param {object} context 
    * @returns {string} return the code from the bext match object
    */
-  findCommand(context) {
-    const ids = this.findByName(context.cowmand);
+  async findCommand(context) {
+    const ids = await this.findByName(context.cowmand);
 
     if (!ids || ids.size < 1) return '';
     if (ids.size === 1) {
       const [id] = ids;
-      return this.getCode(id);
+      return await this.getCode(id);
     }
     for (const id of ids) {
       const obj = this.getById(id);
