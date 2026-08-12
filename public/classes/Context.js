@@ -8,13 +8,20 @@ export class Context {
     // expand the context into this object eg: this.ts = context.ts;
     Object.assign(this, context);
     this.prepRandom(this.ts);
-    //  
+    this.cowmands = new Cowmands(this.app, this);
   }
 
+  /**
+   * Each context gets a unique id being the timestamp + the actor id
+   * @returns {string}
+   */
   key() {
     return `${this.ts}${this.actor}`;
   }
 
+  /**
+   * Entry point for processing this context
+   */
   async process() {
     if (this.app.seen(this.key())) return;
     console.log('processing ', this.ts, this.actor, this.loc, this.cmd);
@@ -44,12 +51,13 @@ export class Context {
     await this.runSub(block);
   }
 
-    /**
-   * Partitions the cowscript code by ## into subroutines
+  /**
+   * Partitions the cowscript code by ## into subs 
+   * @param {string} code 
    */
   partitionCode(code) {
     // Split on ##
-    // We prefix with ##__start: to catch the initial statements
+    // We prefix with ##__start: to catch the initial statement
     const blocks = ('##__start:' + code).split('##');
     for (const block of blocks) {
       if (!block.trim()) continue;
@@ -64,6 +72,7 @@ export class Context {
 
     /**
    * Executes a subroutine block line-by-line (semicolon separated)
+   * @param {string} subName
    */
   async runSub(subName) {
     const subContent = this.subs[subName];
@@ -80,9 +89,10 @@ export class Context {
 
     /**
    * Executes a single statement
+   * @param {string} statement 
    */
   async executeStatement(statement) {
-    //console.log({ statement });
+    console.log(` - [${statement}]`);
     const trimmed = statement.trim();
     if (!trimmed) return;
 
@@ -95,9 +105,7 @@ export class Context {
       firstword = 'var';
     }
 
-    const cowmands = new Cowmands(this.app, this);
-
-    const handler = cowmands.statementList[firstword.toLowerCase()];
+    const handler = this.cowmands.statementList[firstword.toLowerCase()];
     if (handler) {
       // Pass the remaining string
       await handler(rest);

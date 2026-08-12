@@ -67,12 +67,14 @@ class App {
       return true;
     }; 
     console.log(`setting lastContext to ${key}`);
-    this.lastContext = localStorage.setItem(LAST_CONTEXT_KEY, key);
+    this.lastContext = key; 
+    localStorage.setItem(LAST_CONTEXT_KEY, this.lastContext);
     return false;
   }
 
+
   async sendCommand(data) {
-    data.last = localStorage.getItem(LAST_CONTEXT_KEY);
+    data.last = this.lastContext;
     const result = await this.io.fetchJson('server', data);
     console.log(`sendCommand last=${data.last}`, result);
     if (result.contexts) {

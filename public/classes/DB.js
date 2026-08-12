@@ -139,7 +139,6 @@ export class DB {
     const set = await this.pools.code.get(id);
     if (!set || set.size === 0) return '';
     const codeObj = set.values().next().value;
-    console.log('getCode', id, set, codeObj);
     return codeObj?.code ?? '';
   };
 

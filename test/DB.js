@@ -12,7 +12,7 @@ app.io = new IO(app);
 app.db = new DB(app);
 app.id = new ID(app);
 
-const context = new Context(app);
+const context = new Context({app});
 
 const settings = {
   generate: false,
