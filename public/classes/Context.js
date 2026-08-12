@@ -29,6 +29,7 @@ export class Context {
     const { firstword, rest } = this.app.utils.splitFirstWord(this.cmd);
     this.cowmand = firstword;
     this.rest = rest;
+    this.cmd_text = rest;
     const code = await this.app.db.findCommand(this);
     if (!code) {
       this.msg = `{${this.actor}} tries to ${this.cmd}, but nothing happens`,        
@@ -96,7 +97,7 @@ export class Context {
     const trimmed = statement.trim();
     if (!trimmed) return;
 
-    const { firstword, rest } = this.app.utils.splitFirstWord(trimmed);
+    let { firstword, rest } = this.app.utils.splitFirstWord(trimmed);
 
     // Flexible handling for variable assignments without the "var" keyword
     // e.g. `$prefix to (sweetly, nicely)` -> rewritten as `var $prefix to ...`
