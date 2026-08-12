@@ -171,9 +171,9 @@ export class Cowmands {
         elseSub = '';
       }
       if (conditionMet) {
-        if (thenSub) await this.runSub(thenSub);
+        if (thenSub) await this.context.runSub(thenSub);
       } else {
-        if (elseSub) await this.runSub(elseSub);
+        if (elseSub) await this.context.runSub(elseSub);
       }
     },
     // VAR handler
@@ -240,7 +240,7 @@ export class Cowmands {
       this.context.new_id = obj.id;
     },
     runsub: async (rest) => {
-      await this.runSub(rest);
+      await this.context.runSub(rest);
     }
   };
   /**
@@ -307,23 +307,6 @@ export class Cowmands {
     cls = words[i] || '';
     name = words.slice(i + 1).join(' ');
     return { qty, color, attribs: attribs.join(' '), class: cls, name };
-  }
-
-
-  /**
-   * Executes a subroutine block line-by-line (semicolon separated)
-   */
-  async runSub(subName) {
-    const subContent = this.subs[subName];
-    if (!subContent) {
-      return;
-    }
-    const statements = subContent.split(';');
-    for (const statement of statements) {
-      const trimmedStatement = statement.trim();
-      if (!trimmedStatement) continue;
-      await this.executeStatement(trimmedStatement);
-    }
   }
 
 }
