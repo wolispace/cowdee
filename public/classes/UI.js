@@ -8,6 +8,7 @@ export class UI {
 
   constructor(app) {
     this.app = app;
+    if (this.app.debug) return;
     this.splitter = document.getElementById('splitter');
     this.panels = document.getElementById('panels');
     this.top = document.getElementById('top');
@@ -20,9 +21,7 @@ export class UI {
   }
 
   async addMessage(context) {
-    const div = document.createElement("div");
-    const section = context.top ? '#top' : '#bottom';
-    const info = document.querySelector(section);
+
     // set the last target so we can refer to it as 'it' or 'them'
     if (context?.target) {
       this.app.playerInfo.lastt = context.target;
@@ -37,7 +36,14 @@ export class UI {
     context.playerId = this.app.playerInfo.id;
     context.msg = await this.expand(context);
 
+    if (this.app.debug) {
+      return this.expand(context);
+    }
+
     if (context.msg) {
+      const div = document.createElement("div");
+      const section = context.top ? '#top' : '#bottom';
+      const info = document.querySelector(section);
       div.innerHTML = context.msg;
       if (context.top) {
         info.replaceChildren(div);
@@ -64,6 +70,10 @@ export class UI {
           loadedObjs[id] = await this.app.db.getById(id);
         }
       }
+      loadedObjs[context.playerId] = await this.app.db.getById(context.playerId);
+      loadedObjs[context.actor] = await this.app.db.getById(context.actor);
+      loadedObjs[context.target] = await this.app.db.getById(context.target);
+      loadedObjs[context.second] = await this.app.db.getById(context.second);
 
       // Interpolate object templates: {ID} (defaults to longname) or {ID.attribute}
       context.msg = context.msg.replace(/\{(\w+)(?:\.(\w+))?\}/g, (match, id, attr) => {
