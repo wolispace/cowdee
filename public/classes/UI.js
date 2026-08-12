@@ -37,7 +37,7 @@ export class UI {
     context.msg = await this.expand(context);
 
     if (this.app.debug) {
-      return this.expand(context);
+      return context.msg;
     }
 
     if (context.msg) {

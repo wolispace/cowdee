@@ -220,12 +220,13 @@ export class Cowmands {
       await this.app.db.save(obj, oldObj);
     },
     // SAY handler
-    say: (rest) => {
+    say: async (rest) => {
       const match = rest.match(/^['"](\w+)['"]\s*,\s*(.+)$/i);
       if (!match) return;
       this.context.trigger = match[1];
-      this.context.msg = this.app.utils.trimQuotes(match[2].trim());
-      this.app.ui.addMessage(this.context);
+      const template = this.app.utils.trimQuotes(match[2].trim());
+      this.context.msg = this.expandTemplate(template);
+      await this.app.ui.addMessage(this.context);
     },
     // Additional handlers (new, runsub, etc.) can be added here as needed.
     new: async (rest) => {
@@ -307,6 +308,20 @@ export class Cowmands {
     cls = words[i] || '';
     name = words.slice(i + 1).join(' ');
     return { qty, color, attribs: attribs.join(' '), class: cls, name };
+  }
+
+
+  /**
+   * Replaces $varName tokens in a template string with their values from context.
+   * e.g. "[$actor] .oO( $text )" -> "[wol] .oO( hello )"
+   * @param {string} template
+   * @returns {string}
+   */
+  expandTemplate(template) {
+    return template.replace(/\$(\w+)/g, (match, varName) => {
+      const val = this.context[varName];
+      return val !== undefined ? val : match;
+    });
   }
 
 }
