@@ -29,6 +29,7 @@ export class IO {
   }
 
   async fetchJson(type, payload) {
+    console.log(`fetchJson: ${type}`, payload);
     payload.token = this.token;
     const response = await fetch(this.types[type], {
       method: 'POST',
