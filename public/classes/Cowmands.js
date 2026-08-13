@@ -228,7 +228,7 @@ export class Cowmands {
       this.context.msg = this.expandTemplate(template);
       await this.app.ui.addMessage(this.context);
     },
-    // Additional handlers (new, runsub, etc.) can be added here as needed.
+    // NEW
     new: async (rest) => {
       const parsed = this.parseObj(await this.resolveValue(rest.trim()));
       const db = this.app.db;
@@ -240,9 +240,24 @@ export class Cowmands {
       this.context.lastt = obj.id;
       this.context.new_id = obj.id;
     },
+    // RUNSUB
     runsub: async (rest) => {
       await this.context.runSub(rest);
-    }
+    },
+    // RELOOK
+    relook: async (rest) => {
+      const loc = await this.resolveValue(rest.trim());
+      this.context.loc = loc;
+      const data = await this.app.db.lookLoc({ ...this.context });
+      this.app.ui.addMessage(data);
+    },
+    // LIST
+    list: async (rest) => {
+      const loc = await this.resolveValue(rest.trim());
+      this.context.loc = loc;
+      const data = await this.app.db.listLoc({ ...this.context });
+      this.app.ui.addMessage(data);
+    },
   };
   /**
    * Resolve a value: literal, $var, or $actor's loc's host's loc chain
