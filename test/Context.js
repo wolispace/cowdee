@@ -53,6 +53,11 @@ const rawContext = {
   const context3 = new Context(rawContext);
   await context3.process();
   console.log('msg', context3.msg);
+
+  rawContext.cmd = 'look';
+  const context4 = new Context(rawContext);
+  await context4.process();
+  console.log('msg', context4.msg);
   
 }
 

@@ -249,14 +249,14 @@ export class Cowmands {
       const loc = await this.resolveValue(rest.trim());
       this.context.loc = loc;
       const data = await this.app.db.lookLoc({ ...this.context });
-      this.app.ui.addMessage(data);
+      await this.app.ui.addMessage(data);
     },
     // LIST
     list: async (rest) => {
       const loc = await this.resolveValue(rest.trim());
       this.context.loc = loc;
       const data = await this.app.db.listLoc({ ...this.context });
-      this.app.ui.addMessage(data);
+      await this.app.ui.addMessage(data);
     },
   };
   /**
