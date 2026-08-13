@@ -77,9 +77,12 @@ export class UI {
 
       // Interpolate object templates: {ID} (defaults to longname) or {ID.attribute}
 
-      context.msg = context.msg.replace(/\[(\w+)(?:\.(\w+))?\]/g, (match, id, attr) => {
+      context.msg = context.msg.replace(/\[(\w+)(?:\.(\w+))?\]/g, async (match, id, attr) => {
         const obj = loadedObjs[id];
-        if (!obj) return match;
+        if (!obj) {
+          obj = await this.app.db.getById(id);
+        };
+        if (!obj) return `??${id}??`;
         this.app.db.formatObject(obj);
 
         const prop = attr || 'longname';

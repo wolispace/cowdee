@@ -34,7 +34,7 @@ export class LookManager {
     }
     this.found = await this.db.findInLoc(loc.id);
 
-    this.sentences = [`In {${loc.id}} you see: `];
+    this.sentences = [`In [${loc.id}] you see: `];
     if (!this.found || this.found.size < 1) {
       this.sentences.push('Nothing interesting here');
       return this.returnData();
@@ -44,7 +44,7 @@ export class LookManager {
     this.objs[loc.id] = loc;
     let list = '';
     for (const id of this.found) {
-      list += `<li>{${id}}</li>`;
+      list += `<li>[${id}]</li>`;
     }
     this.sentences.push(list);
     return this.returnData();
@@ -80,7 +80,7 @@ export class LookManager {
     this.found = await this.db.findInLoc(loc.id);
     // console.log(`found in ${loc.id}`, this.found);
     const inon = 'in';
-    this.sentences = [`You are ${inon} {${loc.id}}`];
+    this.sentences = [`You are ${inon} [${loc.id}]`];
     if (!this.found || this.found.size < 1) {
       this.sentences.push('Nothing interesting here');
       if (loc) this.objs[loc.id] = loc;
@@ -177,9 +177,9 @@ export class LookManager {
       let showHost = '</div><div>You also see';
       if (host) {
         if (lastHost == host) {
-          showHost = `{${obj.id}.hosthow} the {${host}.class} there {${obj.id}.is}`;
+          showHost = `[${obj.id}.hosthow] the [${host}.class] there [${obj.id}.is]`;
         } else {
-          showHost = `{${obj.id}.hosthow} the {${host}.class} there {${obj.id}.is}`;
+          showHost = `[${obj.id}.hosthow] the [${host}.class] there [${obj.id}.is]`;
         }
       }
       let sentence = sentenceCount++ < 1 ? 'You see' : showHost;
@@ -188,9 +188,9 @@ export class LookManager {
       for (const id of ids) {
         const sub = this.objs[id];
         delim = (ids.size > 1 && objCounter++ >= ids.size) ? ' and ' : delim;
-        let objName = ['player','command'].includes(sub.class) ? `${sub.class} called {${id}}` : `{${id}.plural}`;
-        let descObj = `{${id}.pose} {${id}}`;
-        descObj = `{${id}.qtyText} {${id}.pose} ${objName}`;
+        let objName = ['player','command'].includes(sub.class) ? `${sub.class} called [${id}]` : `[${id}.plural]`;
+        let descObj = `[${id}.pose] [${id}]`;
+        descObj = `[${id}.qtyText] [${id}.pose] ${objName}`;
         sentence += `${delim}${descObj}`;
         delim = ', ';
       }
