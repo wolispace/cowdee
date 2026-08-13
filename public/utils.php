@@ -20,6 +20,8 @@ function get_new_contexts($last) {
     // Otherwise return all contexts newer than $last
     $contexts = [];
     foreach ($files as $file) {
+      $ts = (int) substr(basename($file), 0, 13);
+      if ($ts < (time() - 3600) * 1000) { unlink($file); continue; }
       $data = json_decode(file_get_contents($file), true);
       $key = "{$data['ts']}{$data['actor']}";
 
