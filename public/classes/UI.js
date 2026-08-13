@@ -76,7 +76,8 @@ export class UI {
       loadedObjs[context.second] = await this.app.db.getById(context.second);
 
       // Interpolate object templates: {ID} (defaults to longname) or {ID.attribute}
-      context.msg = context.msg.replace(/\{(\w+)(?:\.(\w+))?\}/g, (match, id, attr) => {
+
+      context.msg = context.msg.replace(/\[(\w+)(?:\.(\w+))?\]/g, (match, id, attr) => {
         const obj = loadedObjs[id];
         if (!obj) return match;
         this.app.db.formatObject(obj);
@@ -112,7 +113,8 @@ export class UI {
 
       context.msg = context.msg.replace(/\s+/g, ' ').trim();
     }
-    return this.capitalEachSentence(context.msg);
+    context.msg = this.capitalEachSentence(context.msg);
+    return context.msg;
   }
 
   capitalEachSentence(text) {
