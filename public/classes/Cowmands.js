@@ -320,7 +320,7 @@ export class Cowmands {
   expandTemplate(template) {
     return template.replace(/\$(\w+)/g, (match, varName) => {
       const val = this.context[varName];
-      return val !== undefined ? val : match;
+      return val !== undefined ? val : '';
     });
   }
 
