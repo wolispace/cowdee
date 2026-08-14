@@ -59,10 +59,17 @@ export class UI {
     }
   }
 
-  // TODO: update to read objects directl from this.app.db not context.objs
+  /**
+   * Expand the [id] and [id.prop] templates in the message to the actual object names or attributes
+   * @param {object} context 
+   * @param {string} format 
+   * @returns 
+   */
   async expand(context, format = 'html') {
     if (context.msg) {
-      const matches = [...context.msg.matchAll(/\{(\w+)(?:\.(\w+))?\}/g)];
+      const matches = [...context.msg.matchAll(/\[(\w+)(?:\.(\w+))?\]/g)];
+
+      // make a list of all referenced object IDs for quick reference
       const loadedObjs = {};
       for (const match of matches) {
         const id = match[1];
@@ -70,18 +77,9 @@ export class UI {
           loadedObjs[id] = await this.app.db.getById(id);
         }
       }
-      loadedObjs[context.playerId] = await this.app.db.getById(context.playerId);
-      loadedObjs[context.actor] = await this.app.db.getById(context.actor);
-      loadedObjs[context.target] = await this.app.db.getById(context.target);
-      loadedObjs[context.second] = await this.app.db.getById(context.second);
 
-      // Interpolate object templates: {ID} (defaults to longname) or {ID.attribute}
-
-      context.msg = context.msg.replace(/\[(\w+)(?:\.(\w+))?\]/g, async (match, id, attr) => {
-        let obj = loadedObjs[id];
-        if (!obj) {
-          obj = await this.app.db.getById(id);
-        };
+      context.msg = context.msg.replace(/\[(\w+)(?:\.(\w+))?\]/g, (match, id, attr) => {
+        const obj = loadedObjs[id];
         if (!obj) return `??${id}??`;
         this.app.db.formatObject(obj);
 
@@ -96,11 +94,9 @@ export class UI {
         // if (['pus','drop','pose','paint'].includes(context.context.trigger)) {
         //   val = `the ${obj.longname}`;
         // }
-
         if (!['longname', 'name', 'shorname', 'plural'].includes(prop)) {
           return val;
         }
-
         if (format == 'html') {
           // Format value with styling if color is defined
           const color = obj.color;
@@ -113,7 +109,6 @@ export class UI {
           return val;
         }
       });
-
       context.msg = context.msg.replace(/\s+/g, ' ').trim();
     }
     context.msg = this.capitalEachSentence(context.msg);

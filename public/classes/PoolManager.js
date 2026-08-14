@@ -36,7 +36,7 @@ export class PoolManager {
    */
   async get(key) {
     if (key === undefined || key === null || key === '') return;
-    console.log(`get[${key}]`);
+    // console.log(`get[${key}]`);
     if (this.pool.has(key)) return this.pool.get(key);
     const filename = this.app.io.makeShardFilename(this.type, key);
     const items = await this.app.io.loadJson(filename);
