@@ -9,6 +9,7 @@ export class Context {
     Object.assign(this, context);
     this.prepRandom(this.ts);
     this.cowmands = new Cowmands(this.app, this);
+    this.app.id.counter = this.counter; // keep id counters in sync
   }
 
   /**
@@ -93,7 +94,7 @@ export class Context {
    * @param {string} statement 
    */
   async executeStatement(statement) {
-    console.log(` - [${statement}]`);
+  //  console.log(` - [${statement}]`);
     const trimmed = statement.trim();
     if (!trimmed) return;
 

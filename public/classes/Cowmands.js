@@ -231,11 +231,13 @@ export class Cowmands {
     // NEW
     new: async (rest) => {
       const parsed = this.parseObj(await this.resolveValue(rest.trim()));
-      const db = this.app.db;
+
       const loc = this.context.loc;
       const obj = { loc, ...parsed };
+      // TODO: app.id need to be loaded from the server when we start
+      // OR pass a new id in the context IF we create a new object
       obj.id = this.app.id.new();
-      await db.save(obj);
+      await this.app.db.save(obj);
       this.context.target = obj.id;
       this.context.lastt = obj.id;
       this.context.new_id = obj.id;

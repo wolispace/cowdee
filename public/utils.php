@@ -23,6 +23,9 @@ function get_new_contexts($last) {
       $ts = (int) substr(basename($file), 0, 13);
       if ($ts < (time() - 3600) * 1000) { unlink($file); continue; }
       $data = json_decode(file_get_contents($file), true);
+      if ($data['counter'] < 1) {
+        $data['counter'] = file_get_contents('../_db/_counter.txt');
+      }
       $key = "{$data['ts']}{$data['actor']}";
 
       if ($key > $last) {

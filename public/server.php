@@ -22,7 +22,12 @@ function handleInput($request) {
     */
     $mstimestamp = round(microtime(true) * 1000);
     $filename = CONTEXT_DIR . "/{$mstimestamp}{$request['actor']}.json";
-    $context = json_encode(['ts' => $mstimestamp, 'actor' => $request['actor'], 'loc' => $request['loc'], 'cmd' => $request['cmd']]);
+    $context = json_encode([
+      'ts' => $mstimestamp,
+      'counter' => $request['ounter'], 
+      'actor' => $request['actor'], 
+      'loc' => $request['loc'], 
+      'cmd' => $request['cmd']]);
     file_put_contents($filename, $context);
     // get all new contexts we have not seen yet
     $last = $request['last'] ?? '0';
@@ -34,6 +39,9 @@ function handleInput($request) {
     if (empty($request['content'])) {
       outputJson(loadJson($file));
     } else {
+      if (!empty($request['counter'])) {
+        file_put_contents('../_db/_counter.txt', $request['counter']);
+      }
       saveJson($file, json_decode($request['content'], true));
       outputJson(['ok' => true]);
     }

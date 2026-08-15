@@ -29,7 +29,7 @@ class App {
     this.id = new ID(this); // generate unique sequential ids
     this.playerManager = new PlayerManager(this);
     this.lookManager = new LookManager(this);
-    
+
     if (testing) return;
     // TODO: do we need to poll or process a queue.. I think not any more....
     // setInterval(() => this.doNext(), this.interval);
@@ -37,7 +37,7 @@ class App {
 
   start() {
     this.lastContext = localStorage.getItem(LAST_CONTEXT_KEY);
-    console.log(`started last=${this.lastContext}`);
+    // console.log(`started last=${this.lastContext}`);
     // this.ui.showDialog(' Hi ', () => {alert('hmm')});
 
     // universal form submit we pass to the handler for forms
@@ -49,6 +49,8 @@ class App {
       data.actor = 'wol';
       data.loc = '2';
       this.handleForm(data);
+      const cmdInput = document.getElementById('cmd');
+      cmdInput.value = '';
     });
   }
 
@@ -66,7 +68,7 @@ class App {
     if (this.lastContext >= key) {
       return true;
     }; 
-    console.log(`setting lastContext to ${key}`);
+    //console.log(`setting lastContext to ${key}`);
     this.lastContext = key; 
     localStorage.setItem(LAST_CONTEXT_KEY, this.lastContext);
     return false;
@@ -75,8 +77,9 @@ class App {
 
   async sendCommand(data) {
     data.last = this.lastContext;
+    data.counter = this.id.counter;
     const result = await this.io.fetchJson('server', data);
-    console.log(`sendCommand last=${data.last}`, result);
+    //console.log(`sendCommand last=${data.last}`, result);
     if (result.contexts) {
       const contexts = JSON.parse(result.contexts);
       for ( const rawContext of contexts) {
