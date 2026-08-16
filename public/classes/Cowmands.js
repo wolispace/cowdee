@@ -1,5 +1,7 @@
 // Cowmands.js – modular command handling
 export class Cowmands {
+  relWords = 'at|as|to|on|in|near|far from|far away from|away from|under|between|above|around|encompassing|beside|behind|leaning against|next to|through|against|with|by|over|across|facing|leaning|looking|leading|heading|pointing|going|running|to the|north|east|west|south|up|down|from|off';
+
   /**
    * Create a Cowmands helper. Pass the main app instance so handlers can access DB, utils, etc.
    */
@@ -78,18 +80,12 @@ export class Cowmands {
         }
       } else if (gCount >= 3) {
         // 3 or more variables: split cmd_text on relationship word
-        let relWords;
-        if (isQuotedLiteral(getBits[1])) {
-          relWords = unquote(getBits[1]);
-        } else {
-          relWords = this.relWords;
-        }
         let splitMatch;
         if (nonGreedy) {
-          const relRegex = new RegExp(`^(.*?)\\s+(${relWords})\\s+(.*)$`, 'i');
+          const relRegex = new RegExp(`^(.*?)\\s+(${this.relWords})\\s+(.*)$`, 'i');
           splitMatch = cmdText.match(relRegex);
         } else {
-          const relRegex = new RegExp(`^(.+)\\s+(${relWords})\\s+(.*)$`, 'i');
+          const relRegex = new RegExp(`^(.+)\\s+(${this.relWords})\\s+(.*)$`, 'i');
           splitMatch = cmdText.match(relRegex);
         }
         if (splitMatch) {
@@ -217,6 +213,26 @@ export class Cowmands {
         const val = await this.resolveValue(pair.substring(eqIdx + 1).trim());
         obj[prop] = val;
       }
+      await this.app.db.save(obj, oldObj);
+    },
+    // CLEAR
+    clear: async (rest) => {
+      // match[1] = $var or chained expression, match[2] = params
+      const match = rest.match(/^(.+)\s*,\s*(.+)$/i);
+      if (!match) return;
+
+      const obj = await this.resolveObj(match[1].trim());
+      if (!obj) return;
+      const oldObj = { ...obj };
+
+      const params = match[2];
+      // TODO: if params == 'xyz' we only clear those
+      delete obj.host;
+      delete obj.hosthow;
+      delete obj.pose;
+      // TODO: clear the x, y and z and maybe other positional things
+
+      // Save the updated object
       await this.app.db.save(obj, oldObj);
     },
     // SAY handler

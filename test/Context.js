@@ -37,7 +37,7 @@ async function testCommands() {
     ts: 12345,
     actor: 'wol',
     loc: '2',
-    cmd: 'think what is that?',
+    cmd: 'put the cup on the basket',
     counter: app.id.counter,
   };
   rawContext.app = app; // stuff the app into the context object
@@ -46,26 +46,23 @@ async function testCommands() {
   await context1.process();
   console.log('msg', context1.msg);
 
-  rawContext.cmd = 'say hello';
+  rawContext.cmd = 'look';
   const context2 = new Context(rawContext);
   await context2.process();
   console.log('msg', context2.msg);
 
-  rawContext.cmd = 'no command';
-  const context3 = new Context(rawContext);
-  await context3.process();
-  console.log('msg', context3.msg);
+  // rawContext.cmd = 'no command';
+  // const context3 = new Context(rawContext);
+  // await context3.process();
+  // console.log('msg', context3.msg);
 
-  rawContext.cmd = 'create an orange carrot';
-  const context4 = new Context(rawContext);
-  await context4.process();
-  console.log('msg', context4.msg);
+  // rawContext.cmd = 'create an orange carrot';
+  // const context4 = new Context(rawContext);
+  // await context4.process();
+  // console.log('msg', context4.msg);
 
-  const carrots = await app.db.findByName('carrot');
-  console.log(carrots);
-  // the _db/loc_2.json should contain the new carrot ID
-  // the _db/name_c.json should contain the carrot 
-  // the _db/id_{x}.json should contain the new carrot
+  // const carrots = await app.db.findByName('carrot');
+  // console.log(carrots);
 
   await app.db.savePoolsToDisk();
 

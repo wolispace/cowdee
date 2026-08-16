@@ -65,8 +65,7 @@ export class PoolManager {
       this.pool.add(key, thing);
     }
     this.dirtyUpdated.add(key);
-    this.app.anyDirty = true;
-    console.log('setting global dirty', this.app.anyDirty);
+    this.app.db.anyDirty = true;
     // remove from the previous key eg was in loc:A now in loc:B
     // if loc is empty then flag it as deleted
     if (!oldKey || oldKey === key) return;
@@ -77,10 +76,10 @@ export class PoolManager {
     if (isEmpty) {
       // console.log(`delete old loc=${oldKey} id=${thing} isEmpty=`, isEmpty);
       this.dirtyDeleted.add(oldKey);
-          this.app.anyDirty = true;
+          this.app.db.anyDirty = true;
     } else {
       this.dirtyUpdated.add(oldKey);
-          this.app.anyDirty = true;
+          this.app.db.anyDirty = true;
     }
   }
 
@@ -98,11 +97,11 @@ export class PoolManager {
       if (thing === undefined || thing === null) {
         this.pool.delete(key);
         this.dirtyDeleted.add(key);
-            this.app.anyDirty = true;
+            this.app.db.anyDirty = true;
       } else {
         existing.delete(thing);
         this.dirtyUpdated.add(key);
-            this.app.anyDirty = true;
+            this.app.db.anyDirty = true;
       }
     }
   }

@@ -244,7 +244,7 @@ export class DB {
     if (!old || obj.loc !== old.loc) {
       await this.pools.loc.set(obj.loc, obj.id, old?.loc);
     }
-    this.app.debounceSave();
+    this.app.db.debounceSave();
   }
 
   /**
@@ -417,5 +417,21 @@ export class DB {
   async listLoc(context) {
     const data = await this.app.lookManager.list(context);
     return data;
+  }
+
+    debounceSave() {
+    // Clear any existing timer
+    if (this.saveTimeout) {
+        clearTimeout(this.saveTimeout);
+    }
+
+    // Set a new 5-second timer
+    this.saveTimeout = setTimeout(() => {
+      if (this.anyDirty) {
+        this.savePoolsToDisk();
+        this.saveTimeout = null; // optional: helps debugging
+        this.anyDirty = false;
+      }
+    }, this.interval);
   }
 }

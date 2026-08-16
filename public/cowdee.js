@@ -14,7 +14,7 @@ const LAST_CONTEXT_KEY = 'lastContext'; // how we local store the last see conte
 class App {
 
   interval = 5_000;
-  playerInfo = {};
+  playerInfo = {id: 'wol', loc: '2'};
   saveTimeout = null;
   #isProcessing = false;
   anyDirty = false; // set by pools to true the moment one pool is dirty, clear after save
@@ -46,8 +46,8 @@ class App {
       const form = event.target;
       const data = Object.fromEntries(new FormData(form));
       // DEBUG: set essential values
-      data.actor = 'wol';
-      data.loc = '2';
+      data.actor = this.playerInfo.id;
+      data.loc = this.playerInfo.loc;
       this.handleForm(data);
       const cmdInput = document.getElementById('cmd');
       cmdInput.value = '';
@@ -106,23 +106,6 @@ class App {
       this.sendCommand(data);
     }
   }
-
-  debounceSave() {
-    // Clear any existing timer
-    if (this.saveTimeout) {
-        clearTimeout(this.saveTimeout);
-    }
-
-    // Set a new 5-second timer
-    this.saveTimeout = setTimeout(() => {
-      if (this.anyDirty) {
-        this.db.savePoolsToDisk();
-        this.saveTimeout = null; // optional: helps debugging
-        this.anyDirty = false;
-      }
-    }, this.interval);
-  }
-
 };
 
 
