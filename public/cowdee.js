@@ -13,11 +13,8 @@ const LAST_CONTEXT_KEY = 'lastContext'; // how we local store the last see conte
 
 class App {
 
-  interval = 5_000;
   playerInfo = {id: 'wol', loc: '2'};
-  saveTimeout = null;
   #isProcessing = false;
-  anyDirty = false; // set by pools to true the moment one pool is dirty, clear after save
   lastContext = '0'; // last seen context.key
 
   constructor(testing) {
@@ -31,8 +28,7 @@ class App {
     this.lookManager = new LookManager(this);
 
     if (testing) return;
-    // TODO: do we need to poll or process a queue.. I think not any more....
-    // setInterval(() => this.doNext(), this.interval);
+    this.playerManager.loadPlayerInfo();
   }
 
   start() {

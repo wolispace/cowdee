@@ -64,4 +64,19 @@ export class PlayerManager {
     const token = crypto.randomUUID();
     this.#sessions.set(token, {user: user, pw: pw});
   }
+
+  /**
+   * Load players id and loc from local storagte when browser opens
+   */
+  loadPlayerInfo() {
+    this.app.playerInfo = localStorage.getItem('playerInfo');
+  }
+
+  /**
+   * Saves the players id and loc after logging in and each time their loc changes
+   */
+  savePlayerInfo() {
+    localStorage.setItem('playerInfo', this.app.playerInfo);
+  }
+
 }

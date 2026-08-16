@@ -40,6 +40,7 @@ if (app.settings.generate) {
   await app.tester.initObjects();
   await app.tester.initPlayers();
   await app.tester.initCommands();
+  console.log('testing savePools after db init');
   await app.db.savePoolsToDisk();
 }
 
@@ -57,6 +58,7 @@ async function testCommands() {
   console.log('msg', app.tester.context.msg);
   console.log(app.playerInfo);
 
+  console.log('testing savePools after running commands');
   await app.db.savePoolsToDisk();
 
 }

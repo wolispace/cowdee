@@ -198,6 +198,11 @@ export class Cowmands {
       const oldObj = { ...obj };
       obj[prop] = val;
       await this.app.db.save(obj, oldObj);
+      // update the players location
+      if (this.app.playerInfo.id == obj.id && this.app.playerInfo.loc != obj.loc) {
+        this.app.playerInfo.loc == obj.loc;
+        this.app.playerManager.savePlayerInfo();
+      }
     },
     // UPDATE handler
     update: async (rest) => {

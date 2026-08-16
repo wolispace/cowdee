@@ -5,6 +5,10 @@ export class DB {
   pools = {};
   keys = ['id', 'name', 'code', 'loc', 'trigger', 'info'];
   dir = '_db';
+  interval = 5_000;
+  saveTimeout = null;
+  anyDirty = false; // set by pools to true the moment one pool is dirty, clear after save
+
 
   constructor(app) {
     this.app = app;
@@ -268,9 +272,8 @@ export class DB {
    * - merging the objects with existing json on disk
    */
   async savePoolsToDisk() {
-    // const caller = this.app.utils.getImmediateCaller();
     console.log('--- savePoolsToDisk ---');
-    // save changed pools to disk
+    this.anyDirty = false;
     for (const pool of Object.values(this.pools)) {
       await pool.saveDirty();
     }
@@ -419,18 +422,18 @@ export class DB {
     return data;
   }
 
-    debounceSave() {
+  debounceSave() {
     // Clear any existing timer
     if (this.saveTimeout) {
         clearTimeout(this.saveTimeout);
     }
 
     // Set a new 5-second timer
-    this.saveTimeout = setTimeout(() => {
+    this.saveTimeout = setTimeout(async () => {
       if (this.anyDirty) {
-        this.savePoolsToDisk();
-        this.saveTimeout = null; // optional: helps debugging
-        this.anyDirty = false;
+        console.log('timeout debounce savePools');
+        this.saveTimeout = null;
+        await this.savePoolsToDisk();
       }
     }, this.interval);
   }
