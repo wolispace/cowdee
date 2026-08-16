@@ -9,7 +9,9 @@ export class Context {
     Object.assign(this, context);
     this.prepRandom(this.ts);
     this.cowmands = new Cowmands(this.app, this);
-    this.app.id.counter = this.counter; // keep id counters in sync
+    if (this.counter > this.app.id.counter) {
+      this.app.id.counter = this.counter;
+    }
   }
 
   /**
@@ -25,8 +27,8 @@ export class Context {
    */
   async process() {
     if (this.app.seen(this.key())) return;
-    console.log('processing ', this.ts, this.actor, this.loc, this.cmd);
     if (!this.cmd) return;
+    console.log('processing ', this.ts, this.actor, this.loc, this.app.id.counter, this.cmd);
     const { firstword, rest } = this.app.utils.splitFirstWord(this.cmd);
     this.cowmand = firstword;
     this.rest = rest;
@@ -38,7 +40,6 @@ export class Context {
       return;
     };
     await this.runCodeFrom(code, '__start');
-
   }
 
     /**

@@ -260,6 +260,11 @@ export class Cowmands {
       const data = await this.app.db.listLoc({ ...this.context });
       await this.app.ui.addMessage(data);
     },
+    // FLUSH
+    flush: ($rest) => {
+      this.app.db.flush();
+    },
+
   };
   /**
    * Resolve a value: literal, $var, or $actor's loc's host's loc chain

@@ -24,7 +24,7 @@ function handleInput($request) {
     $filename = CONTEXT_DIR . "/{$mstimestamp}{$request['actor']}.json";
     $context = json_encode([
       'ts' => $mstimestamp,
-      'counter' => $request['ounter'], 
+      'counter' => $request['counter'], 
       'actor' => $request['actor'], 
       'loc' => $request['loc'], 
       'cmd' => $request['cmd']]);
@@ -39,8 +39,9 @@ function handleInput($request) {
     if (empty($request['content'])) {
       outputJson(loadJson($file));
     } else {
-      if (!empty($request['counter'])) {
-        file_put_contents('../_db/_counter.txt', $request['counter']);
+      $oldCounter = file_get_contents(ID_COUNTER_FILE);
+      if ($request['counter'] > $oldCounter) {
+        file_put_contents(ID_COUNTER_FILE, $request['counter']);
       }
       saveJson($file, json_decode($request['content'], true));
       outputJson(['ok' => true]);

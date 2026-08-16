@@ -244,6 +244,7 @@ export class DB {
     if (!old || obj.loc !== old.loc) {
       await this.pools.loc.set(obj.loc, obj.id, old?.loc);
     }
+    this.app.debounceSave();
   }
 
   /**
@@ -267,8 +268,8 @@ export class DB {
    * - merging the objects with existing json on disk
    */
   async savePoolsToDisk() {
-    const caller = this.app.utils.getImmediateCaller();
-    // console.log(caller, '--- save pool ---');
+    // const caller = this.app.utils.getImmediateCaller();
+    console.log('--- savePoolsToDisk ---');
     // save changed pools to disk
     for (const pool of Object.values(this.pools)) {
       await pool.saveDirty();

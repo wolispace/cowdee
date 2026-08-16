@@ -15,9 +15,10 @@ app.id = new ID(app);
 const context = new Context({app});
 
 const settings = {
-  generate: false,
+  generate: true,
   max: 5,
 };
+  console.log(process.cwd());
 
 console.log('-------------- START ----------------');
 app.io.flush();
@@ -30,31 +31,36 @@ if (settings.generate) {
   await app.db.savePoolsToDisk();
 }
 
-const poseIds = await app.db.findByName('pose');
-console.log('pose ids', poseIds); // Set(1) { 'E' }
-const poseId = poseIds.values().next().value;
-const commandPose = await app.db.getById(poseId);
-commandPose.code = await app.db.getCode(poseId);
-console.log('command pose', commandPose);
+if (settings.testFind) {
+  const poseIds = await app.db.findByName('pose');
+  console.log('pose ids', poseIds); // Set(1) { 'E' }
+  const poseId = poseIds.values().next().value;
+  const commandPose = await app.db.getById(poseId);
+  commandPose.code = await app.db.getCode(poseId);
+  console.log('command pose', commandPose);
+  
+  const playerWolis = await app.db.findByNameInLoc('wol', '2');
+  console.log('player Wolis', playerWolis);
+  
+  context.actor = 'wol';
+  context.loc = '2';
+  context.cowmand = 'go';
+  const commandGo = await app.db.findCommand(context);
+  console.log('command go', commandGo);
 
-
-const playerWolis = await app.db.findByNameInLoc('wol', '2');
-console.log('player Wolis', playerWolis);
-
-context.actor = 'wol';
-context.loc = '2';
-context.cowmand = 'go';
-const commandGo = await app.db.findCommand(context);
-console.log('command go', commandGo);
-
+}  
 
 
 console.log('-------------- END ----------------');
 
 function deleteTestFiles() {
-  const dir = "./_db";
+
+  const dir = "_db";
+  const test = fs.readdirSync(dir);
+  console.log({test});
   for (const file of fs.readdirSync(dir)) {
     if (file.endsWith(".json")) {
+      console.log('removing', file);
       fs.rmSync(path.join(dir, file), { force: true });
     }
   }

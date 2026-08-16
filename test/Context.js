@@ -5,14 +5,14 @@ import { IO } from '../public/classes/IO.js';
 import { DB } from '../public/classes/DB.js';
 import { ID } from '../public/classes/ID.js';
 import { UI } from '../public/classes/UI.js';
-import { PlayerManager} from '../public/classes/PlayerManager.js';
-import { LookManager} from '../public/classes/LookManager.js';
-import { Context} from '../public/classes/Context.js';
+import { PlayerManager } from '../public/classes/PlayerManager.js';
+import { LookManager } from '../public/classes/LookManager.js';
+import { Context } from '../public/classes/Context.js';
 
 // simulate the app
 const app = {
   debug: true,
-  seen: () => {return(false)},
+  seen: () => { return (false) },
   playerInfo: { id: 'wol', loc: '2' },
 }
 
@@ -23,7 +23,7 @@ app.id = new ID(app); // generate unique sequential ids
 app.ui = new UI(app); // user interface - display messages and handle input
 app.playerManager = new PlayerManager(app);
 app.lookManager = new LookManager(app);
-  
+
 
 console.log('-------------- START ----------------');
 
@@ -32,14 +32,16 @@ await testCommands();
 console.log('-------------- END ----------------');
 
 async function testCommands() {
-const rawContext = {
+  app.id.counter = parseInt(fs.readFileSync('./_db/_counter.txt', 'utf8'), 10);
+  const rawContext = {
     ts: 12345,
     actor: 'wol',
     loc: '2',
     cmd: 'think what is that?',
+    counter: app.id.counter,
   };
   rawContext.app = app; // stuff the app into the context object
-  
+
   const context1 = new Context(rawContext);
   await context1.process();
   console.log('msg', context1.msg);
@@ -48,29 +50,37 @@ const rawContext = {
   const context2 = new Context(rawContext);
   await context2.process();
   console.log('msg', context2.msg);
-  
+
   rawContext.cmd = 'no command';
   const context3 = new Context(rawContext);
   await context3.process();
   console.log('msg', context3.msg);
 
-  rawContext.cmd = 'look';
+  rawContext.cmd = 'create an orange carrot';
   const context4 = new Context(rawContext);
   await context4.process();
   console.log('msg', context4.msg);
-  
+
+  const carrots = await app.db.findByName('carrot');
+  console.log(carrots);
+  // the _db/loc_2.json should contain the new carrot ID
+  // the _db/name_c.json should contain the carrot 
+  // the _db/id_{x}.json should contain the new carrot
+
+  await app.db.savePoolsToDisk();
+
 }
 
 function testRandom() {
   const contexts = [];
   const dir = '_contexts';
   for (const filename of fs.readdirSync(dir)) {
-    
+
     const content = JSON.parse(fs.readFileSync(`${dir}/${filename}`, `utf8`));
     const context = new Context(content);
     contexts.push(context);
   }
-  
+
   for (const context of contexts) {
     console.log(context.seed, context.random(9), context.random(9), context.random(9));
     context.seed = 100;
@@ -78,4 +88,3 @@ function testRandom() {
   }
 }
 
-  

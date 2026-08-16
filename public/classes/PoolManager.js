@@ -66,6 +66,7 @@ export class PoolManager {
     }
     this.dirtyUpdated.add(key);
     this.app.anyDirty = true;
+    console.log('setting global dirty', this.app.anyDirty);
     // remove from the previous key eg was in loc:A now in loc:B
     // if loc is empty then flag it as deleted
     if (!oldKey || oldKey === key) return;

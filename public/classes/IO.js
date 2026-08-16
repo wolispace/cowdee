@@ -12,19 +12,17 @@ export class IO {
   }
 
   async loadJson(file) {
-    if (typeof localStorage !== 'undefined') {
-      const cached = localStorage.getItem(file);
-      if (cached) return JSON.parse(cached);
-    }
+    const cached = localStorage.getItem(file);
+    if (cached) return JSON.parse(cached);
+
     const json = await this.fetchJson('server', {file, token: this.token});
     if (!json) return {};
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(file, JSON.stringify(json));
-    }
+    localStorage.setItem(file, JSON.stringify(json));
     return json;
   }
 
   async saveJson(file, json) {
+    localStorage.setItem(file, JSON.stringify(json));
     return await this.fetchJson('server', {file, token: this.token, content: JSON.stringify(json)});
   }
 

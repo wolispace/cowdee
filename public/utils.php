@@ -2,7 +2,7 @@
 // require_once "utils.php";
  
 define('CONTEXT_DIR', '../_contexts'); // root level folder for context files
-
+define('ID_COUNTER_FILE', '../_db/_counter.txt'); // the counter of the last highest ID
 function logIt($str) {
   $dateTime = date('Ymd H:i:s');
   file_put_contents('_log.txt', "{$dateTime},{$_SERVER['REMOTE_ADDR']},{$str}\n", FILE_APPEND | LOCK_EX);
@@ -23,8 +23,9 @@ function get_new_contexts($last) {
       $ts = (int) substr(basename($file), 0, 13);
       if ($ts < (time() - 3600) * 1000) { unlink($file); continue; }
       $data = json_decode(file_get_contents($file), true);
-      if ($data['counter'] < 1) {
-        $data['counter'] = file_get_contents('../_db/_counter.txt');
+      $lastCounter = file_get_contents(ID_COUNTER_FILE);
+      if ($data['counter'] < $lastCounter) {
+        $data['counter'] = $lastCounter;
       }
       $key = "{$data['ts']}{$data['actor']}";
 

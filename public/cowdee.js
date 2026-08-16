@@ -107,51 +107,6 @@ class App {
     }
   }
 
-  // ----- was TickManager ---
-
-  doNext() {
-    if (this.#isProcessing) return;
-    this.#isProcessing = true;
-    this.#process();
-  }
-
-  #process() {
-    if (this.testing) {
-      while (this.commandManager.pending() || this.messageManager.pending()) {
-        if (this.commandManager.pending()) {
-          this.commandManager.doNext();
-        } else if (this.messageManager.pending()) {
-          const payload = this.messageManager.get();
-          this.messageManager.send(payload);
-        }
-      }
-      this.#isProcessing = false;
-      this.objectManager.savePoolsToDisk();
-      return;
-    }
-
-    // Process one command if available
-    if (this.commandManager.pending()) {
-      this.commandManager.doNext();
-      setImmediate(() => this.#process());
-      return;
-    }
-
-    // Process one message if available
-    if (this.messageManager.pending()) {
-      const payload = this.messageManager.get();
-      this.messageManager.send(payload);
-      setImmediate(() => this.#process());
-      return;
-    }
-
-    // Nothing left to do
-    this.#isProcessing = false;
-    if (this.anyDirty) {
-      this.debounceSave();
-    }
-  }
-
   debounceSave() {
     // Clear any existing timer
     if (this.saveTimeout) {
@@ -160,9 +115,11 @@ class App {
 
     // Set a new 5-second timer
     this.saveTimeout = setTimeout(() => {
-        this.objectManager.savePoolsToDisk();
+      if (this.anyDirty) {
+        this.db.savePoolsToDisk();
         this.saveTimeout = null; // optional: helps debugging
         this.anyDirty = false;
+      }
     }, this.interval);
   }
 
