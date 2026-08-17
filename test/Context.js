@@ -49,15 +49,16 @@ await testCommands();
 console.log('-------------- END ----------------');
 
 async function testCommands() {
+  app.tester.context.actor = app.player.info.id;
   app.tester.context.cmd = 'build a shed';
   app.tester.context.loc = app.player.info.loc;
   await app.tester.context.process();
-  console.log('msg', app.tester.context.msg);
+  console.log('msg in',  app.tester.context.loc, app.tester.context.msg);
 
   app.tester.context.cmd = 'go shed';
   app.tester.context.loc = app.player.info.loc;
   await app.tester.context.process();
-  console.log('msg', app.tester.context.msg);
+  console.log('msg in',  app.tester.context.loc, app.tester.context.msg);
   console.log(app.player.info);
 
   await app.db.savePoolsToDisk();

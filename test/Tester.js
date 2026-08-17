@@ -65,12 +65,17 @@ export class Tester {
         process.stdout.write(":");
       }
     }
-    const initLoc = await this.app.db.getById('2');
-    const oldObj = { ...initLoc };
-    initLoc.class = 'house';
-    initLoc.loc = '0';
-    await this.app.db.save(initLoc, oldObj);
-    console.log('init Loc', initLoc);
+    const house = await this.app.db.getById('2');
+    const old1 = { ...house };
+    house.class = 'house';
+    house.loc = '0';
+    await this.app.db.save(house, old1);
+
+    const library = await this.app.db.getById('3');
+    const old2 = { ...library };
+    library.class = 'library';
+    library.loc = '0';
+    await this.app.db.save(library, old2);
   }
 
   async initPlayers() {

@@ -200,10 +200,9 @@ export class Cowmands {
       await this.app.db.save(obj, oldObj);
       // update the players location
       if (this.app.player.info.id == obj.id && this.app.player.info.loc != obj.loc) {
-        this.app.player.info.loc == obj.loc;
+        this.app.player.info.loc = obj.loc;
         this.app.player.save();
       }
-      console.log('set ', obj, this.app.player.info);
     },
     // UPDATE handler
     update: async (rest) => {
