@@ -14,8 +14,8 @@ export class Tester {
 
     const rawContext = {
       ts: 12345,
-      actor: this.app.playerInfo.id,
-      loc: this.app.playerInfo.loc,
+      actor: this.app.player.info.id,
+      loc: this.app.player.info.loc,
       cmd: 'build a shed',
       counter: this.app.id.counter,
     };
@@ -33,6 +33,8 @@ export class Tester {
         fs.rmSync(path.join(dir, file), { force: true });
       }
     }
+    this.app.id.counter = 1;
+    fs.writeFileSync(`${dir}/_counter.txt`, '1');
   }
 
 
@@ -59,10 +61,16 @@ export class Tester {
       };
       //  obj.info = `It's a pretty ordinary ${obj.class}`;
       await this.app.db.save(obj);
-      if (counter % 100 === 0) {
+      if (counter % 10 === 0) {
         process.stdout.write(":");
       }
     }
+    const initLoc = await this.app.db.getById('2');
+    const oldObj = { ...initLoc };
+    initLoc.class = 'house';
+    initLoc.loc = '0';
+    await this.app.db.save(initLoc, oldObj);
+    console.log('init Loc', initLoc);
   }
 
   async initPlayers() {

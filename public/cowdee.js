@@ -5,7 +5,7 @@ import { IO } from './classes/IO.js';
 import { UI } from './classes/UI.js';
 import { DB } from './classes/DB.js';
 import { ID } from './classes/ID.js';
-import { PlayerManager} from './classes/PlayerManager.js';
+import { Player} from './classes/Player.js';
 import { LookManager} from './classes/LookManager.js';
 import { Context} from './classes/Context.js';
 
@@ -13,7 +13,6 @@ const LAST_CONTEXT_KEY = 'lastContext'; // how we local store the last see conte
 
 class App {
 
-  playerInfo = {id: 'wol', loc: '2'};
   #isProcessing = false;
   lastContext = '0'; // last seen context.key
 
@@ -24,14 +23,13 @@ class App {
     this.ui = new UI(this); // user interface
     this.db = new DB(this); // database - read and write objects
     this.id = new ID(this); // generate unique sequential ids
-    this.playerManager = new PlayerManager(this);
+    this.player = new Player(this);
     this.lookManager = new LookManager(this);
 
-    if (testing) return;
-    this.playerManager.loadPlayerInfo();
   }
-
-  start() {
+  
+  async start() {
+    await this.player.load();
     this.lastContext = localStorage.getItem(LAST_CONTEXT_KEY);
     // console.log(`started last=${this.lastContext}`);
     // this.ui.showDialog(' Hi ', () => {alert('hmm')});
@@ -42,8 +40,8 @@ class App {
       const form = event.target;
       const data = Object.fromEntries(new FormData(form));
       // DEBUG: set essential values
-      data.actor = this.playerInfo.id;
-      data.loc = this.playerInfo.loc;
+      data.actor = this.player.info.id;
+      data.loc = this.player.info.loc;
       this.handleForm(data);
       const cmdInput = document.getElementById('cmd');
       cmdInput.value = '';
@@ -91,8 +89,8 @@ class App {
       const result = await this.io.fetchJson('server', data);
       if (result.id) {
         localStorage.setItem(PLAYER_KEY, result.id);
-        playerInfo.id = result.id;
-        playerInfo.loc = result.loc;
+        this.player.info.id = result.id;
+        this.player.info.loc = result.loc;
         this.wakePlayer();
         this.closeDialog();
       } else {
@@ -107,8 +105,8 @@ class App {
 
 // ----- It all starts here -------------------------------------------------------------
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const app = new App();
-  app.start();
+  await app.start();
 });
 

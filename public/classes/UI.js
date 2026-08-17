@@ -24,7 +24,7 @@ export class UI {
 
     // set the last target so we can refer to it as 'it' or 'them'
     if (context?.target) {
-      this.app.playerInfo.lastt = context.target;
+      this.app.player.info.lastt = context.target;
     }
 
     // DEBUG: If the user simply includes 'logoff' in the msg then logoff - make a propper command later
@@ -33,12 +33,14 @@ export class UI {
       localStorage.clear(TOKEN_KEY);
       showDialog('You have logged off<form><menu><button class="buttonize">Ok</button></menu></form>');
     }
-    context.playerId = this.app.playerInfo.id;
-    context.msg = await this.expand(context);
+    context.playerId = this.app.player.info.id;
 
+    
     if (this.app.debug) {
+      context.msg = await this.expand(context, 'txt');
       return context.msg;
     }
+    context.msg = await this.expand(context, 'html');
 
     if (context.msg) {
       const div = document.createElement("div");
