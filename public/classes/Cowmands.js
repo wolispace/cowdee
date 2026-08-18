@@ -240,6 +240,21 @@ export class Cowmands {
       // Save the updated object
       await this.app.db.save(obj, oldObj);
     },
+    // UNHOST pushed everythig that was hosted by this object, off.
+    unhost: async (rest) => {
+      const obj = await this.resolveObj(rest.trim());
+      if (!obj) return;
+      const hosted = await this.app.db.findInLoc(obj.id);
+      for (const subId of hosted) {
+        const sub = await this.app.db.getById(subId);
+        if (!sub) continue;
+        const oldObj = { ...sub };
+        sub.host = '';
+        sub.hosthow = '';
+        sub.pose = '';
+        await this.app.db.save(sub, oldObj);
+      }
+    },
     // SAY handler
     say: async (rest) => {
       const match = rest.match(/^['"](\w+)['"]\s*,\s*(.+)$/i);
@@ -247,6 +262,129 @@ export class Cowmands {
       this.context.trigger = match[1];
       const template = this.app.utils.trimQuotes(match[2].trim());
       this.context.msg = this.expandTemplate(template);
+      await this.app.ui.addMessage(this.context);
+    },
+    // MSG - advanced say where we can control the location and who gets to see the msg
+    msg: async (rest) => {
+      // params to extract: 
+      // $loc,$actor,$target,$second,$action,$msg,$init_obj,$init_cmd
+
+      // A global message everyone can here:
+      // msg 0,$actor,0,0,"moves","You can hear [$actor] moving around"
+      
+      // The 'say' cowmand (see new relook above) in the old perl script would do this: 
+      // &add_msg($loc,$actor,0,0,eval($1),$actor,$cmd_text,$niceness); # $action,$msg
+      
+      // The 'relook' cowmand (see new relook below) in the old perl script would do this: 
+      // &add_msg($op1,$actor,0,0,'force',"force:look ".$op1,$actor,$cmd_text,$niceness);
+      
+      // whisper:
+      // msg 0,$actor,$target,$second,'wispers',\"<i>( [$actor] whispers '$text' just to [$target] ) <\/i>\",$actor;
+
+      if (!rest || !rest.trim()) return;
+
+      // Parse comma-separated arguments respecting quoted strings
+      const args = [];
+      let current = '';
+      let inQuote = false;
+      let quoteChar = '';
+      let escape = false;
+
+      for (let i = 0; i < rest.length; i++) {
+        const char = rest[i];
+        if (escape) {
+          current += char;
+          escape = false;
+        } else if (char === '\\') {
+          current += char;
+          escape = true;
+        } else if (inQuote) {
+          current += char;
+          if (char === quoteChar) {
+            inQuote = false;
+          }
+        } else if (char === '"' || char === "'") {
+          inQuote = true;
+          quoteChar = char;
+          current += char;
+        } else if (char === ',') {
+          args.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      if (current.trim().length > 0 || args.length > 0) {
+        args.push(current.trim());
+      }
+
+      let rawLoc, rawActor, rawTarget, rawSecond, rawAction, rawMsg, rawInitObj, rawInitCmd;
+
+      if (args.length >= 6) {
+        [rawLoc, rawActor, rawTarget, rawSecond, rawAction, rawMsg, rawInitObj, rawInitCmd] = args;
+      } else if (args.length === 5) {
+        [rawLoc, rawActor, rawTarget, rawSecond, rawMsg] = args;
+        rawAction = 'msg';
+      } else if (args.length === 2) {
+        [rawAction, rawMsg] = args;
+      } else if (args.length === 1) {
+        rawMsg = args[0];
+        rawAction = 'msg';
+      } else {
+        [rawLoc, rawActor, rawTarget, rawSecond, rawAction, rawMsg, rawInitObj, rawInitCmd] = args;
+      }
+
+      const loc = rawLoc !== undefined ? await this.resolveValue(rawLoc) : this.context.loc;
+      const actor = rawActor !== undefined ? await this.resolveValue(rawActor) : this.context.actor;
+      const target = rawTarget !== undefined ? await this.resolveValue(rawTarget) : this.context.target;
+      const second = rawSecond !== undefined ? await this.resolveValue(rawSecond) : this.context.second;
+      let action = rawAction !== undefined ? (await this.resolveValue(rawAction)).replace(/^["']|["']$/g, '').trim() : 'msg';
+
+      let template = (rawMsg || '').trim();
+      // Strip leading and trailing quotes / escaped quotes if present
+      template = template.replace(/^(\\?["'])(.*)\1$/, '$2');
+      template = template.replace(/\\(["'])/g, '$1');
+      template = template.replace(/\\\//g, '/');
+      // Handle perl-style string concatenation if present (e.g. "force:look " . $op1)
+      template = template.replace(/["']\s*\.\s*["']?/g, '');
+      const expandedMsg = this.expandTemplate(template);
+
+      // Handle 'force' / 'force:look' relook use
+      if (action === 'force' || /^force:look/i.test(expandedMsg)) {
+        let lookLoc = (loc && loc !== '0' && loc !== 0) ? loc : this.context.loc;
+        const forceMatch = expandedMsg.match(/^force:look\s*(.*)$/i);
+        if (forceMatch && forceMatch[1].trim()) {
+          const parsedLoc = await this.resolveValue(forceMatch[1].trim().split(',')[0]);
+          if (parsedLoc) lookLoc = parsedLoc;
+        }
+        await this.statementList.relook(lookLoc || this.context.loc);
+        return;
+      }
+
+      this.context.trigger = action || 'msg';
+      this.context.action = action || 'msg';
+      this.context.msg = expandedMsg;
+
+      if (loc !== undefined && loc !== '') {
+        this.context.loc = loc;
+      }
+      if (actor && actor !== '0' && actor !== 0) {
+        this.context.actor = actor;
+      }
+      if (target && target !== '0' && target !== 0) {
+        this.context.target = target;
+        this.context.to = target;
+      }
+      if (second && second !== '0' && second !== 0) {
+        this.context.second = second;
+      }
+      if (rawInitObj) {
+        this.context.init_obj = await this.resolveValue(rawInitObj);
+      }
+      if (rawInitCmd) {
+        this.context.init_cmd = await this.resolveValue(rawInitCmd);
+      }
+
       await this.app.ui.addMessage(this.context);
     },
     // NEW
