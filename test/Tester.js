@@ -141,7 +141,7 @@ export class Tester {
       code: `get $target,$lastword in $loc;\nset $target's color to $lastword;\nsay 'paint',\"[$actor] paints [$target] $lastword\";\nrelook $loc;`
     }, {
       name: "get",
-      code: `get $target in $loc;\nunhost $target;\nclear $target,all;\nset $target's pose to \"\";\nset $target's loc to $actor;\nsay 'gets',\"[$actor] gets [$target]\";\nrelook $loc;\nvar $loc to $actor;\nsay 'arrives',\"[$target] appears from nowhere\";\nrelook $actor's loc;`
+      code: `get $target in $loc;\nunhost $target;\nclear $target,all;\nset $target's pose to \"\";\nset $target's loc to $actor;\nsay 'gets',\"[$actor] gets [$target]\";\nrelook $loc;\nvar $loc to $actor;\n msg $loc,$actor,$target,0,'arrives',\"[$target] appears from nowhere\";\nrelook $actor's loc;`
     }, {
       name: "drop",
       code: `get $target in $actor;\nvar $dest to $actor's loc;\nset $target's loc to $dest;\nsay 'drops',\"[$actor] drops [$target]\";\nvar $loc to $dest;\nrelook $loc;\nvar $loc to $actor;\nsay 'gone',\"[$target] has gone\";\nrelook $actor's loc;`
