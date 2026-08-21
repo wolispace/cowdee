@@ -6,12 +6,12 @@ export class Context {
   subs = {};
 
   constructor(app, context) {
-    this.app = app,
     // expand the context into this object eg: this.ts = context.ts;
     Object.assign(this, context);
+    this.app = app;
     this.prepRandom(this.ts);
     this.cowmands = new Cowmands(this.app, this);
-    if (this.app && this.app.id && this.counter > this.app.id.counter) {
+    if (this.counter > this.app.id.counter) {
       this.app.id.counter = this.counter;
     }
   }
@@ -37,18 +37,18 @@ export class Context {
     this.cmd_text = rest;
     const code = await this.app.db.findCommand(this);
     if (!code) {
-      this.msg = `[${this.actor}] tries to ${this.cmd}, but nothing happens`,        
-      await this.app.ui.addMessage(this);
+      this.msg = `[${this.actor}] tries to ${this.cmd}, but nothing happens`,
+        await this.app.ui.addMessage(this);
       return;
     };
     await this.runCodeFrom(code, '__start');
   }
 
-    /**
-   * Sets up the context to run the code from the block
-   * @param {string} code 
-   * @param {string} block 
-   */
+  /**
+ * Sets up the context to run the code from the block
+ * @param {string} code 
+ * @param {string} block 
+ */
   async runCodeFrom(code, block) {
     // Partition cowscript code into sub-blocks
     this.partitionCode(code);
@@ -75,10 +75,10 @@ export class Context {
     }
   }
 
-    /**
-   * Executes a subroutine block line-by-line (semicolon separated)
-   * @param {string} subName
-   */
+  /**
+ * Executes a subroutine block line-by-line (semicolon separated)
+ * @param {string} subName
+ */
   async runSub(subName) {
     const subContent = this.subs[subName];
     if (!subContent) {
@@ -92,12 +92,12 @@ export class Context {
     }
   }
 
-    /**
-   * Executes a single statement
-   * @param {string} statement 
-   */
+  /**
+ * Executes a single statement
+ * @param {string} statement 
+ */
   async executeStatement(statement) {
-  //  console.log(` - [${statement}]`);
+    //  console.log(` - [${statement}]`);
     const trimmed = statement.trim();
     if (!trimmed) return;
 

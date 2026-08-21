@@ -70,17 +70,30 @@ class App {
   }
 
 
+  /**
+   * Sends one context to the server then processes all of the contexts it gets back (this being one of them)
+   * {actor:'wol', loc:'2', cmd: 'look', lastContext: '2928192827392wol', counter: 5}
+   * @param {object} data 
+   */
   async sendCommand(data) {
     data.lastContext = this.lastContext;
     data.counter = this.id.counter;
     const result = await this.io.fetchJson('server', data);
     if (result.contexts) {
       const contexts = JSON.parse(result.contexts);
-      for ( const rawContext of contexts) {
-        rawContext.app = this; // stuff the app into the context object
-        const context = new Context(this, rawContext);
-        await context.process();
-      }
+      await this.processContexts(contexts);
+    }
+  }
+
+  /**
+   * Processes each of the array of basic context values [{actor:'wol', loc:'2', cmd: 'look'}]
+   * @param {array} contexts 
+   */
+  async processContexts(contexts) {
+    for ( const rawContext of contexts) {
+      rawContext.app = this; // stuff the app into the context object
+      const context = new Context(this, rawContext);
+      await context.process();
     }
   }
 
