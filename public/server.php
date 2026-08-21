@@ -46,7 +46,9 @@ function handleInput($request) {
       saveJson($file, json_decode($request['content'], true));
       outputJson(['ok' => true]);
     }
-  }
+    } else if (!empty($request['last'])) {
+      outputJson(['last' => get_last_context()]);
+    }
 }
 
 /**

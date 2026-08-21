@@ -12,19 +12,47 @@ export class Player {
   /** 
    * show the logon form 
    */
-  welcome() {
-    // show dialog,
-    // try to login
-    // if success then wake player
-    // if faile then reshow dialog
+  async welcome() {
+    // show dialog, app.handleForm() handes logins
+    this.app.ui.showDialog(this.loginFormContent());    
   }
+
+  loginFormContent() {
+    return `
+      <form method="dialog" id="loginform">
+      <input type="hidden" name="type" value="login">
+        <label for="playername">Your name:</label>
+        <input type="text" id="playername" name="playername" placeholder="Your name in cow" required>
+        <label for="pw">Password:</label>
+        <input type="password" id="pw" name="pw" placeholder="Prove your you">
+        <!-- <label for="email">Email:</label>
+        <input type="text" id="email" name="email" placeholder="Optional. For email recovery">
+        -->
+        <menu>
+          <button value="submit" class="buttonize">Login</button>
+        </menu>
+      </form>
+    `;
+  }
+
+  async handleLogon(data) {
+    const isLoggedIn = await this.logon(data);
+    if (isLoggedIn) {
+      this.app.ui.closeDialog();
+      await this.wake();
+    } else {
+      alert(`Player ${data.playername} not found.`);
+    }
+
+  }
+
 
   /**
    * Validate player, return true if logged in OK
    * @return {boolean}
    */
-  async logon(user, pw) {
-    const obj = await this.app.db.findPlayer({ playername: user, pw: pw });
+  async logon(data) {
+    const obj = await this.app.db.findPlayer(data);
     if (obj) {
       this.info.id = obj.id;
       this.info.loc = obj.loc;
@@ -39,6 +67,14 @@ export class Player {
     this.clear();
   }
 
+async wake() {
+    // get the last comntext seen by the server
+    const last = await this.app.io.fetchJson('server', {'last': 1});
+    console.log({last});
+    this.app.lastContext = last.last;
+    await this.app.sendCommand({cmd: 'look', actor: this.info.id, loc: this.info.loc});
+  }
+
   /**
    * Load players id and loc from local storagte when browser opens
    */
@@ -49,15 +85,7 @@ export class Player {
       this.info = JSON.parse(json);
       return;
     }
-    console.log('DEBUG auto login as wolis');
-    const obj = await this.app.db.findPlayer({ playername: 'wolis', pw: '' });
-    if (obj) {
-      this.info = {id: obj.id, loc: obj.loc};
-    } else {
-      console.log("DEBUG: summry player");
-      this.info = {id: 'wol', loc: '2'};
-    }
-    this.save();
+    await this.welcome();
   }
 
   /**
@@ -70,7 +98,7 @@ export class Player {
 
   clear() {
     this.info = {};
-    localStorage.clear(PLAYER_INFO_KEY);
+    localStorage.clear(this.PLAYER_INFO_KEY);
   }
 
 }

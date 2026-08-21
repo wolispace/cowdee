@@ -84,18 +84,10 @@ class App {
     }
   }
 
+  // forms dont need to fetch anymore, as the data is in memory (or fetch to fill memory)
   async handleForm(data) {
     if (data.type == 'login') {
-      const result = await this.io.fetchJson('server', data);
-      if (result.id) {
-        localStorage.setItem(PLAYER_KEY, result.id);
-        this.player.info.id = result.id;
-        this.player.info.loc = result.loc;
-        this.wakePlayer();
-        this.closeDialog();
-      } else {
-        alert('Invalid player or password');
-      }
+      await this.player.handleLogon(data);
     } else {
       this.sendCommand(data);
     }

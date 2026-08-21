@@ -35,9 +35,8 @@ export class UI {
 
     // DEBUG: If the user simply includes 'logoff' in the msg then logoff - make a propper command later
     if (context?.msg?.includes('logoff')) {
-      localStorage.clear(PLAYER_KEY);
-      localStorage.clear(TOKEN_KEY);
-      showDialog('You have logged off<form><menu><button class="buttonize">Ok</button></menu></form>');
+      this.app.player.clear();
+      this.showDialog('You have logged off<form><menu><button class="buttonize">Ok</button></menu></form>', () => {this.app.ui.closeDialog()});
     }
     context.playerId = this.app.player.info.id;
 

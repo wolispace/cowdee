@@ -8,4 +8,4 @@ start "Website" "W:\My Drive\Apps\php\php_859\php.exe" -S localhost:%PORT%
 
 :: SSE server - multiple workers so concurrent connections don't block each other
 set PORT=8881
-:: start "SSE" "W:\My Drive\Apps\php\php_859\php.exe" -S localhost:%PORT%
+start "SSE" "W:\My Drive\Apps\php\php_859\php.exe" -S localhost:%PORT%
