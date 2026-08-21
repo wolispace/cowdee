@@ -13,6 +13,7 @@ export class Player {
    * show the logon form 
    */
   async welcome() {
+    if (this.app.debug || typeof document === 'undefined' || !this.app.ui?.showDialog) return;
     // show dialog, app.handleForm() handes logins
     this.app.ui.showDialog(this.loginFormContent());    
   }

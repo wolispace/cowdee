@@ -11,18 +11,17 @@ while (ob_get_level() > 0) ob_end_flush();
 flush();
 
 $endTime = time() + 55;
-$lastContext = isset($_GET['lastContext']) ? (int)$_GET['lastContext'] : 0;
-
-
+$lastContext = $_GET['last'] ?? $_GET['lastContext'] ?? '0';
 
 while (time() < $endTime) {
   $contexts = get_new_contexts($lastContext);
-  if (is_array($contexts)) {
+  if (is_array($contexts) && count($contexts) > 0) {
     foreach ($contexts as $context) {
       sse_event('context', $context);
+      $lastContext = "{$context['ts']}{$context['actor']}";
     }
   }
-  usleep(5000000);
+  usleep(250000); // 250ms interval for near-instant SSE delivery
 }
 
 sse_event('shutdown', ['reason' => 'session ended, client should reconnect']);
