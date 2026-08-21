@@ -39,14 +39,18 @@ export class Player {
   async handleLogon(data) {
     const isLoggedIn = await this.logon(data);
     if (isLoggedIn) {
-      this.app.ui.closeDialog();
+      if (this.app.ui?.closeDialog) {
+        this.app.ui.closeDialog();
+      }
       await this.wake();
     } else {
-      alert(`Player ${data.playername} not found.`);
+      if (typeof alert !== 'undefined') {
+        alert(`Player ${data.playername} not found.`);
+      } else {
+        console.warn(`Player ${data.playername} not found.`);
+      }
     }
-
   }
-
 
   /**
    * Validate player, return true if logged in OK
@@ -57,6 +61,8 @@ export class Player {
     if (obj) {
       this.info.id = obj.id;
       this.info.loc = obj.loc;
+      this.info.name = obj.name;
+      this.app.storage?.setNamespace(this.info.id);
       this.save();
       return true;
     }
@@ -68,23 +74,25 @@ export class Player {
     this.clear();
   }
 
-async wake() {
-    // get the last comntext seen by the server
+  async wake() {
+    // get the last context seen by the server
     const result = await this.app.io.fetchJson('server', {'lastContext': 1});
     console.log({result});
-    this.app.lastContext = result.lastContext;
+    this.app.lastContext = result?.lastContext || '0';
     await this.app.sendCommand({cmd: 'look', actor: this.info.id, loc: this.info.loc});
   }
 
   /**
-   * Load players id and loc from local storagte when browser opens
+   * Load players id and loc from local storage when browser opens
    */
   async load() {
-    
-    const json = localStorage.getItem(this.PLAYER_INFO_KEY);
+    const json = this.app.storage?.getItem(this.PLAYER_INFO_KEY);
     if (json) {
       this.info = JSON.parse(json);
-      this.wake();
+      if (this.info.id) {
+        this.app.storage?.setNamespace(this.info.id);
+      }
+      await this.wake();
       return;
     }
     await this.welcome();
@@ -95,12 +103,13 @@ async wake() {
    */
   save() {
     console.log('save player info', this.info);
-    localStorage.setItem(this.PLAYER_INFO_KEY, JSON.stringify(this.info));
+    this.app.storage?.setItem(this.PLAYER_INFO_KEY, JSON.stringify(this.info));
   }
 
   clear() {
     this.info = {};
-    localStorage.clear(this.PLAYER_INFO_KEY);
+    this.app.storage?.removeItem(this.PLAYER_INFO_KEY);
+    this.app.storage?.setNamespace('0');
   }
 
 }

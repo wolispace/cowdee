@@ -25,9 +25,7 @@ export class DB {
     for (const key of this.keys) {
       this.pools[key].clear();
     }
-    if (typeof localStorage !== 'undefined') {
-      localStorage.clear();
-    }
+    this.app.storage?.clear();
   }
 
   /**

@@ -1,5 +1,6 @@
 :: this will all be one port and one webserver on the host, this is just for dev to use php -S
 :: SSE needs to hold the session open so the other requests dont get a lookin
+set PHP_CLI_SERVER_WORKERS=8
 
 :: Webs server for json and html etc..
 set PORT=8880

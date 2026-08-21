@@ -3,35 +3,48 @@ ini_set('display_errors', 0);
 error_reporting(E_ALL);
 require_once "utils.php";
 
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+  exit(0);
+}
+
 // always recieve json data
 $request = json_decode(file_get_contents('php://input'), true);
 
 handleInput($request);
 
 function handleInput($request) {
+  if (!$request) return;
 
   if (!empty($request['cmd'])) {
-    /*
-    We are writing a context to disk.
-    who what where and then (sorted as when,who,where,what)
-    {timestamp},{actor},{loc},{cmd}
-    The timestamp will be microseconds
-    Combination of msTimestamp + actor is the unique filename  
-      1786021222321_wol.json
-      {"ts":1786021222321,"actor":"wol","loc":"2","cmd":"create a white cup"}
-    */
     $mstimestamp = round(microtime(true) * 1000);
+    $lastContext = $request['lastContext'] ?? '0';
+
+    if (is_string($lastContext) && strlen($lastContext) >= 13) {
+      $lastTs = (int) substr($lastContext, 0, 13);
+      if ($mstimestamp <= $lastTs) {
+        $mstimestamp = $lastTs + 1;
+      }
+    }
+
     $filename = CONTEXT_DIR . "/{$mstimestamp}{$request['actor']}.json";
-    $context = json_encode([
+    $contextData = [
       'ts' => $mstimestamp,
       'counter' => $request['counter'], 
       'actor' => $request['actor'], 
       'loc' => $request['loc'], 
-      'cmd' => $request['cmd']]);
-    file_put_contents($filename, $context);
+      'cmd' => $request['cmd']
+    ];
+    file_put_contents($filename, json_encode($contextData));
+
     // get all new contexts we have not seen yet
-    $lastContext = $request['lastContext'] ?? '0';
     $contexts = get_new_contexts($lastContext);
+    if (empty($contexts)) {
+      $contexts = [$contextData];
+    }
     outputJson(['contexts' => json_encode($contexts)]);
 
   } else if (!empty($request['file'])) {

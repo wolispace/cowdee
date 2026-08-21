@@ -5,10 +5,12 @@ export class UI {
   startTopH = 0;
   startBottomH = 0;
   splitRatio = null; // null = use CSS flex defaults; 0–1 = top's share after drag
+  messages = [];
+  topView = '';
 
   constructor(app) {
     this.app = app;
-    if (this.app.debug) return;
+    if (this.app.debug || this.app.headless || typeof document === 'undefined') return;
     this.splitter = document.getElementById('splitter');
     this.panels = document.getElementById('panels');
     this.top = document.getElementById('top');
@@ -39,9 +41,14 @@ export class UI {
     }
     context.playerId = this.app.player.info.id;
 
-    
-    if (this.app.debug) {
+    if (this.app.debug || this.app.headless || typeof document === 'undefined') {
       context.msg = await this.expand(context, 'text');
+      if (context.msg) {
+        this.messages.push(context.msg);
+        if (context.top) {
+          this.topView = context.msg;
+        }
+      }
       return context.msg;
     }
     context.msg = await this.expand(context, 'html');
@@ -147,16 +154,20 @@ export class UI {
    */
   showDialog(html, closeCallback = () => { }) {
     this.closeCallback = closeCallback;
-    this.dialogElement.addEventListener("close", this.closeCallback);
-    this.dialogElement.innerHTML = html;
-    this.dialogElement.showModal();
+    if (this.dialogElement) {
+      this.dialogElement.addEventListener("close", this.closeCallback);
+      this.dialogElement.innerHTML = html;
+      this.dialogElement.showModal();
+    }
   }
 
   /**
    * Closes the dialog
    */
   closeDialog() {
-    this.dialogElement.close();
+    if (this.dialogElement) {
+      this.dialogElement.close();
+    }
   }
 
 

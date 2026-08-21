@@ -1,117 +1,31 @@
-import fs from "fs";
-import path from "path";
-import { Utils } from '../public/classes/Utils.js';
-import { DB } from '../public/classes/DB.js';
-import { ID } from '../public/classes/ID.js';
-import { IO } from '../public/classes/IO.js';
-import { Player } from '../public/classes/Player.js';
-import { LookManager } from '../public/classes/LookManager.js';
-import { Context } from '../public/classes/Context.js';
+import { App } from '../public/cowdee.js';
 import { Tester } from './Tester.js';
 
 /**
- * In-memory Storage mock for isolated client storage in Node.js
+ * Shared Context Hub simulating the SSE server broadcast
+ * Dispatches contexts across real App instances
  */
-class MemoryStorage {
+class ContextHub {
   constructor() {
-    this.store = new Map();
-  }
-  getItem(key) {
-    return this.store.has(key) ? this.store.get(key) : null;
-  }
-  setItem(key, value) {
-    this.store.set(key, String(value));
-  }
-  removeItem(key) {
-    this.store.delete(key);
-  }
-  clear() {
-    this.store.clear();
-  }
-}
-
-/**
- * Headless UI mock to record client output without DOM
- */
-class HeadlessUI {
-  constructor(app) {
-    this.app = app;
-    this.messages = [];
-    this.topView = '';
-  }
-
-  async addMessage(context) {
-    // Spatial check: only show if in same location or broadcast
-    if (context.loc && this.app.player.info.loc && context.loc !== this.app.player.info.loc) {
-      return;
-    }
-
-    if (context?.target) {
-      this.app.player.info.lastt = context.target;
-    }
-
-    context.playerId = this.app.player.info.id;
-    const textMsg = await this.expand(context, 'text');
-    if (textMsg) {
-      this.messages.push({
-        text: textMsg,
-        raw: context.msg,
-        trigger: context.trigger,
-        loc: context.loc,
-        actor: context.actor,
-        top: context.top || false
-      });
-      if (context.top) {
-        this.topView = textMsg;
-      }
-    }
-    return textMsg;
-  }
-
-  async expand(context, format = 'text') {
-    let msg = context.msg;
-    if (!msg) return '';
-
-    // Simple template expansions
-    msg = msg.replaceAll('$actor', context.actor || '');
-    msg = msg.replaceAll('$target', context.target || '');
-    msg = msg.replaceAll('$second', context.second || '');
-    msg = msg.replaceAll('$loc', context.loc || '');
-    msg = msg.replaceAll('$prefix', context.prefix || '');
-    msg = msg.replaceAll('$text', context.text || '');
-
-    // Replace [id] with object name/class if available
-    const matches = msg.match(/\[(.*?)\]/g);
-    if (matches) {
-      for (const match of matches) {
-        const id = match.slice(1, -1);
-        const obj = await this.app.db.getById(id);
-        if (obj) {
-          const label = obj.name || obj.class || id;
-          msg = msg.replaceAll(match, label);
-        }
-      }
-    }
-    return msg;
-  }
-
-  showDialog() {}
-  closeDialog() {}
-}
-
-/**
- * Shared Context Bus simulating the SSE / server broadcast hub
- */
-export class ContextHub {
-  constructor() {
-    this.clients = [];
+    this.apps = [];
     this.history = [];
     this.globalCounter = 1;
   }
 
-  register(client) {
-    this.clients.push(client);
-    client.hub = this;
+  register(app) {
+    this.apps.push(app);
+    // Intercept sendCommand to broadcast through the hub
+    const originalSendCommand = app.sendCommand.bind(app);
+    app.sendCommand = async (data) => {
+      const rawContext = {
+        ts: Date.now(),
+        actor: app.player.info.id,
+        loc: app.player.info.loc,
+        cmd: typeof data === 'string' ? data : data.cmd,
+        counter: app.id.counter
+      };
+      await this.broadcast(rawContext);
+    };
   }
 
   async broadcast(rawContext) {
@@ -123,164 +37,105 @@ export class ContextHub {
 
     this.history.push(rawContext);
 
-    // Dispatch sequentially or concurrently to all connected clients
-    for (const client of this.clients) {
-      await client.receiveContext(rawContext);
+    // Replicate context to all connected clients
+    for (const app of this.apps) {
+      await app.processContexts([rawContext]);
     }
   }
 }
-
-/**
- * Simulated client application instance for a player
- */
-export class SimulatedClient {
-  constructor(name, playerId, startLoc = '2', hub = null) {
-    this.name = name;
-    this.debug = true;
-    this.lastContext = '0';
-    this.storage = new MemoryStorage();
-
-    // Wire up app components
-    this.utils = new Utils(this);
-    this.io = new IO(this);
-    this.db = new DB(this);
-    this.id = new ID(this);
-    this.ui = new HeadlessUI(this);
-    this.player = new Player(this);
-    this.lookManager = new LookManager(this);
-
-    // Initial player info
-    this.player.info = { id: playerId, name: name, loc: startLoc };
-
-    if (hub) {
-      hub.register(this);
-    }
-  }
-
-  seen(key) {
-    if (this.lastContext >= key) {
-      return true;
-    }
-    this.lastContext = key;
-    return false;
-  }
-
-  async sendCommand(cmdText) {
-    console.log(`\n▶ [${this.name} (${this.player.info.id}) @ Loc ${this.player.info.loc}] runs: "${cmdText}"`);
-    const rawContext = {
-      ts: Date.now(),
-      actor: this.player.info.id,
-      loc: this.player.info.loc,
-      cmd: cmdText,
-      counter: this.id.counter
-    };
-
-    if (this.hub) {
-      await this.hub.broadcast(rawContext);
-    } else {
-      await this.receiveContext(rawContext);
-    }
-  }
-
-  async receiveContext(rawContext) {
-    const contextCopy = { ...rawContext, app: this };
-    const context = new Context(this, contextCopy);
-    await context.process();
-  }
-
-  lastMessage() {
-    return this.ui.messages.length > 0 ? this.ui.messages[this.ui.messages.length - 1].text : null;
-  }
-
-  dumpMessages() {
-    console.log(`--- Messages for ${this.name} ---`);
-    for (const m of this.ui.messages) {
-      console.log(`  • ${m.text}`);
-    }
-  }
-}
-
-// ------------------- RUN TEST SUITE -------------------
 
 async function runMultiUserSimulation() {
   console.log('=====================================================');
-  console.log('       COWDEE MULTI-USER LOCAL SIMULATION TEST       ');
+  console.log('       COWDEE MULTI-USER REAL-APP TEST               ');
   console.log('=====================================================\n');
 
-  // 1. Initialise the database test fixtures
-  const initApp = {
-    debug: true,
-    seen: () => false,
-    settings: { generate: true, max: 5 }
-  };
-  initApp.utils = new Utils(initApp);
-  initApp.io = new IO(initApp);
-  initApp.db = new DB(initApp);
-  initApp.id = new ID(initApp);
-  initApp.ui = new HeadlessUI(initApp);
-  initApp.player = new Player(initApp);
-  initApp.lookManager = new LookManager(initApp);
+  // 1. Initialize DB fixtures
+  const initApp = new App({ debug: true, headless: true, settings: { generate: true, max: 5 } });
   initApp.tester = new Tester(initApp);
-
   initApp.tester.deleteTestFiles();
   await initApp.tester.initObjects();
   await initApp.tester.initPlayers();
   await initApp.tester.initCommands();
   await initApp.db.savePoolsToDisk();
-  console.log('✔ Initialized test database and command fixtures.\n');
+  console.log('✔ Initialized test database fixtures.\n');
 
-  // 2. Set up shared Hub and 2 Simulated Clients
+  // 2. Create the Hub and 3 independent real App instances
   const hub = new ContextHub();
-  const wolis = new SimulatedClient('Wolis', 'wol', '2', hub);
-  const bob = new SimulatedClient('Bob', 'bob', '2', hub);
+  const wolis = new App({ debug: true, headless: true });
+  const bob = new App({ debug: true, headless: true });
+  const jane = new App({ debug: true, headless: true });
 
-  console.log('👥 Clients connected:');
-  console.log(`   - Wolis (id: 'wol', location: '2' [House])`);
-  console.log(`   - Bob   (id: 'bob', location: '2' [House])\n`);
+  hub.register(wolis);
+  hub.register(bob);
+  hub.register(jane);
 
-  // 3. Test 1: Bob creates a white cup
+  // 3. Test Storage isolation in unlogged '0' void state
   console.log('-----------------------------------------------------');
-  console.log('TEST 1: Bob creates a white cup in Room 2');
+  console.log('TEST 1: Storage namespace in unlogged "0" void state');
   console.log('-----------------------------------------------------');
-  await bob.sendCommand('create a white cup');
-
-  console.log('\n🔍 Verifying Bob\'s client:');
-  console.log('   Last message seen by Bob:', bob.lastMessage());
-  
-  console.log('\n🔍 Verifying Wolis\'s client (replicated via Context stream):');
-  console.log('   Last message seen by Wolis:', wolis.lastMessage());
-
-  // Search Wolis's local memory DB for the cup created by Bob
-  const cupInWolisDB = await wolis.db.findByNameInLoc('cup', '2');
-  console.log('   Did Wolis\'s local DB replicate the cup in Loc 2?', cupInWolisDB ? `YES (ID: ${cupInWolisDB})` : 'NO');
-
-  if (!cupInWolisDB) {
-    throw new Error('FAILED: Wolis did not replicate the created cup in local DB!');
+  console.log('   Initial Wolis storage namespace:', wolis.storage.getNamespace());
+  console.log('   Initial Bob storage namespace:  ', bob.storage.getNamespace());
+  if (wolis.storage.getNamespace() !== '0' || bob.storage.getNamespace() !== '0') {
+    throw new Error('FAILED: Initial storage namespace must be "0"');
   }
 
-  // 4. Test 2: Bob speaks to Wolis
+  // 4. Log in players and verify namespace transition
   console.log('\n-----------------------------------------------------');
-  console.log('TEST 2: Bob says something in Room 2');
+  console.log('TEST 2: Login and Player namespace transition');
   console.log('-----------------------------------------------------');
-  await bob.sendCommand('say hello there Wolis');
-  console.log('   Bob last message:', bob.lastMessage());
-  console.log('   Wolis last message:', wolis.lastMessage());
+  await wolis.player.handleLogon({ playername: 'Wolis' });
+  await bob.player.handleLogon({ playername: 'Bob' });
+  await jane.player.handleLogon({ playername: 'Jane' });
 
-  // 5. Test 3: Spatial Filtering with 3rd client in another room
+  console.log(`   Wolis logged in: ID="${wolis.player.info.id}", Loc="${wolis.player.info.loc}", Namespace="${wolis.storage.getNamespace()}"`);
+  console.log(`   Bob logged in:   ID="${bob.player.info.id}", Loc="${bob.player.info.loc}", Namespace="${bob.storage.getNamespace()}"`);
+  console.log(`   Jane logged in:  ID="${jane.player.info.id}", Loc="${jane.player.info.loc}", Namespace="${jane.storage.getNamespace()}"`);
+
+  if (wolis.storage.getNamespace() !== 'wol' || bob.storage.getNamespace() !== 'bob' || jane.storage.getNamespace() !== 'jan') {
+    throw new Error('FAILED: Storage namespace did not update to player ID on login!');
+  }
+
+  // Verify storage isolation (each player has their own playerInfo key in storage)
+  const wolisStoredInfo = JSON.parse(wolis.storage.getItem('playerInfo'));
+  const bobStoredInfo = JSON.parse(bob.storage.getItem('playerInfo'));
+  console.log('   Wolis stored info in storage:', wolisStoredInfo);
+  console.log('   Bob stored info in storage:  ', bobStoredInfo);
+  if (wolisStoredInfo.id !== 'wol' || bobStoredInfo.id !== 'bob') {
+    throw new Error('FAILED: Storage keys collided between players!');
+  }
+
+  // 5. Test Object creation & replication across clients
   console.log('\n-----------------------------------------------------');
-  console.log('TEST 3: Spatial filtering - Jane in Room 3 (Library)');
+  console.log('TEST 3: Bob creates a white cup in Room 2');
   console.log('-----------------------------------------------------');
-  const jane = new SimulatedClient('Jane', 'jan', '3', hub);
+  await bob.sendCommand({ cmd: 'create a white cup' });
+
+  console.log('   Bob UI last message:  ', bob.ui.messages[bob.ui.messages.length - 1]);
+  console.log('   Wolis UI last message:', wolis.ui.messages[wolis.ui.messages.length - 1]);
+
+  const cupInWolisDB = await wolis.db.findByNameInLoc('cup', '2');
+  const cupInBobDB = await bob.db.findByNameInLoc('cup', '2');
+  console.log(`   Cup in Bob's local DB:   ${cupInBobDB ? 'YES (ID: ' + cupInBobDB + ')' : 'NO'}`);
+  console.log(`   Cup in Wolis's local DB: ${cupInWolisDB ? 'YES (ID: ' + cupInWolisDB + ')' : 'NO'}`);
+
+  if (!cupInBobDB || !cupInWolisDB) {
+    throw new Error('FAILED: Created cup was not replicated to local DBs!');
+  }
+
+  // 6. Test Chat & Spatial Filtering
+  console.log('\n-----------------------------------------------------');
+  console.log('TEST 4: Spatial Chat & Message Filtering');
+  console.log('-----------------------------------------------------');
   const janeMsgCountBefore = jane.ui.messages.length;
 
-  await bob.sendCommand('say secret conversation only in house');
+  await bob.sendCommand({ cmd: 'say hello Wolis in the house' });
 
+  console.log('   Wolis heard:', wolis.ui.messages[wolis.ui.messages.length - 1]);
   const janeMsgCountAfter = jane.ui.messages.length;
-  console.log(`   Jane message count change: ${janeMsgCountAfter - janeMsgCountBefore} (Expected: 0)`);
-  console.log('   Wolis heard:', wolis.lastMessage());
+  console.log(`   Jane (in Library loc 3) received new messages: ${janeMsgCountAfter - janeMsgCountBefore} (Expected: 0)`);
 
   if (janeMsgCountAfter !== janeMsgCountBefore) {
-    throw new Error('FAILED: Jane received a message from a different location!');
+    throw new Error('FAILED: Jane received message from another room!');
   }
 
   console.log('\n=====================================================');
