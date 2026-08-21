@@ -21,7 +21,7 @@ export class Tester {
     };
     rawContext.app = app; // stuff the app into the context object
 
-    this.context = new Context(rawContext);
+    this.context = new Context(this.app, rawContext);
 
   }
 

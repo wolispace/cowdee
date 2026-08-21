@@ -69,7 +69,7 @@ function testRandom() {
   const dir = '_contexts';
   for (const filename of fs.readdirSync(dir)) {
     const content = JSON.parse(fs.readFileSync(`${dir}/${filename}`, `utf8`));
-    const context = new Context(content);
+    const context = new Context(app, content);
     contexts.push(context);
   }
 

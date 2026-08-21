@@ -8,16 +8,16 @@ function logIt($str) {
   file_put_contents('_log.txt', "{$dateTime},{$_SERVER['REMOTE_ADDR']},{$str}\n", FILE_APPEND | LOCK_EX);
 }
 
-function get_new_contexts($last) {
+function get_new_contexts($lastContext) {
   $files = glob(CONTEXT_DIR . '/*.json');
   if (!$files) return [];
   sort($files);
   // If last == '0', return ONLY the newest context
-  if ($last === '0') {
+  if ($lastContext == '0') {
     $file = end($files);
     return [ json_decode(file_get_contents($file), true) ];
   }
-  // Otherwise return all contexts newer than $last
+  // Otherwise return all contexts newer than $lastContext
   $contexts = [];
   foreach ($files as $file) {
     $ts = (int) substr(basename($file), 0, 13);
@@ -29,7 +29,8 @@ function get_new_contexts($last) {
     }
     $key = "{$data['ts']}{$data['actor']}";
 
-    if ($key > $last) {
+    logIt("key={$key}, lastContext={$lastContext}");
+    if ($key > $lastContext) {
       $contexts[] = $data;
     }
   }

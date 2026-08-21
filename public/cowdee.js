@@ -18,7 +18,7 @@ class App {
 
   constructor(testing) {
     this.utils = new Utils(this); // random utils
-    this.sse = new SSE(this); // server site events
+    
     this.io = new IO(this); // disk IO - read and write to server
     this.ui = new UI(this); // user interface
     this.db = new DB(this); // database - read and write objects
@@ -31,8 +31,9 @@ class App {
   async start() {
     await this.player.load();
     this.lastContext = localStorage.getItem(LAST_CONTEXT_KEY);
-    // console.log(`started last=${this.lastContext}`);
-    // this.ui.showDialog(' Hi ', () => {alert('hmm')});
+    // start the SSE now we know the last context seen
+    this.sse = new SSE(this); // server site events
+    await this.sse.connect();
 
     // universal form submit we pass to the handler for forms
     document.addEventListener("submit", async (event) => {
@@ -70,15 +71,14 @@ class App {
 
 
   async sendCommand(data) {
-    data.last = this.lastContext;
+    data.lastContext = this.lastContext;
     data.counter = this.id.counter;
     const result = await this.io.fetchJson('server', data);
-    //console.log(`sendCommand last=${data.last}`, result);
     if (result.contexts) {
       const contexts = JSON.parse(result.contexts);
       for ( const rawContext of contexts) {
         rawContext.app = this; // stuff the app into the context object
-        const context = new Context(rawContext);
+        const context = new Context(this, rawContext);
         await context.process();
       }
     }

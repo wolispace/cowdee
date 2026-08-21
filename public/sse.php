@@ -11,18 +11,18 @@ while (ob_get_level() > 0) ob_end_flush();
 flush();
 
 $endTime = time() + 55;
-$last = isset($_GET['last']) ? (int)$_GET['last'] : 0;
+$lastContext = isset($_GET['lastContext']) ? (int)$_GET['lastContext'] : 0;
 
 
 
 while (time() < $endTime) {
-  $contexts = get_new_contexts($last);
+  $contexts = get_new_contexts($lastContext);
   if (is_array($contexts)) {
     foreach ($contexts as $context) {
       sse_event('context', $context);
     }
   }
-  usleep(500000);
+  usleep(5000000);
 }
 
 sse_event('shutdown', ['reason' => 'session ended, client should reconnect']);

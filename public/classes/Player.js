@@ -69,9 +69,9 @@ export class Player {
 
 async wake() {
     // get the last comntext seen by the server
-    const last = await this.app.io.fetchJson('server', {'last': 1});
-    console.log({last});
-    this.app.lastContext = last.last;
+    const result = await this.app.io.fetchJson('server', {'lastContext': 1});
+    console.log({result});
+    this.app.lastContext = result.lastContext;
     await this.app.sendCommand({cmd: 'look', actor: this.info.id, loc: this.info.loc});
   }
 
@@ -83,6 +83,7 @@ async wake() {
     const json = localStorage.getItem(this.PLAYER_INFO_KEY);
     if (json) {
       this.info = JSON.parse(json);
+      this.wake();
       return;
     }
     await this.welcome();

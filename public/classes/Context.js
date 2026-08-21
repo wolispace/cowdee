@@ -1,15 +1,17 @@
 import { Cowmands } from './Cowmands.js';
 
 export class Context {
-  seed = 1;
+  counter = 0; // counter for next IDs
+  seed = 1; // seed for consistent random numbers based on this.ts
   subs = {};
 
-  constructor(context) {
+  constructor(app, context) {
+    this.app = app,
     // expand the context into this object eg: this.ts = context.ts;
     Object.assign(this, context);
     this.prepRandom(this.ts);
     this.cowmands = new Cowmands(this.app, this);
-    if (this.counter > this.app.id.counter) {
+    if (this.app && this.app.id && this.counter > this.app.id.counter) {
       this.app.id.counter = this.counter;
     }
   }

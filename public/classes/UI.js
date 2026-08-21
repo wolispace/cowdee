@@ -22,9 +22,8 @@ export class UI {
 
   async addMessage(context) {
     // if its not in the players location, or its to the player or loc is all then dont show
-    console.log(context.loc, '?', this.app.player.info.loc);
     if (context.loc != this.app.player.info.loc) {
-      console.log('no show', context);
+      //console.log('no show', context);
       return;
     }
 

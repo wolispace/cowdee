@@ -30,8 +30,8 @@ function handleInput($request) {
       'cmd' => $request['cmd']]);
     file_put_contents($filename, $context);
     // get all new contexts we have not seen yet
-    $last = $request['last'] ?? '0';
-    $contexts = get_new_contexts($last);
+    $lastContext = $request['lastContext'] ?? '0';
+    $contexts = get_new_contexts($lastContext);
     outputJson(['contexts' => json_encode($contexts)]);
 
   } else if (!empty($request['file'])) {
@@ -46,8 +46,8 @@ function handleInput($request) {
       saveJson($file, json_decode($request['content'], true));
       outputJson(['ok' => true]);
     }
-    } else if (!empty($request['last'])) {
-      outputJson(['last' => get_last_context()]);
+    } else if (!empty($request['lastContext'])) {
+      outputJson(['lastContext' => get_last_context()]);
     }
 }
 
