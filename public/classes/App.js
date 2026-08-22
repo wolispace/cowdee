@@ -1,13 +1,13 @@
-import { Storage } from './classes/Storage.js';
-import { Utils } from './classes/Utils.js';
-import { SSE } from './classes/SSE.js';
-import { IO } from './classes/IO.js';
-import { UI } from './classes/UI.js';
-import { DB } from './classes/DB.js';
-import { ID } from './classes/ID.js';
-import { Player } from './classes/Player.js';
-import { LookManager } from './classes/LookManager.js';
-import { Context } from './classes/Context.js';
+import { Storage } from './Storage.js';
+import { Utils } from './Utils.js';
+import { SSE } from './SSE.js';
+import { IO } from './IO.js';
+import { UI } from './UI.js';
+import { DB } from './DB.js';
+import { ID } from './ID.js';
+import { Player } from './Player.js';
+import { LookManager } from './LookManager.js';
+import { Context } from './Context.js';
 
 const LAST_CONTEXT_KEY = 'lastContext'; // how we local store the last seen context key
 
@@ -36,9 +36,10 @@ export class App {
     
     // start the SSE now we know the last context seen
     this.sse = new SSE(this);
+    console.log('starting SSE');
     if (!this.headless && typeof window !== 'undefined') {
-      // await this.sse.connect();
     }
+    await this.sse.connect();
 
     if (typeof document !== 'undefined') {
       // universal form submit we pass to the handler for forms
