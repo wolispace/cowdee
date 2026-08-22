@@ -1,7 +1,7 @@
 // for handling data to and from server
 export class IO {
   token = '';
-  types = {server: 'http://localhost:8880/public/server.php', player: 'http://localhost/?player'};
+  types = {server: 'http://localhost/server.php', player: 'http://localhost/?player'};
 
   constructor(app) {
     this.app = app;

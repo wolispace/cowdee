@@ -6,8 +6,10 @@ header('Access-Control-Allow-Origin: *');
 header('Content-Type: text/event-stream');
 header('Cache-Control: no-cache');
 header('Connection: keep-alive');
+header('X-WWebserver-Streaming: 1');
 
 while (ob_get_level() > 0) ob_end_flush();
+echo ": ping\n\n";
 flush();
 
 $endTime = time() + 55;
