@@ -1,5 +1,5 @@
 <?php
-
+set_time_limit(0);
 require_once "utils.php";
 
 header('Access-Control-Allow-Origin: *');
@@ -9,7 +9,6 @@ header('Connection: keep-alive');
 header('X-WWebserver-Streaming: 1');
 
 while (ob_get_level() > 0) ob_end_flush();
-echo ": ping\n\n";
 flush();
 
 $endTime = time() + 55;
@@ -23,6 +22,8 @@ while (time() < $endTime) {
       $lastContext = "{$context['ts']}{$context['actor']}";
     }
   }
+  if ( connection_aborted() ) break;
+
   usleep(250000); // 250ms interval for near-instant SSE delivery
 }
 
@@ -33,3 +34,13 @@ function sse_event($event, $data) {
   echo "data: " . json_encode($data) . "\n\n";
   flush();
 }
+
+
+/*
+  const eventSource = nw EventSource('sse.php');
+  eventSource.AddEventListener('context', (event) => {
+    console.log(event, data);
+    
+  })
+
+*/

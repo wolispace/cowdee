@@ -15,12 +15,14 @@ const LAST_CONTEXT_KEY = 'lastContext'; // how we local store the last seen cont
 export class App {
   #isProcessing = false;
   lastContext = '0'; // last seen context.key
-  WEB_ROOT = 'http://localhost';
+  // WEB_ROOT = 'http://localhost:8880/public'; // 'http://localhost';
+  WEB_ROOT = new URL('.', window.location.href).toString();
 
   constructor(options = {}) {
     this.debug = options.debug || false;
     this.headless = options.headless || (typeof document === 'undefined');
     this.settings = options.settings || { generate: false, max: 5 };
+    console.log(options);
     
     this.storage = new Storage(this, options.namespace || '0');
     this.utils = new Utils(this); // random utils
@@ -34,14 +36,15 @@ export class App {
   
   async start() {
     this.lastContext = this.storage.getItem(LAST_CONTEXT_KEY) || '0';
+    await this.id.load();
     await this.player.load();
     
     // start the SSE now we know the last context seen
-    this.sse = new SSE(this);
-    console.log('starting SSE');
-    if (!this.headless && typeof window !== 'undefined') {
+    if (!this.settings.nosse) {
+      this.sse = new SSE(this);
+      console.log('starting SSE');
+      await this.sse.connect();
     }
-    await this.sse.connect();
 
     if (typeof document !== 'undefined') {
       // universal form submit we pass to the handler for forms
@@ -84,6 +87,11 @@ export class App {
    * @param {object} data 
    */
   async sendCommand(data) {
+    if (typeof data === 'string') {
+      data = { cmd: data };
+    }
+    data.actor = data.actor ?? this.player.info.id;
+    data.loc = data.loc ?? this.player.info.loc;
     data.lastContext = this.lastContext;
     data.counter = this.id.counter;
     const result = await this.io.fetchJson('server', data);

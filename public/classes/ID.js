@@ -3,7 +3,7 @@
  * The 16,777,216th object will be id '9999' so plenty of growth wile taking up very little space 
  */
 export class ID {
-  filename = '_data/id_counter.json';
+  filename = '_db/_counter.txt';
   counter = 1; // first object is 1, anything without a loc is in the void = 0
   // if alphabet is 62 char long then we are doing base62 encoding
   alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -19,21 +19,34 @@ export class ID {
    * Load the last saved counter so we continue where we left off
    * @returns 
    */
-  load() {
-    // TODO: use IO to load the file
-    // if (!fs.existsSync(this.filename)) {
-    //   this.counter = 0;
-    //   return;
-    // }
-    // this.counter = 0 + fs.readFileSync(this.filename);
+  async load() {
+    if (typeof window === 'undefined') {
+      try {
+        const fs = await import('fs');
+        if (fs.existsSync(this.filename)) {
+          const val = parseInt(fs.readFileSync(this.filename, 'utf8'), 10);
+          if (!isNaN(val) && val > 0) {
+            this.counter = val;
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
   }
 
   /**
    * Save the counter
    */
-  save() {
-    // TODO: use this.app.io to save the file
-    //fs.writeFileSync(this.filename, `${this.counter}`);
+  async save() {
+    if (typeof window === 'undefined') {
+      try {
+        const fs = await import('fs');
+        fs.writeFileSync(this.filename, `${this.counter}`);
+      } catch (e) {
+        // ignore
+      }
+    }
   }
 
   /**

@@ -8,7 +8,12 @@ export class Tester {
 
   constructor(app) {
     this.app = app;
-    this.app.id.counter = parseInt(fs.readFileSync(this.counterFile), 1);
+    if (fs.existsSync(this.counterFile)) {
+      const val = parseInt(fs.readFileSync(this.counterFile, 'utf8'), 10);
+      if (!isNaN(val) && val > 0) {
+        this.app.id.counter = val;
+      }
+    }
 
     console.log('CWD:', process.cwd());
 
@@ -32,6 +37,17 @@ export class Tester {
       if (file.endsWith(".json")) {
         fs.rmSync(path.join(dir, file), { force: true });
       }
+    }
+    const contextDir = "_contexts";
+    if (fs.existsSync(contextDir)) {
+      for (const file of fs.readdirSync(contextDir)) {
+        if (file.endsWith(".json")) {
+          fs.rmSync(path.join(contextDir, file), { force: true });
+        }
+      }
+    }
+    if (typeof localStorage !== 'undefined') {
+      try { localStorage.clear(); } catch (e) {}
     }
     this.app.id.counter = 1;
     fs.writeFileSync(this.counterFile, '1');
@@ -158,6 +174,7 @@ export class Tester {
       obj.color = this.randomColor();
       await this.app.db.save(obj);
     }
+    await this.app.id.save();
   }
 
 

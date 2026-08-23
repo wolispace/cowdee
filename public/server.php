@@ -39,6 +39,7 @@ function handleInput($request) {
       'cmd' => $request['cmd']
     ];
     file_put_contents($filename, json_encode($contextData));
+    logIt("saved context file $filename");
 
     // get all new contexts we have not seen yet
     $contexts = get_new_contexts($lastContext);

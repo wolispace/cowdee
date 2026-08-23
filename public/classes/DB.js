@@ -275,6 +275,7 @@ export class DB {
     for (const pool of Object.values(this.pools)) {
       await pool.saveDirty();
     }
+    await this.app.id.save();
   }
 
 

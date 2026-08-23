@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>cowsee v{{version}}</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
+      <link rel='stylesheet' href='cowdee.css?{{version}}' />
+
+  </head>
+  <body>
+    <h1>Test SSE</h1> 
+    <button id="button" onclick="sendTest()">Click me</button>
+  </body>
+      <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+          const eventSource = new EventSource('sse.php');
+            eventSource.addEventListener('message', (event) => {
+                console.log(event.data);
+                
+            });
+
+        });
+
+        async function sendTest() {
+            const payload = {actor: 'wol', loc: '2', cmd: 'say hello'};
+            const response = await fetch('server.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+                signal: AbortSignal.timeout(400)
+            });
+            const result = await response.json();
+            console.log(result);
+        }
+      </script>  
+</html>
