@@ -13,8 +13,8 @@ export class Player {
    * show the logon form 
    */
   async welcome() {
-    if (this.app.debug || typeof document === 'undefined' || !this.app.ui?.showDialog) return;
-    // show dialog, app.handleForm() handes logins
+    if (!window) return;
+    // show dialog, app.handleForm() handles logins
     this.app.ui.showDialog(this.loginFormContent());    
   }
 
@@ -39,15 +39,13 @@ export class Player {
   async handleLogon(data) {
     const isLoggedIn = await this.logon(data);
     if (isLoggedIn) {
-      if (this.app.ui?.closeDialog) {
-        this.app.ui.closeDialog();
-      }
+      this.app.ui.closeDialog();
       await this.wake();
     } else {
-      if (typeof alert !== 'undefined') {
-        alert(`Player ${data.playername} not found.`);
-      } else {
+      if (!window) {
         console.warn(`Player ${data.playername} not found.`);
+      } else {
+        alert(`Player ${data.playername} not found.`);
       }
     }
   }

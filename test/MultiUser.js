@@ -9,7 +9,7 @@ async function runMultiUserSimulation() {
   console.log('=====================================================\n');
 
   // 1. Initialize DB fixtures
-  const initApp = new App({ debug: true, headless: true, settings: { generate: true, max: 5 } });
+  const initApp = new App({settings: { generate: true, max: 5 } });
   initApp.tester = new Tester(initApp);
   initApp.tester.deleteTestFiles();
   await initApp.tester.initObjects();
@@ -19,9 +19,9 @@ async function runMultiUserSimulation() {
   console.log(`✔ Initialized test database fixtures. DB Counter: ${initApp.id.counter}\n`);
 
   // 2. Create 3 independent real App instances and connect to SSE / Server
-  const wolis = new App({ debug: true, headless: true });
-  const bob = new App({ debug: true, headless: true });
-  const jane = new App({ debug: true, headless: true });
+  const wolis = new App();
+  const bob = new App();
+  const jane = new App();
 
   await wolis.start();
   await bob.start();

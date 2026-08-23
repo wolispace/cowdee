@@ -11,7 +11,8 @@ export class SSE {
 
   async connect() {
     this.aborted = false;
-    const url = new URL(this.app.io.type.sse);
+    const sseroot = this.app.webroot.replace('8880', '8881');
+    const url = new URL(sseroot + 'sse.php');
     url.searchParams.set('last', this.app.lastContext);
     console.log('[SSE] connecting ', url.toString());
 

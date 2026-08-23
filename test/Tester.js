@@ -17,11 +17,12 @@ export class Tester {
 
     console.log('CWD:', process.cwd());
 
+    // a context to use for creating new objects so they have the same seed
     const rawContext = {
       ts: 12345,
       actor: this.app.player.info.id,
       loc: this.app.player.info.loc,
-      cmd: 'build a shed',
+      cmd: 'do nothing',
       counter: this.app.id.counter,
     };
     rawContext.app = app; // stuff the app into the context object
@@ -31,6 +32,8 @@ export class Tester {
   }
 
   deleteTestFiles() {
+    console.log('flushing memory');
+    this.app.io.flush();
     console.log('removing files');
     const dir = "_db";
     for (const file of fs.readdirSync(dir)) {

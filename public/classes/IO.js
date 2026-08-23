@@ -5,8 +5,8 @@ export class IO {
   constructor(app) {
     this.app = app;
     this.type = {
-      server: `${this.app.WEB_ROOT}/server.php`, 
-      sse: `${this.app.WEB_ROOT}/sse.php`};
+      server: `${this.app.webroot}/server.php`, 
+      sse: `${this.app.wrbroot}/sse.php`};
   }
 
   setToken(token) {
@@ -40,7 +40,7 @@ export class IO {
       });
       return await response.json();
     } catch (err) {
-      if (typeof window === 'undefined' || this.app.headless) {
+      if (!window) {
         return await this.localDiskFallback(payload);
       }
       return null;

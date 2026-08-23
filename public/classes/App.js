@@ -11,18 +11,16 @@ import { Context } from './Context.js';
 
 const LAST_CONTEXT_KEY = 'lastContext'; // how we local store the last seen context key
 
+if (typeof window === "undefined") {
+  global.window = false;
+}
 
 export class App {
-  #isProcessing = false;
   lastContext = '0'; // last seen context.key
-  // WEB_ROOT = 'http://localhost:8880/public'; // 'http://localhost';
-  WEB_ROOT = new URL('.', window.location.href).toString();
-
+  
   constructor(options = {}) {
-    this.debug = options.debug || false;
-    this.headless = options.headless || (typeof document === 'undefined');
     this.settings = options.settings || { generate: false, max: 5 };
-    console.log(options);
+    this.webroot = this.getWebroot();
     
     this.storage = new Storage(this, options.namespace || '0');
     this.utils = new Utils(this); // random utils
@@ -64,6 +62,15 @@ export class App {
 
   wakePlayer() {
     console.log('wake player');
+  }
+
+  // returns this font-rne js or node script communicates with
+  getWebroot() {
+    if (!window) {
+      return 'http://localhost:8880/public'; // 'http://localhost';
+    } else {
+      return new URL('.', window.location.href).toString();
+    }
   }
 
   /**

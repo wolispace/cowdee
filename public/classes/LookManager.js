@@ -62,7 +62,7 @@ export class LookManager {
     this.sentences = [];
     this.objs = {};
     if (!this.context.loc) {
-      console.log('There is nothing to see as you are nowhere', context);
+      console.log('There is nothing to see as you are nowhere', context.actor, context.loc);
       this.sentences.push('You are nowhere');
       return this.returnData();
     }

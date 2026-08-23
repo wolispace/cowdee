@@ -10,7 +10,7 @@ export class UI {
 
   constructor(app) {
     this.app = app;
-    if (this.app.debug || this.app.headless || typeof document === 'undefined') return;
+    if (!window) return;
     this.splitter = document.getElementById('splitter');
     this.panels = document.getElementById('panels');
     this.top = document.getElementById('top');
@@ -41,7 +41,7 @@ export class UI {
     }
     context.playerId = this.app.player.info.id;
 
-    if (this.app.debug || this.app.headless || typeof document === 'undefined') {
+    if (!window) {
       context.msg = await this.expand(context, 'text');
       if (context.msg) {
         this.messages.push(context.msg);

@@ -4,8 +4,6 @@ import { Context } from '../public/classes/Context.js';
 import { Tester } from './Tester.js';
 
 const app = new App({
-  debug: true,
-  headless: true,
   settings: {
     generate: true,
     max: 5,
@@ -32,6 +30,9 @@ console.log('-------------- END ----------------');
 process.exit(0);
 
 async function testCommands() {
+  await app.player.handleLogon({ playername: 'Wolis' });
+  console.log(` - Wolis logged in: ID="${app.player.info.id}", Loc="${app.player.info.loc}", Namespace="${app.storage.getNamespace()}"`);
+    
   app.tester.context.actor = app.player.info.id;
   app.tester.context.cmd = 'build a shed';
   app.tester.context.loc = app.player.info.loc;
