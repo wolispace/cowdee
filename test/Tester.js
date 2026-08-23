@@ -4,11 +4,11 @@ import { Context } from '../public/classes/Context.js';
 
 export class Tester {
 
-
+   counterFile = '_db/_counter.txt';
 
   constructor(app) {
     this.app = app;
-    this.app.id.counter = parseInt(fs.readFileSync('./_db/_counter.txt', 'utf8'), 10);
+    this.app.id.counter = parseInt(fs.readFileSync(this.counterFile), 1);
 
     console.log('CWD:', process.cwd());
 
@@ -34,7 +34,7 @@ export class Tester {
       }
     }
     this.app.id.counter = 1;
-    fs.writeFileSync(`${dir}/_counter.txt`, '1');
+    fs.writeFileSync(this.counterFile, '1');
   }
 
 

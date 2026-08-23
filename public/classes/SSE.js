@@ -7,11 +7,9 @@ export class SSE {
   }
 
   async connect() {
-    const url = new URL(window.location.href);
-    //url.port = '80';
-    url.pathname = '/sse.php';
+    const url = new URL(this.app.io.type.sse);
     url.searchParams.set('last', this.app.lastContext);
-    console.log('[SSE] connecting, last:', this.app.lastContext || '(none)');
+    console.log('[SSE] connecting ', url.toString());
     this.sse = new EventSource(url.toString());
 
     this.sse.addEventListener('context', async (event) => {

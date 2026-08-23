@@ -1,5 +1,5 @@
 import fs from "fs";
-import { App } from '../public/cowdee.js';
+import { App } from '../public/classes/App.js';
 import { Context } from '../public/classes/Context.js';
 import { Tester } from './Tester.js';
 

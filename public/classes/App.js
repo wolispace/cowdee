@@ -11,9 +11,11 @@ import { Context } from './Context.js';
 
 const LAST_CONTEXT_KEY = 'lastContext'; // how we local store the last seen context key
 
+
 export class App {
   #isProcessing = false;
   lastContext = '0'; // last seen context.key
+  WEB_ROOT = 'http://localhost';
 
   constructor(options = {}) {
     this.debug = options.debug || false;

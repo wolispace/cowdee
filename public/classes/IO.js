@@ -1,10 +1,12 @@
 // for handling data to and from server
 export class IO {
   token = '';
-  types = {server: 'http://localhost/server.php', player: 'http://localhost/?player'};
-
+  
   constructor(app) {
     this.app = app;
+    this.type = {
+      server: `${this.app.WEB_ROOT}/server.php`, 
+      sse: `${this.app.WEB_ROOT}/sse.php`};
   }
 
   setToken(token) {
@@ -30,7 +32,7 @@ export class IO {
     payload.token = this.token;
     payload.counter = this.app.id.counter;
     try {
-      const response = await fetch(this.types[type], {
+      const response = await fetch(this.type[type], {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

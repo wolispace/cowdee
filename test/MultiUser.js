@@ -1,4 +1,4 @@
-import { App } from '../public/cowdee.js';
+import { App } from '../public/classes/App.js';
 import { Tester } from './Tester.js';
 
 /**
@@ -105,21 +105,22 @@ async function runMultiUserSimulation() {
   }
 
   // 5. Test Object creation & replication across clients
+  const newObjName = 'pig';
   console.log('\n-----------------------------------------------------');
-  console.log('TEST 3: Bob creates a white cup in Room 2');
+  console.log('TEST 3: Bob creates a pink ${newObjName} in Room 2');
   console.log('-----------------------------------------------------');
-  await bob.sendCommand({ cmd: 'create a white cup' });
+  await bob.sendCommand({ cmd: `create a pink ${newObjName}` });
 
   console.log('   Bob UI last message:  ', bob.ui.messages[bob.ui.messages.length - 1]);
   console.log('   Wolis UI last message:', wolis.ui.messages[wolis.ui.messages.length - 1]);
 
-  const cupInWolisDB = await wolis.db.findByNameInLoc('cup', '2');
-  const cupInBobDB = await bob.db.findByNameInLoc('cup', '2');
-  console.log(`   Cup in Bob's local DB:   ${cupInBobDB ? 'YES (ID: ' + cupInBobDB + ')' : 'NO'}`);
-  console.log(`   Cup in Wolis's local DB: ${cupInWolisDB ? 'YES (ID: ' + cupInWolisDB + ')' : 'NO'}`);
+  const newObjInWolisDB = await wolis.db.findByNameInLoc(newObjName, '2');
+  const newObjInBobDB = await bob.db.findByNameInLoc(newObjName, '2');
+  console.log(`   newObj in Bob's local DB:   ${newObjInBobDB ? 'YES (ID: ' + newObjInBobDB + ')' : 'NO'}`);
+  console.log(`   newObj in Wolis's local DB: ${newObjInWolisDB ? 'YES (ID: ' + newObjInWolisDB + ')' : 'NO'}`);
 
-  if (!cupInBobDB || !cupInWolisDB) {
-    throw new Error('FAILED: Created cup was not replicated to local DBs!');
+  if (!newObjInBobDB || !newObjInWolisDB) {
+    throw new Error('FAILED: Created newObj was not replicated to local DBs!');
   }
 
   // 6. Test Chat & Spatial Filtering

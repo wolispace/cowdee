@@ -1,4 +1,4 @@
-import { App } from '../public/cowdee.js';
+import { App } from '../public/classes/App.js';
 import { Tester } from './Tester.js';
 
 const app = new App({
