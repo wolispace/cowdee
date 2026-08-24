@@ -25,7 +25,7 @@ export class UI {
   async addMessage(context) {
     // if its not in the players location, or its to the player or loc is all then dont show
     if (context.loc != this.app.player.info.loc) {
-      console.log(` - ${this.app.name} msg not shown`, context.loc, context.actor, context.msg.slice(0, 30));
+      console.log(`${this.app.name} --- msg not shown`, context.loc, context.actor, context.msg.slice(0, 30));
       return;
     }
 
@@ -50,7 +50,7 @@ export class UI {
           this.topView = context.msg;
         }
       }
-      console.log(`${this.app.name} - addMsg node: `, context.msg);
+      console.log(`${this.app.name} --- addMsg node: `, context.msg);
       return context.msg;
     }
 

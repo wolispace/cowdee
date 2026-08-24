@@ -128,7 +128,7 @@ export class PoolManager {
    */
   async saveDirty() {
     if (!this.isDirty()) return;
-    console.log('saveDirty', this.type);
+    console.log(`${this.app.name} saveDirty:`, this.type);
 
     const files = new Map();
     // Group updated keys by shard file
@@ -166,7 +166,7 @@ export class PoolManager {
         const item = new Set(json?.[key] ?? undefined);
         this.pool.replace(key, item);
       }
-      console.log('saving', filename);
+      console.log(`${this.app.name} - saving:`, filename);
       await this.app.io.saveJson(filename, json);
     }
 

@@ -30,7 +30,7 @@ export class Context {
   async process() {
     if (this.app.seen(this.key())) return;
     if (!this.cmd) return;
-    console.log(`\n - ${this.app.name} processing `, this.ts, this.actor, this.loc, this.app.id.counter, this.cmd);
+    console.log(`\n${this.app.name} ### processing:`, this.ts, this.actor, this.loc, this.app.id.counter, this.cmd);
     const { firstword, rest } = this.app.utils.splitFirstWord(this.cmd);
     this.cowmand = firstword;
     this.rest = rest;
@@ -97,7 +97,7 @@ export class Context {
  * @param {string} statement 
  */
   async executeStatement(statement) {
-    console.log(` ${this.app.name} executeCowmand - [${statement}]`);
+    console.log(`${this.app.name} -- executeCowmand [${statement}]`);
     const trimmed = statement.trim();
     if (!trimmed) return;
 

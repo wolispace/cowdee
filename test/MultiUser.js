@@ -9,7 +9,7 @@ async function runMultiUserSimulation() {
   console.log('=====================================================\n');
 
   // 1. Initialize DB fixtures
-  const initApp = new App({settings: { generate: true, max: 5 } });
+  const initApp = new App({settings: { name: 'initApp', generate: true, max: 5 } });
   initApp.tester = new Tester(initApp);
   initApp.tester.deleteTestFiles();
   await initApp.tester.initObjects();
@@ -22,6 +22,10 @@ async function runMultiUserSimulation() {
   const wolis = new App({settings: {name: 'wolisApp'}});
   const bob = new App({settings: {name: 'bobApp'}});
   const jane = new App({settings: {name: 'janeApp'}});
+
+  await wolis.db.flush();
+  await bob.db.flush();
+  await jane.db.flush();
 
   await wolis.start();
   await bob.start();
