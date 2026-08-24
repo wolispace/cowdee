@@ -54,8 +54,8 @@ export class ID {
    * @returns {string}
    */
   new() {
-    const id = this.encodeInt(this.counter);
     this.counter++;
+    const id = this.encodeInt(this.counter);
     this.save();
     return id;
   }

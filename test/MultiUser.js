@@ -19,9 +19,9 @@ async function runMultiUserSimulation() {
   console.log(`✔ Initialized test database fixtures. DB Counter: ${initApp.id.counter}\n`);
 
   // 2. Create 3 independent real App instances and connect to SSE / Server
-  const wolis = new App();
-  const bob = new App();
-  const jane = new App();
+  const wolis = new App({settings: {name: 'wolisApp'}});
+  const bob = new App({settings: {name: 'wolisApp'}});
+  const jane = new App({settings: {name: 'wolisApp'}});
 
   await wolis.start();
   await bob.start();

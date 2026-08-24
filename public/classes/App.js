@@ -20,6 +20,7 @@ export class App {
   
   constructor(options = {}) {
     this.settings = options.settings || { generate: false, max: 5 };
+    this.name = this.settings.name || 'cowsee';
     this.webroot = this.getWebroot();
     
     this.storage = new Storage(this, options.namespace || '0');

@@ -11,30 +11,30 @@ export class SSE {
 
   async connect() {
     this.aborted = false;
-    const sseroot = this.app.webroot.replace('8880', '8881');
+    const sseroot = this.app.webroot.replace('8880', '8881').replace(/\/?$/, '/');
     const url = new URL(sseroot + 'sse.php');
     url.searchParams.set('last', this.app.lastContext);
-    console.log('[SSE] connecting ', url.toString());
+    console.log('[SSE] connecting ',this.app.name, url.toString());
 
     if (typeof EventSource !== 'undefined') {
       this.sse = new EventSource(url.toString());
 
       this.sse.addEventListener('context', async (event) => {
         const rawContext = JSON.parse(event.data);
-        console.log('[SSE] received:', rawContext, 'lastContext:', this.app.lastContext);
+        console.log('[SSE] received:', this.app.name, rawContext, 'lastContext:', this.app.lastContext);
         const context = new Context(this.app, rawContext);
         await context.process();
       });
 
       this.sse.addEventListener('shutdown', async () => {
-        console.log('[SSE] shutdown, reconnecting...');
+        console.log('[SSE] shutdown, reconnecting...', this.app.name);
         if (!this.aborted) {
           this.close();
           await this.connect();
         }
       });
       this.sse.onerror = async (e) => {
-        console.log('[SSE] error, state:', this.sse?.readyState, e);
+        console.log('[SSE] error, state:', this.app.name, this.sse?.readyState, e);
         if (!this.aborted) {
           this.close();
           setTimeout(() => this.connect(), 1000);
@@ -61,6 +61,8 @@ export class SSE {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
+      let currentEvent = 'message';
+      let currentData = '';
 
       while (!this.aborted) {
         const { value, done } = await reader.read();
@@ -69,9 +71,6 @@ export class SSE {
 
         const lines = buffer.split(/\r?\n/);
         buffer = lines.pop(); // remaining incomplete line
-
-        let currentEvent = 'message';
-        let currentData = '';
 
         for (const line of lines) {
           const trimmed = line.trim();
@@ -93,14 +92,14 @@ export class SSE {
       }
 
       if (!this.aborted) {
-        console.log('[SSE] shutdown, reconnecting...');
+        console.log('[SSE] shutdown, reconnecting...', this.app.name);
         setTimeout(() => {
           if (!this.aborted) this.connect();
         }, 250);
       }
     } catch (err) {
       if (this.aborted || err.name === 'AbortError') return;
-      console.log('[SSE] error, state:', err.message);
+      console.log('[SSE] error, state:', this.app.name, err.message);
       setTimeout(() => {
         if (!this.aborted) this.connect();
       }, 1000);
@@ -108,21 +107,22 @@ export class SSE {
   }
 
   async handleMessage(event, dataStr) {
+    console.log('[SSE] handleMessage event:', this.app.name, event, 'data:', dataStr.slice(0, 60));
     try {
       const rawContext = JSON.parse(dataStr);
       if (event === 'context') {
-        console.log('[SSE] received:', rawContext, 'lastContext:', this.app.lastContext);
+        console.log('[SSE] received:', this.app.name, rawContext, 'lastContext:', this.app.lastContext);
         const context = new Context(this.app, rawContext);
         await context.process();
       } else if (event === 'shutdown') {
-        console.log('[SSE] shutdown, reconnecting...');
+        console.log('[SSE] shutdown, reconnecting...', this.app.name);
         this.close();
         if (!this.aborted) {
           await this.connect();
         }
       }
     } catch (e) {
-      // ignore parse errors for ping or non-json data
+      console.log('[SSE] parse error:', this.app.name, e.message);
     }
   }
 
