@@ -25,7 +25,7 @@ export class UI {
   async addMessage(context) {
     // if its not in the players location, or its to the player or loc is all then dont show
     if (context.loc != this.app.player.info.loc) {
-      //console.log('no show', context);
+      console.log(` - ${this.app.name} msg not shown`, context.loc, context.actor, context.msg.slice(0, 30));
       return;
     }
 
@@ -38,6 +38,7 @@ export class UI {
     if (context?.msg?.includes('logoff')) {
       this.app.player.clear();
       this.showDialog('You have logged off<form><menu><button class="buttonize">Ok</button></menu></form>', () => {this.app.ui.closeDialog()});
+      return;
     }
     context.playerId = this.app.player.info.id;
 
@@ -49,10 +50,11 @@ export class UI {
           this.topView = context.msg;
         }
       }
+      console.log(`${this.app.name} - addMsg node: `, context.msg);
       return context.msg;
     }
-    context.msg = await this.expand(context, 'html');
 
+    context.msg = await this.expand(context, 'html');
     if (context.msg) {
       const div = document.createElement("div");
       const section = context.top ? '#top' : '#bottom';

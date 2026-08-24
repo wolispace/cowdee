@@ -20,8 +20,8 @@ async function runMultiUserSimulation() {
 
   // 2. Create 3 independent real App instances and connect to SSE / Server
   const wolis = new App({settings: {name: 'wolisApp'}});
-  const bob = new App({settings: {name: 'wolisApp'}});
-  const jane = new App({settings: {name: 'wolisApp'}});
+  const bob = new App({settings: {name: 'bobApp'}});
+  const jane = new App({settings: {name: 'janeApp'}});
 
   await wolis.start();
   await bob.start();
@@ -76,9 +76,6 @@ async function runMultiUserSimulation() {
     // Wait for SSE broadcast across network/server
     await sleep(600);
 
-    console.log('   Bob UI last message:  ', bob.ui.messages[bob.ui.messages.length - 1]);
-    console.log('   Wolis UI last message:', wolis.ui.messages[wolis.ui.messages.length - 1]);
-
     const newObjInBobDB = await bob.db.findByNameInLoc(newObjName, '2');
     const newObjInWolisDB = await wolis.db.findByNameInLoc(newObjName, '2');
     const decodedBobId = newObjInBobDB ? bob.id.decodeInt(newObjInBobDB) : -1;
@@ -86,6 +83,9 @@ async function runMultiUserSimulation() {
 
     console.log(`   newObj in Bob's local DB:   ${newObjInBobDB ? 'YES (ID: ' + newObjInBobDB + ', Decoded: ' + decodedBobId + ')' : 'NO'}`);
     console.log(`   newObj in Wolis's local DB: ${newObjInWolisDB ? 'YES (ID: ' + newObjInWolisDB + ', Decoded: ' + decodedWolisId + ')' : 'NO'}`);
+
+    wolis.storage.dump();
+    bob.storage.dump();
 
     if (!newObjInBobDB || !newObjInWolisDB) {
       throw new Error('FAILED: Created newObj was not replicated to local DBs!');
@@ -118,6 +118,7 @@ async function runMultiUserSimulation() {
     console.log('           ALL MULTI-USER TESTS PASSED!              ');
     console.log('=====================================================\n');
   } finally {
+    await wolis.db.savePoolsToDisk();
     // Close SSE streams cleanly so process can exit
     wolis.sse?.close();
     bob.sse?.close();

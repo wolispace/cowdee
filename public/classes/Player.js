@@ -75,7 +75,7 @@ export class Player {
   async wake() {
     // get the last context seen by the server
     const result = await this.app.io.fetchJson('server', {'lastContext': 1});
-    console.log({result});
+    console.log(` ${this.app.name} wake `, result);
     this.app.lastContext = result?.lastContext || '0';
     await this.app.sendCommand({cmd: 'look', actor: this.info.id, loc: this.info.loc});
   }
@@ -100,7 +100,7 @@ export class Player {
    * Saves the players id and loc after logging in and each time their loc changes
    */
   save() {
-    console.log('save player info', this.info);
+    console.log(`${this.app.name} save player info`, this.info);
     this.app.storage?.setItem(this.PLAYER_INFO_KEY, JSON.stringify(this.info));
   }
 

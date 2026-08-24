@@ -29,8 +29,8 @@ function get_new_contexts($lastContext) {
     }
     $key = "{$data['ts']}{$data['actor']}";
 
-    logIt("key={$key}, lastContext={$lastContext}");
     if ($key > $lastContext) {
+      logIt("get_new_contexts key={$key}, lastContext={$lastContext}");
       $contexts[] = $data;
     }
   }

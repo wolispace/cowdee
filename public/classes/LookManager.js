@@ -207,6 +207,7 @@ export class LookManager {
     return {
       msg: '<div>' + this.sentences.join('. ') + '</div>',
       loc: this.context.loc,
+      actor: this.context.actor,
       top: true, // this message replaces the top section if true
     };
   }

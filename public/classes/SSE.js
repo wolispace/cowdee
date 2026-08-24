@@ -30,7 +30,7 @@ export class SSE {
 
     this.sse.addEventListener('context', async (event) => {
       const rawContext = JSON.parse(event.data);
-      console.log('[SSEweb] received:', this.app.name, rawContext, 'lastContext:', this.app.lastContext);
+      console.log('[SSEweb] received:', this.app.name, event.data, 'lastContext:', this.app.lastContext);
       const context = new Context(this.app, rawContext);
       await context.process();
     });
@@ -52,7 +52,7 @@ export class SSE {
 
   }
   async connectNode(urlString) {
-    console.log('[SSEnode] connecting ',this.app.name, urlString);
+    console.log(`${this.app.name} [SSEnode] connecting`, urlString);
     try {
       this.abortController = new AbortController();
       const response = await fetch(urlString, {
@@ -98,14 +98,14 @@ export class SSE {
       }
 
       if (!this.aborted) {
-        console.log('[SSEnode] shutdown, reconnecting...', this.app.name);
+        console.log(`${this.app.name} [SSEnode] shutdown, reconnecting...`);
         setTimeout(() => {
           if (!this.aborted) this.connect();
         }, 250);
       }
     } catch (err) {
       if (this.aborted || err.name === 'AbortError') return;
-      console.log('[SSEnode] error, state:', this.app.name, err.message);
+      console.log(`${this.app.name} [SSEnode] error, state:`, err.message);
       setTimeout(() => {
         if (!this.aborted) this.connect();
       }, 1000);
@@ -113,22 +113,21 @@ export class SSE {
   }
 
   async handleMessage(event, dataStr) {
-    console.log('[SSE] handleMessage event:', this.app.name, event, 'data:', dataStr.slice(0, 60));
     try {
       const rawContext = JSON.parse(dataStr);
       if (event === 'context') {
-        console.log('[SSE] received:', this.app.name, rawContext, 'lastContext:', this.app.lastContext);
+        console.log(`${this.app.name} [SSE] received:`, dataStr, 'lastContext:', this.app.lastContext);
         const context = new Context(this.app, rawContext);
         await context.process();
       } else if (event === 'shutdown') {
-        console.log('[SSE] shutdown, reconnecting...', this.app.name);
+        console.log(`${this.app.name} [SSE] shutdown, reconnecting...`);
         this.close();
         if (!this.aborted) {
           await this.connect();
         }
       }
     } catch (e) {
-      console.log('[SSE] parse error:', this.app.name, e.message);
+      console.log(`${this.app.name} [SSE] parse error:`, e.message);
     }
   }
 

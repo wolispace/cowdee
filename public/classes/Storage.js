@@ -45,6 +45,10 @@ export class Storage {
     this.memory.delete(k);
   }
 
+  dump() {
+    console.log(`\n${this.app.name} - memory: `, this.memory);
+  }
+
   clear(allNamespaces = false) {
     if (allNamespaces) {
       if (typeof localStorage !== 'undefined') {
