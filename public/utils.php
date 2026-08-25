@@ -1,15 +1,22 @@
 <?php
 // require_once "utils.php";
  
-define('CONTEXT_DIR', '../_contexts'); // root level folder for context files
-define('ID_COUNTER_FILE', '../_db/_counter.txt'); // the counter of the last highest ID
+
+
+
+define('CONTEXT_DIR', '_contexts'); // folder for context files relative to public
+define('CONTEXT_EXT', '.json'); // file type for json
+define('DB_DIR', '_db'); // folder for db json files relative to public
+define('DB_EXT', '.json'); // extension of db files
+
+define('ID_COUNTER_FILE', '_counter.txt'); // the counter of the last highest ID
 function logIt($str) {
   $dateTime = date('Ymd H:i:s');
   file_put_contents('_log.txt', "{$dateTime},{$_SERVER['REMOTE_ADDR']},{$str}\n", FILE_APPEND | LOCK_EX);
-}
-
-function get_new_contexts($lastContext) {
-  $files = glob(CONTEXT_DIR . '/*.json');
+  }
+  
+  function get_new_contexts($lastContext) {
+  $files = glob(CONTEXT_DIR . '/*' . CONTEXT_EXT);
   if (!$files) return [];
   sort($files);
   // If last == '0', return ONLY the newest context
@@ -23,7 +30,7 @@ function get_new_contexts($lastContext) {
     $ts = (int) substr(basename($file), 0, 13);
     if ($ts < (time() - 3600) * 1000) { unlink($file); continue; }
     $data = json_decode(file_get_contents($file), true);
-    $lastCounter = file_get_contents(ID_COUNTER_FILE);
+    $lastCounter = file_get_contents(DB_DIR . '/' . ID_COUNTER_FILE);
     if ($data['counter'] < $lastCounter) {
       $data['counter'] = $lastCounter;
     }
@@ -38,12 +45,16 @@ function get_new_contexts($lastContext) {
 }
 
 function get_last_context() {
-    $files = glob(CONTEXT_DIR . '/*.json');
+    $files = glob(CONTEXT_DIR . '/*' . CONTEXT_EXT);
     if (!$files) return null;
 
     rsort($files); // newest filename first
     $file = $files[0];
 
-    return pathinfo($file, PATHINFO_FILENAME);
+    $lastfile = pathinfo($file, PATHINFO_FILENAME);
+    if (empty($lastfile)) {
+      $lastfile = round(microtime(true) * 1000);
+    }
+    return $lastfile;
 }
 

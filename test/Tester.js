@@ -4,7 +4,7 @@ import { Context } from '../public/classes/Context.js';
 
 export class Tester {
 
-   counterFile = '_db/_counter.txt';
+   counterFile = 'public/_db/_counter.txt';
 
   constructor(app) {
     this.app = app;
@@ -35,13 +35,13 @@ export class Tester {
     console.log('flushing memory');
     this.app.io.flush();
     console.log('removing files');
-    const dir = "_db";
+    const dir = "public/_db";
     for (const file of fs.readdirSync(dir)) {
       if (file.endsWith(".json")) {
         fs.rmSync(path.join(dir, file), { force: true });
       }
     }
-    const contextDir = "_contexts";
+    const contextDir = "public/_contexts";
     if (fs.existsSync(contextDir)) {
       for (const file of fs.readdirSync(contextDir)) {
         if (file.endsWith(".json")) {

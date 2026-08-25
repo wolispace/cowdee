@@ -13,7 +13,7 @@ export class SSE {
     this.aborted = false;
     const sseroot = this.app.webroot.replace('8880', '8881').replace(/\/?$/, '/');
     const url = new URL(sseroot + 'sse.php');
-    url.searchParams.set('last', this.app.lastContext);
+    //url.searchParams.set('last', this.app.lastContext);
     
 
     if (typeof EventSource !== 'undefined') {
@@ -60,6 +60,8 @@ export class SSE {
         signal: this.abortController.signal
       });
 
+      console.log(`${this.app.name} [SSEnode] response `, response.status);
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status} ${response.statusText}`);
       }
@@ -71,6 +73,7 @@ export class SSE {
       let currentData = '';
 
       while (!this.aborted) {
+        console.log(`${this.app.name} [SSEnode] while `, this.aborted);
         const { value, done } = await reader.read();
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
@@ -95,18 +98,22 @@ export class SSE {
             currentData += (currentData ? '\n' : '') + trimmed.slice(5).trim();
           }
         }
+        console.log();
       }
 
       if (!this.aborted) {
         console.log(`${this.app.name} [SSEnode] shutdown, reconnecting...`);
         setTimeout(() => {
           if (!this.aborted) this.connect();
+          console.log(`${this.app.name} [SSEnode] timeout abored=`,this.aborted);
         }, 250);
       }
+      console.log(`${this.app.name} [SSEnode] looping abored=`,this.aborted);
     } catch (err) {
       if (this.aborted || err.name === 'AbortError') return;
       console.log(`${this.app.name} [SSEnode] error, state:`, err.message);
       setTimeout(() => {
+        
         if (!this.aborted) this.connect();
       }, 1000);
     }
@@ -132,6 +139,7 @@ export class SSE {
   }
 
   close() {
+    console.log(`${this.app.name} [SSEnode] close `, this.aborted);
     this.aborted = true;
     if (this.sse) {
       if (typeof this.sse.close === 'function') this.sse.close();

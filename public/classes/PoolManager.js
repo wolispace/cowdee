@@ -128,7 +128,7 @@ export class PoolManager {
    */
   async saveDirty() {
     if (!this.isDirty()) return;
-    console.log(`${this.app.name} saveDirty:`, this.type);
+    console.log(`${this.app.name} saveDirty:`, this.type, this.app.utils.getImmediateCaller());
 
     const files = new Map();
     // Group updated keys by shard file

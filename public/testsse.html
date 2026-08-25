@@ -14,7 +14,7 @@
       <script>
         document.addEventListener('DOMContentLoaded', async () => {
           const eventSource = new EventSource('sse.php');
-            eventSource.addEventListener('message', (event) => {
+            eventSource.addEventListener('context', (event) => {
                 console.log(event.data);
                 
             });

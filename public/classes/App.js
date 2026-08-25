@@ -68,7 +68,8 @@ export class App {
   // returns this font-rne js or node script communicates with
   getWebroot() {
     if (!window) {
-      return 'http://localhost:8880'; // 'http://localhost';
+      // return 'http://localhost:8880'; 
+      return 'http://localhost';
     } else {
       return new URL('.', window.location.href).toString();
     }

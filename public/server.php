@@ -30,7 +30,7 @@ function handleInput($request) {
       }
     }
 
-    $filename = CONTEXT_DIR . "/{$mstimestamp}{$request['actor']}.json";
+    $filename = CONTEXT_DIR . "/{$mstimestamp}{$request['actor']}" . CONTEXT_EXT ;
     $contextData = [
       'ts' => $mstimestamp,
       'counter' => $request['counter'], 
@@ -53,9 +53,10 @@ function handleInput($request) {
     if (empty($request['content'])) {
       outputJson(loadJson($file));
     } else {
-      $oldCounter = file_get_contents(ID_COUNTER_FILE);
+      $counterFile = DB_DIR . '/' . ID_COUNTER_FILE;
+      $oldCounter = file_get_contents($counterFile);
       if ($request['counter'] > $oldCounter) {
-        file_put_contents(ID_COUNTER_FILE, $request['counter']);
+        file_put_contents($counterFile, $request['counter']);
       }
       saveJson($file, json_decode($request['content'], true));
       outputJson(['ok' => true]);
@@ -71,7 +72,7 @@ function handleInput($request) {
  * @param {string} key
  */
 function shardName($filename) {
-  return "../_db/{$filename}.json";
+  return DB_DIR . "/{$filename}" . DB_EXT;
 }
 
 function outputJson($data) {
