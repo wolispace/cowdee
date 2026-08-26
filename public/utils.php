@@ -5,9 +5,9 @@
 
 
 define('CONTEXT_DIR', '_contexts'); // folder for context files relative to public
-define('CONTEXT_EXT', '.txt'); // file type for json
+define('CONTEXT_EXT', '.json'); // file type for json
 define('DB_DIR', '_db'); // folder for db json files relative to public
-define('DB_EXT', '.txt'); // extension of db files
+define('DB_EXT', '.json'); // extension of db files
 
 define('ID_COUNTER_FILE', '_counter.txt'); // the counter of the last highest ID
 function logIt($str) {

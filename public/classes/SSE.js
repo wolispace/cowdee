@@ -138,8 +138,8 @@ export class SSE {
   }
 
   close() {
-    console.log(`${this.app.name} [SSEnode] close `, this.aborted);
     this.aborted = true;
+    console.log(`${this.app.name} [SSEnode] close `, this.aborted);
     if (this.sse) {
       if (typeof this.sse.close === 'function') this.sse.close();
       this.sse = null;

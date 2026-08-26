@@ -46,16 +46,8 @@ function handleInput($request) {
         logIt("Folder already exists.");
     }
 
-    file_put_contents('_BINGO.txt', 'bingo');
-    file_put_contents('_db/_BINGO2.txt', 'bingo');
-    file_put_contents(CONTEXT_DIR .'/_BINGO3.txt', 'bingo');
-    
-
     $filename = CONTEXT_DIR . "/{$mstimestamp}{$request['actor']}" . CONTEXT_EXT ;
-    $filename2 = CONTEXT_DIR . "/TEST3" . CONTEXT_EXT ;
-    file_put_contents(CONTEXT_DIR . "/_TEST2.txt", json_encode($contextData));
     file_put_contents($filename, json_encode($contextData));
-    logIt("cwd = " . getcwd());
     logIt("saved context file $filename");
 
     // get all new contexts we have not seen yet
