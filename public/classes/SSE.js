@@ -98,7 +98,6 @@ export class SSE {
             currentData += (currentData ? '\n' : '') + trimmed.slice(5).trim();
           }
         }
-        console.log();
       }
 
       if (!this.aborted) {

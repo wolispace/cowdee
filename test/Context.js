@@ -25,6 +25,7 @@ if (app.settings.generate) {
 }
 
 await testCommands();
+app.sse.close();
 
 console.log('-------------- END ----------------');
 process.exit(0);

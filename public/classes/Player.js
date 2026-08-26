@@ -62,6 +62,8 @@ export class Player {
       this.info.name = obj.name;
       this.app.storage?.setNamespace(this.info.id);
       this.save();
+      this.app.name = obj.id;
+ 
       return true;
     }
     return false;

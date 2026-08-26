@@ -88,8 +88,8 @@ async function runMultiUserSimulation() {
     console.log(`   newObj in Bob's local DB:   ${newObjInBobDB ? 'YES (ID: ' + newObjInBobDB + ', Decoded: ' + decodedBobId + ')' : 'NO'}`);
     console.log(`   newObj in Wolis's local DB: ${newObjInWolisDB ? 'YES (ID: ' + newObjInWolisDB + ', Decoded: ' + decodedWolisId + ')' : 'NO'}`);
 
-    wolis.storage.dump();
-    bob.storage.dump();
+    // wolis.storage.dump();
+    // bob.storage.dump();
 
     if (!newObjInBobDB || !newObjInWolisDB) {
       throw new Error('FAILED: Created newObj was not replicated to local DBs!');
@@ -124,9 +124,9 @@ async function runMultiUserSimulation() {
   } finally {
     await wolis.db.savePoolsToDisk();
     // Close SSE streams cleanly so process can exit
-    wolis.sse?.close();
-    bob.sse?.close();
-    jane.sse?.close();
+    wolis.sse.close();
+    bob.sse.close();
+    jane.sse.close();
   }
 
   process.exit(0);

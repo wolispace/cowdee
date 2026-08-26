@@ -5,6 +5,7 @@ const app = new App();
 console.log('-------------- START ----------------');
 
 await testSSE();
+app.sse.close();
 
 console.log('-------------- END ----------------');
 process.exit(0);

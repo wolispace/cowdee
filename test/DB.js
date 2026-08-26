@@ -20,6 +20,7 @@ if (app.settings.generate) {
   await app.tester.initCommands();
   await app.db.savePoolsToDisk();
 }
+app.sse.close();
 
 console.log('-------------- END ----------------');
 process.exit(0);

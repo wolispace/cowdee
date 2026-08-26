@@ -5,9 +5,9 @@
 
 
 define('CONTEXT_DIR', '_contexts'); // folder for context files relative to public
-define('CONTEXT_EXT', '.json'); // file type for json
+define('CONTEXT_EXT', '.txt'); // file type for json
 define('DB_DIR', '_db'); // folder for db json files relative to public
-define('DB_EXT', '.json'); // extension of db files
+define('DB_EXT', '.txt'); // extension of db files
 
 define('ID_COUNTER_FILE', '_counter.txt'); // the counter of the last highest ID
 function logIt($str) {
@@ -27,8 +27,12 @@ function logIt($str) {
   // Otherwise return all contexts newer than $lastContext
   $contexts = [];
   foreach ($files as $file) {
-    $ts = (int) substr(basename($file), 0, 13);
-    if ($ts < (time() - 3600) * 1000) { unlink($file); continue; }
+    $ts = substr(basename($file), 0, 13);
+    if ($ts < (time() - 3600) * 1000) { 
+      unlink($file);
+      logIt('kill old file ' . $file . ', ' . $ts . ' < ' . (time() - 3600) * 1000); 
+      continue; 
+    }
     $data = json_decode(file_get_contents($file), true);
     $lastCounter = file_get_contents(DB_DIR . '/' . ID_COUNTER_FILE);
     if ($data['counter'] < $lastCounter) {
