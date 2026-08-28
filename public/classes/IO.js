@@ -79,7 +79,8 @@ export class IO {
   }
 
   flush() {
-    this.app.storage?.clear();
+    console.log(`${this.app.name} flush local storage`);
+    this.app.storage.clear(true);
   }
 
   makeShardFilename(type = '_', key = '_') {
@@ -88,11 +89,13 @@ export class IO {
 
   async tryLock() {
     const response = await this.fetchJson('server', {lock: this.app.player.info.id});
+    console.log(`${this.app.name} tryLock`, response.status);
     return response.status;
   }
 
   async unLock() {
     const response = await this.fetchJson('server', {lock: this.app.player.info.id, clear: 1});
+    console.log(`${this.app.name} unLock`, response.status);
     return response.status;
   }
 }

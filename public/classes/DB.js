@@ -272,10 +272,12 @@ export class DB {
   async savePoolsToDisk() {
     console.log('--- savePoolsToDisk ---');
     this.anyDirty = false;
+    if (!await this.app.io.tryLock()) return;
     for (const pool of Object.values(this.pools)) {
       await pool.saveDirty();
     }
     await this.app.id.save();
+    await this.app.io.unLock();
   }
 
 

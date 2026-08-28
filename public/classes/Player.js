@@ -63,8 +63,7 @@ export class Player {
       this.app.storage?.setNamespace(this.info.id);
       this.save();
       this.app.name = obj.id;
-      // clear browsers cache of previous world when we log in
-      this.app.io.flush();
+      console.log(`${this.app.name} logs in`);
  
       return true;
     }
@@ -77,6 +76,8 @@ export class Player {
   }
 
   async wake() {
+          // clear browsers cache of previous world when we log in
+      this.app.io.flush();
     // get the last context seen by the server
     const result = await this.app.io.fetchJson('server', {'lastContext': 1});
     console.log(` ${this.app.name} wake `, result);

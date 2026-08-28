@@ -1,17 +1,13 @@
 import { App } from '../public/classes/App.js';
 import { Tester } from './Tester.js';
 
-const app = new App({
-  settings: {
-    generate: true,
-    max: 5,
-  }
-});
+const app = new App({settings: { name: 'initApp', generate: true, max: 5 } });
 
 app.tester = new Tester(app);
 
 console.log('-------------- START ----------------');
 
+await app.start();
 if (app.settings.generate) {
 
   app.tester.deleteTestFiles();
@@ -20,7 +16,7 @@ if (app.settings.generate) {
   await app.tester.initCommands();
   await app.db.savePoolsToDisk();
 }
-app.sse.close();
+await app.sse.close();
 
 console.log('-------------- END ----------------');
 process.exit(0);
