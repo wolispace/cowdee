@@ -85,4 +85,14 @@ export class IO {
   makeShardFilename(type = '_', key = '_') {
     return `${type}_${key[0]}`;
   }
+
+  async tryLock() {
+    const response = await this.fetchJson('server', {lock: this.app.player.info.id});
+    return response.status;
+  }
+
+  async unLock() {
+    const response = await this.fetchJson('server', {lock: this.app.player.info.id, clear: 1});
+    return response.status;
+  }
 }

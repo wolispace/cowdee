@@ -56,7 +56,24 @@ function handleInput($request) {
       $contexts = [$contextData];
     }
     outputJson(['contexts' => json_encode($contexts)]);
-
+  } else if (!empty($request['lock'])) {
+    // send the player ID as the lock value, we set into the lock file ?lock=wol
+    // if the option is to clear then we must match the lock file contents ?lock=wol&clear=1
+    $lockfile = DB_DIR . '/' . LOCK_FILE;
+    if (!empty($request['clear'])) {
+      $contents = file_get_contents($lockfile);
+      if ($contents == $request['lock']) {
+        outputJson(['status' => unlink($lockfile)]);
+        return;
+      }
+    } else {
+      if (file_exists($lockfile)) {
+        outputJson(['status' => false]);
+        return;
+      }
+      outputJson(['status' => file_put_contents($lockfile, $request['lock']) > 0]);
+    }
+    return ``;
   } else if (!empty($request['file'])) {
     $file = shardName($request['file']);
     if (empty($request['content'])) {
@@ -70,9 +87,9 @@ function handleInput($request) {
       saveJson($file, json_decode($request['content'], true));
       outputJson(['ok' => true]);
     }
-    } else if (!empty($request['lastContext'])) {
-      outputJson(['lastContext' => get_last_context()]);
-    }
+  } else if (!empty($request['lastContext'])) {
+    outputJson(['lastContext' => get_last_context()]);
+  }
 }
 
 /**

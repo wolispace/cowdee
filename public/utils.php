@@ -8,6 +8,7 @@ define('CONTEXT_DIR', '_contexts'); // folder for context files relative to publ
 define('CONTEXT_EXT', '.json'); // file type for json
 define('DB_DIR', '_db'); // folder for db json files relative to public
 define('DB_EXT', '.json'); // extension of db files
+define('LOCK_FILE', '_lockfile.txt'); // if present we have the db locked for writting
 
 define('ID_COUNTER_FILE', '_counter.txt'); // the counter of the last highest ID
 function logIt($str) {
