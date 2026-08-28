@@ -68,6 +68,11 @@ function handleInput($request) {
       }
     } else {
       if (file_exists($lockfile)) {
+        // remove stale lock files > 10mins old
+        $age = time() - filemtime($lockfile);
+        if ($age > (10 * 60)) {
+          unlink($lockfile);
+        }
         outputJson(['status' => false]);
         return;
       }

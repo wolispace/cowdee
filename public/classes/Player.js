@@ -63,6 +63,8 @@ export class Player {
       this.app.storage?.setNamespace(this.info.id);
       this.save();
       this.app.name = obj.id;
+      // clear browsers cache of previous world when we log in
+      this.app.io.flush();
  
       return true;
     }
