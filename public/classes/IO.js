@@ -19,6 +19,12 @@ export class IO {
     return json || {};
   }
 
+  async loadFiles(files) {
+    if (!files || files.length === 0) return {};
+    const json = await this.fetchJson('server', { files, token: this.token });
+    return json || {};
+  }
+
   async saveJson(file, json) {
     return await this.fetchJson('server', { file, token: this.token, content: JSON.stringify(json) });
   }

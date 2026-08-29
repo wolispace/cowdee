@@ -29,6 +29,16 @@ export class PoolManager {
   }
 
   /**
+   * Helper to populate the pool with all items inside a loaded shard
+   */
+  populateFromShard(items) {
+    if (!items || typeof items !== 'object') return;
+    for (const [k, v] of Object.entries(items)) {
+      this.pool.replace(k, new Set(v ?? []));
+    }
+  }
+
+  /**
    * Returns the object matching the key from the pool or add it into the pool from shard file on disk
    * @param {string} key 
    * @returns {object}
@@ -40,9 +50,28 @@ export class PoolManager {
     if (this.pool.has(key)) return this.pool.get(key);
     const filename = this.app.io.makeShardFilename(this.type, key);
     const items = await this.app.io.loadJson(filename);
-    const item = new Set(items?.[key] ?? []);
-    this.pool.replace(key, item);
-    return item;
+    this.populateFromShard(items);
+    return this.pool.get(key) || new Set();
+  }
+
+  /**
+   * Preloads all shard files needed for an array/Set of keys in a single batch request
+   * @param {Iterable<string>} keys 
+   */
+  async preload(keys) {
+    if (!keys) return;
+    const filenames = new Set();
+    for (const key of keys) {
+      if (!this.pool.has(key)) {
+        filenames.add(this.app.io.makeShardFilename(this.type, key));
+      }
+    }
+    if (filenames.size === 0) return;
+
+    const fileMap = await this.app.io.loadFiles([...filenames]);
+    for (const items of Object.values(fileMap)) {
+      this.populateFromShard(items);
+    }
   }
 
   /**

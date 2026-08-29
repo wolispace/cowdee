@@ -107,6 +107,10 @@ export class LookManager {
    */
   async populateObjs() {
     const objs = {};
+    if (!this.found || this.found.size === 0) return objs;
+
+    await this.db.pools.id.preload(this.found);
+
     for (const id of this.found) {
       const obj = await this.db.getById(id);
       if (!obj || obj.pose == 'hidden') continue;

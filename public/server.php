@@ -96,6 +96,13 @@ function handleInput($request) {
       saveJson($file, $data);
     }
     outputJson(['ok' => true]);
+  } else if (!empty($request['files'])) {
+    $results = [];
+    foreach ($request['files'] as $filename) {
+      $file = shardName($filename);
+      $results[$filename] = loadJson($file);
+    }
+    outputJson($results);
   } else if (!empty($request['file'])) {
     $file = shardName($request['file']);
     if (empty($request['content'])) {
