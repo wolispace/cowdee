@@ -112,6 +112,8 @@ function handleInput($request) {
     }
   } else if (!empty($request['lastContext'])) {
     outputJson(['lastContext' => get_last_context()]);
+  } else {
+    outputJson(['ok' => false]);
   }
 }
 

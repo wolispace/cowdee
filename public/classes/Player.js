@@ -76,13 +76,11 @@ export class Player {
   }
 
   async wake() {
-          // clear browsers cache of previous world when we log in
-      this.app.io.flush();
     // get the last context seen by the server
-    const result = await this.app.io.fetchJson('server', {'lastContext': 1});
+    const result = await this.app.io.fetchJson('server', { 'lastContext': 1 });
     console.log(` ${this.app.name} wake `, result);
     this.app.lastContext = result?.lastContext || '0';
-    await this.app.sendCommand({cmd: 'look', actor: this.info.id, loc: this.info.loc});
+    await this.app.sendCommand({ cmd: 'look', actor: this.info.id, loc: this.info.loc });
   }
 
   /**

@@ -147,13 +147,9 @@ export class PoolManager {
       files.set(filename, set);
     }
 
-    // Apply changes directly to local storage / memory shard without loading over HTTP
+    // Apply changes directly to batch map without loading over HTTP
     for (const [filename, { updated, deleted }] of files) {
-      let json = batch[filename];
-      if (!json) {
-        const cached = this.app.storage?.getItem(filename);
-        json = cached ? JSON.parse(cached) : {};
-      }
+      let json = batch[filename] || {};
 
       // Apply deletions
       for (const key of deleted) {
@@ -172,7 +168,6 @@ export class PoolManager {
         this.pool.replace(key, item);
       }
 
-      this.app.storage?.setItem(filename, JSON.stringify(json));
       batch[filename] = json;
     }
 
