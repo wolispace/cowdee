@@ -1,5 +1,5 @@
 // handles the memory pools
-import { PoolManager} from './PoolManager.js'
+import { PoolManager } from './PoolManager.js'
 
 export class DB {
   pools = {};
@@ -12,7 +12,7 @@ export class DB {
 
   constructor(app) {
     this.app = app;
-    
+
     for (const key of this.keys) {
       this.pools[key] = new PoolManager(this.app, key);
     }
@@ -37,7 +37,7 @@ export class DB {
     }
   }
 
-  
+
   /**
    * Returns the whole object from a chunked file
    * @param {string} id 
@@ -50,12 +50,12 @@ export class DB {
     return obj;
   };
 
- async getFormattedById(id) {
+  async getFormattedById(id) {
     const obj = await this.getById(id);
     if (obj) {
       this.formatObject(obj);
-      return obj; 
-    } 
+      return obj;
+    }
   }
 
   /**
@@ -74,7 +74,7 @@ export class DB {
    * @param {object} data with data.username and data.pw
    * @returns {object}
    */
- async findPlayer(data) {
+  async findPlayer(data) {
     const candidates = await this.pools.name.get(data.playername.toLocaleLowerCase());
     if (!candidates) return undefined;
     // check all candidates to ensure they are class='player'
@@ -84,7 +84,7 @@ export class DB {
       if (obj?.class == 'player') {
         // first player with matching name..
         // TODO: compare passwords too
-        return obj; 
+        return obj;
       }
     }
   }
@@ -117,11 +117,6 @@ export class DB {
    * @returns {set}
    */
   async findInLoc(key) {
-    //  so we load fresh merged data
-    if (this.pools.loc.isDirty()) {
-      await this.pools.loc.saveDirty();
-      this.pools.loc.clear();
-    }
     return await this.pools.loc.get(key);
   }
 
@@ -226,7 +221,7 @@ export class DB {
     // so clear from all pools
     if (obj.code) {
       await this.pools.code.set(obj.id, { id: obj.id, loc: obj.loc, code: obj.code }, null, true);
-     await  this.addTriggers(obj);
+      await this.addTriggers(obj);
       delete obj.code; // const { code, ...rest } = obj; // delete obj.code using destructuring
     }
     if (obj.info) {
@@ -341,7 +336,7 @@ export class DB {
     this.formatPlural(obj);
     if (obj.qty == 1) {
       obj.is = 'is';
-      obj.gender = 'it';  
+      obj.gender = 'it';
     } else {
       obj.is = 'are';
       obj.gender = 'them';
@@ -350,7 +345,7 @@ export class DB {
     if (obj.name) {
       obj.longname += ' called ' + obj.name;
     }
-    if (['player','command'].includes(obj.class)) {
+    if (['player', 'command'].includes(obj.class)) {
       obj.longname = obj.name;
     }
   }
@@ -416,11 +411,11 @@ export class DB {
     return data;
   }
 
-    /**
-   * Lits objects in a location
-   * @param {object} context 
-   * @returns {object}
-   */
+  /**
+ * Lits objects in a location
+ * @param {object} context 
+ * @returns {object}
+ */
   async listLoc(context) {
     const data = await this.app.lookManager.list(context);
     return data;
@@ -429,7 +424,7 @@ export class DB {
   debounceSave() {
     // Clear any existing timer
     if (this.saveTimeout) {
-        clearTimeout(this.saveTimeout);
+      clearTimeout(this.saveTimeout);
     }
 
     // Set a new 5-second timer
