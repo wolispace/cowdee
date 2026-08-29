@@ -39,13 +39,15 @@ export class IO {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(400)
+        signal: AbortSignal.timeout(1000)
       });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
       return await response.json();
     } catch (err) {
+      console.log(`${this.app.name} fetch error`, err);
+      this.app.ui.hideLoading();
       return null;
     }
   }
