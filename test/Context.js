@@ -25,7 +25,6 @@ if (app.settings.generate) {
 }
 
 await testCommands();
-app.sse.close();
 
 console.log('-------------- END ----------------');
 process.exit(0);
@@ -33,7 +32,7 @@ process.exit(0);
 async function testCommands() {
   await app.player.handleLogon({ playername: 'Wolis' });
   console.log(` - Wolis logged in: ID="${app.player.info.id}", Loc="${app.player.info.loc}", Namespace="${app.storage.getNamespace()}"`);
-    
+
   app.tester.context.actor = app.player.info.id;
   app.tester.context.cmd = 'build a shed';
   app.tester.context.loc = app.player.info.loc;
