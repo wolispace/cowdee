@@ -176,7 +176,7 @@ export class UI {
   /** Redistribute top/bottom within #panels based on the stored ratio */
   applySplitRatio() {
     if (this.splitRatio === null) return; // CSS flex handles it before any drag
-    const available = this.panels.getBoundingClientRect().height - this.panels.getBoundingClientRect().height;
+    const available = this.panels.getBoundingClientRect().height - this.splitter.getBoundingClientRect().height;
 
     let topH = available * this.splitRatio;
     let bottomH = available * (1 - this.splitRatio);
@@ -193,16 +193,16 @@ export class UI {
    * Attach event listners to things that need them
    */
   setupEvents() {
-    this.panels.addEventListener('pointerdown', (e) => {
+    this.splitter.addEventListener('pointerdown', (e) => {
       this.dragging = true;
       this.startY = e.clientY;
       this.startTopH = this.top.getBoundingClientRect().height;
       this.startBottomH = this.bottom.getBoundingClientRect().height;
-      this.panels.setPointerCapture(e.pointerId);
+      this.splitter.setPointerCapture(e.pointerId);
       e.preventDefault();
     });
 
-    this.panels.addEventListener('pointermove', (e) => {
+    this.splitter.addEventListener('pointermove', (e) => {
       if (!this.dragging) return;
       const dy = e.clientY - this.startY;
       let newTopH = this.startTopH + dy;
@@ -217,22 +217,22 @@ export class UI {
         newBottomH = this.minHeight;
         newTopH = this.startTopH + this.startBottomH - this.minHeight;
       }
-      newBottomH -= this.input.getBoundingClientRect().height * 1.3;
 
       this.top.style.flex = `0 0 ${newTopH}px`;
       this.bottom.style.flex = `0 0 ${newBottomH}px`;
     });
 
-    this.panels.addEventListener('pointerup', (e) => {
+    this.splitter.addEventListener('pointerup', (e) => {
+      if (!this.dragging) return;
       this.dragging = false;
-      this.panels.releasePointerCapture(e.pointerId);
+      this.splitter.releasePointerCapture(e.pointerId);
       // store ratio so resizes stay proportional
       const topH = this.top.getBoundingClientRect().height;
       const bottomH = this.bottom.getBoundingClientRect().height;
       this.splitRatio = topH / (topH + bottomH);
     });
 
-    this.panels.addEventListener('pointercancel', (e) => {
+    this.splitter.addEventListener('pointercancel', (e) => {
       this.dragging = false;
     });
 
