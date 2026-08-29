@@ -60,7 +60,6 @@ content {
 
 /* ── Top & Bottom sections ── */
 section {
-  background-color: rgba(0, 0, 0, .35);
   padding: 0.5rem;
   min-height: var(--section-min-height);
   overflow-y: auto;
@@ -74,13 +73,15 @@ section div {
 }
 
 #top {
-  flex: 1 1 30%;
   /* starts at ~30%, grows/shrinks */
+  flex: 1 1 30%;
+  /* for loading animation */
+  transition: opacity 250ms ease-in-out;
 }
 
 #bottom {
-  flex: 1 1 70%;
   /* starts at ~70%, grows/shrinks */
+  flex: 1 1 70%;
 }
 
 /* ── Splitter ── */

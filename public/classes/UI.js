@@ -37,7 +37,7 @@ export class UI {
     // DEBUG: If the user simply includes 'logoff' in the msg then logoff - make a propper command later
     if (context?.msg?.includes('logoff')) {
       this.app.player.clear();
-      this.showDialog('You have logged off<form><menu><button class="buttonize">Ok</button></menu></form>', () => {this.app.ui.closeDialog()});
+      this.showDialog('You have logged off<form><menu><button class="buttonize">Ok</button></menu></form>', () => { this.app.ui.closeDialog() });
       return;
     }
     context.playerId = this.app.player.info.id;
@@ -240,5 +240,24 @@ export class UI {
     new ResizeObserver(() => {
       if (!this.dragging) this.applySplitRatio();
     }).observe(this.panels);
+  }
+
+  // set a timeout of 500ms to animate this.top opacity from current (usually 0%) to 50% opacity over a 500ms period. 
+  showLoading() {
+    this.loading = setTimeout(() => {
+      this.top.style.opacity = '0.25';
+    }, 500);
+  }
+
+  // clear this.loading timeout if present 
+  // if this.top opacity is > 0% then fade it to 0% over250ms.
+  hideLoading() {
+    if (this.loading) {
+      clearTimeout(this.loading);
+      this.loading = null;
+    }
+    if (this.top.style.opacity > 0) {
+      this.top.style.opacity = '1';
+    }
   }
 };

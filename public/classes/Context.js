@@ -42,6 +42,8 @@ export class Context {
       return;
     };
     await this.runCodeFrom(code, '__start');
+    this.app.ui.hideLoading();
+
   }
 
   /**

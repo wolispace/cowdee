@@ -17,12 +17,12 @@ if (typeof window === "undefined") {
 
 export class App {
   lastContext = '0'; // last seen context.key
-  
+
   constructor(options = {}) {
     this.settings = options.settings || { generate: false, max: 5 };
     this.name = this.settings.name || 'cowsee';
     this.webroot = this.getWebroot();
-    
+
     this.storage = new Storage(this, options.namespace || '0');
     this.utils = new Utils(this); // random utils
     this.io = new IO(this); // disk IO - read and write to server
@@ -32,12 +32,12 @@ export class App {
     this.player = new Player(this);
     this.lookManager = new LookManager(this);
   }
-  
+
   async start() {
     this.lastContext = this.storage.getItem(LAST_CONTEXT_KEY) || '0';
     await this.id.load();
     await this.player.load();
-    
+
     // start the SSE now we know the last context seen
     if (!this.settings.nosse) {
       this.sse = new SSE(this);
@@ -85,7 +85,7 @@ export class App {
       return true;
     }
     //console.log(`setting lastContext to ${key}`);
-    this.lastContext = key; 
+    this.lastContext = key;
     this.storage.setItem(LAST_CONTEXT_KEY, this.lastContext);
     return false;
   }
@@ -96,6 +96,7 @@ export class App {
    * @param {object} data 
    */
   async sendCommand(data) {
+    this.ui.showLoading();
     if (typeof data === 'string') {
       data = { cmd: data };
     }
