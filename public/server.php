@@ -87,6 +87,7 @@ function handleInput($request) {
       $counterFile = DB_DIR . '/' . ID_COUNTER_FILE;
       $oldCounter = file_get_contents($counterFile);
       if ($request['counter'] > $oldCounter) {
+        logIt("Incremented counter from {$oldCounter} to {$request['counter']}");
         file_put_contents($counterFile, $request['counter']);
       }
       saveJson($file, json_decode($request['content'], true));

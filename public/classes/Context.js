@@ -30,7 +30,7 @@ export class Context {
   async process() {
     if (this.app.seen(this.key())) return;
     if (!this.cmd) return;
-    console.log(`\n${this.app.name} ### processing:`, this.ts, this.actor, this.loc, this.app.id.counter, this.cmd);
+    console.log(`\n${this.app.name} ### processing:`, this.ts, this.actor, 'loc:', this.loc, 'counter:', this.app.id.counter, this.cmd);
     const { firstword, rest } = this.app.utils.splitFirstWord(this.cmd);
     this.cowmand = firstword;
     this.rest = rest;

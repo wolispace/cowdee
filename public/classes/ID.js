@@ -15,7 +15,7 @@ export class ID {
     this.load();
   }
 
-  /**
+  /** SHOULD NOT BE USING:
    * Load the last saved counter so we continue where we left off
    * @returns 
    */
@@ -35,7 +35,7 @@ export class ID {
     }
   }
 
-  /**
+  /** SHOULD NOT BE USING:
    * Save the counter
    */
   async save() {
@@ -98,7 +98,7 @@ export class ID {
   }
 
 
-  /**
+  /** NOT USED:
    * Pad with lowest value so all ids/keys have the same min length 
    * eg "F" becomes "F0" if we are chunking with 2 character so ends up in index_name_F0_Fz.json
    * Sme logic works for base62 encoded ints, no need to decode. 
@@ -111,7 +111,7 @@ export class ID {
   }
 
 
-/**
+/** NOT USED:
  * Converts an integer OR base62 string into a chunked filename.
  * chunkSize = number of prefixes per chunk (NOT number of objects)
  * chunkLength = number of characters in the prefix (e.g. 2 → "F0_Fz")

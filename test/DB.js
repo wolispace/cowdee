@@ -7,16 +7,14 @@ app.tester = new Tester(app);
 
 console.log('-------------- START ----------------');
 
-await app.start();
 if (app.settings.generate) {
-
+  app.player.info.id = 'wol';
   app.tester.deleteTestFiles();
   await app.tester.initObjects();
   await app.tester.initPlayers();
   await app.tester.initCommands();
   await app.db.savePoolsToDisk();
 }
-await app.sse.close();
 
 console.log('-------------- END ----------------');
 process.exit(0);
