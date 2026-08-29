@@ -123,12 +123,12 @@ export class PoolManager {
 
 
   /**
-   * Saves the dirty pool, merging whats on disk so we dont stomp over it
-   * @returns 
+   * Collects all dirty shard updates and deletions into the batch map without reading from disk/server first
+   * @param {object} batch 
    */
-  async saveDirty() {
+  collectDirty(batch) {
     if (!this.isDirty()) return;
-    console.log(`${this.app.name} saveDirty:`, this.type, this.app.utils.getImmediateCaller());
+    console.log(`${this.app.name} collectDirty:`, this.type, this.app.utils.getImmediateCaller());
 
     const files = new Map();
     // Group updated keys by shard file
@@ -147,9 +147,14 @@ export class PoolManager {
       files.set(filename, set);
     }
 
-    // Apply changes to each shard file
+    // Apply changes directly to local storage / memory shard without loading over HTTP
     for (const [filename, { updated, deleted }] of files) {
-      const json = (await this.app.io.loadJson(filename)) ?? {};
+      let json = batch[filename];
+      if (!json) {
+        const cached = this.app.storage?.getItem(filename);
+        json = cached ? JSON.parse(cached) : {};
+      }
+
       // Apply deletions
       for (const key of deleted) {
         delete json[key];
@@ -166,12 +171,26 @@ export class PoolManager {
         const item = new Set(json?.[key] ?? undefined);
         this.pool.replace(key, item);
       }
-      console.log(`${this.app.name} - saving:`, filename);
-      await this.app.io.saveJson(filename, json);
+
+      this.app.storage?.setItem(filename, JSON.stringify(json));
+      batch[filename] = json;
     }
 
     this.dirtyUpdated.clear();
     this.dirtyDeleted.clear();
+  }
+
+  /**
+   * Saves the dirty pool in a batch
+   * @returns 
+   */
+  async saveDirty() {
+    if (!this.isDirty()) return;
+    const batch = {};
+    this.collectDirty(batch);
+    if (Object.keys(batch).length > 0) {
+      await this.app.io.saveBatch(batch);
+    }
   }
 
 }

@@ -17,10 +17,9 @@ $lastContext = $_GET['lastContext'] ?? '0';
 while (time() < $endTime) {
   $contexts = get_new_contexts($lastContext);
   if (is_array($contexts) && count($contexts) > 0) {
-    foreach ($contexts as $context) {
-      sse_event('context', $context);
-      $lastContext = "{$context['ts']}{$context['actor']}";
-    }
+    sse_event('contexts', $contexts);
+    $last = end($contexts);
+    $lastContext = "{$last['ts']}{$last['actor']}";
   }
   if ( connection_aborted() ) break;
 

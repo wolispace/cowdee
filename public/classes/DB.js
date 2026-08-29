@@ -266,15 +266,18 @@ export class DB {
   }
 
   /**
-   * Write to disk all of the changed pools
-   * - merging the objects with existing json on disk
+   * Write to disk all of the changed pools in a single batch
    */
   async savePoolsToDisk() {
     console.log('--- savePoolsToDisk ---');
     this.anyDirty = false;
     if (!await this.app.io.tryLock()) return;
+    const batch = {};
     for (const pool of Object.values(this.pools)) {
-      await pool.saveDirty();
+      pool.collectDirty(batch);
+    }
+    if (Object.keys(batch).length > 0) {
+      await this.app.io.saveBatch(batch);
     }
     await this.app.id.save();
     await this.app.io.unLock();

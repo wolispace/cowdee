@@ -55,7 +55,7 @@ function handleInput($request) {
     if (empty($contexts)) {
       $contexts = [$contextData];
     }
-    outputJson(['contexts' => json_encode($contexts)]);
+    outputJson(['contexts' => $contexts]);
   } else if (!empty($request['lock'])) {
     // send the player ID as the lock value, we set into the lock file ?lock=wol
     // if the option is to clear then we must match the lock file contents ?lock=wol&clear=1
@@ -79,6 +79,23 @@ function handleInput($request) {
       outputJson(['status' => file_put_contents($lockfile, $request['lock']) > 0]);
     }
     return ``;
+  } else if (!empty($request['batch'])) {
+    $counterFile = DB_DIR . '/' . ID_COUNTER_FILE;
+    if (file_exists($counterFile)) {
+      $oldCounter = (int) file_get_contents($counterFile);
+      if (isset($request['counter']) && $request['counter'] > $oldCounter) {
+        logIt("Incremented counter from {$oldCounter} to {$request['counter']}");
+        file_put_contents($counterFile, $request['counter']);
+      }
+    } else if (isset($request['counter'])) {
+      file_put_contents($counterFile, $request['counter']);
+    }
+
+    foreach ($request['batch'] as $filename => $data) {
+      $file = shardName($filename);
+      saveJson($file, $data);
+    }
+    outputJson(['ok' => true]);
   } else if (!empty($request['file'])) {
     $file = shardName($request['file']);
     if (empty($request['content'])) {

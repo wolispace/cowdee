@@ -105,7 +105,7 @@ export class App {
     data.counter = this.id.counter;
     const result = await this.io.fetchJson('server', data);
     if (result?.contexts) {
-      const contexts = JSON.parse(result.contexts);
+      const contexts = typeof result.contexts === 'string' ? JSON.parse(result.contexts) : result.contexts;
       await this.processContexts(contexts);
     }
   }

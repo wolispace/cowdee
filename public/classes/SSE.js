@@ -28,6 +28,17 @@ export class SSE {
     console.log('[SSEweb] connecting ',this.app.name, urlString);
     this.sse = new EventSource(urlString);
 
+    this.sse.addEventListener('contexts', async (event) => {
+      const rawContexts = JSON.parse(event.data);
+      console.log('[SSEweb] received contexts:', this.app.name, rawContexts?.length, 'lastContext:', this.app.lastContext);
+      if (Array.isArray(rawContexts)) {
+        for (const raw of rawContexts) {
+          const context = new Context(this.app, raw);
+          await context.process();
+        }
+      }
+    });
+
     this.sse.addEventListener('context', async (event) => {
       const rawContext = JSON.parse(event.data);
       console.log('[SSEweb] received:', this.app.name, event.data, 'lastContext:', this.app.lastContext);
@@ -120,10 +131,18 @@ export class SSE {
 
   async handleMessage(event, dataStr) {
     try {
-      const rawContext = JSON.parse(dataStr);
-      if (event === 'context') {
+      const data = JSON.parse(dataStr);
+      if (event === 'contexts') {
+        console.log(`${this.app.name} [SSE] received contexts:`, data?.length, 'lastContext:', this.app.lastContext);
+        if (Array.isArray(data)) {
+          for (const raw of data) {
+            const context = new Context(this.app, raw);
+            await context.process();
+          }
+        }
+      } else if (event === 'context') {
         console.log(`${this.app.name} [SSE] received:`, dataStr, 'lastContext:', this.app.lastContext);
-        const context = new Context(this.app, rawContext);
+        const context = new Context(this.app, data);
         await context.process();
       } else if (event === 'shutdown') {
         console.log(`${this.app.name} [SSE] shutdown, reconnecting...`);

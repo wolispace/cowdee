@@ -28,6 +28,17 @@ export class IO {
     return await this.fetchJson('server', {file, token: this.token, content: JSON.stringify(json)});
   }
 
+  async saveBatch(batch) {
+    for (const [file, json] of Object.entries(batch)) {
+      this.app.storage?.setItem(file, JSON.stringify(json));
+    }
+    return await this.fetchJson('server', {
+      batch: batch,
+      token: this.token,
+      counter: this.app.id.counter
+    });
+  }
+
   async fetchJson(type, payload) {
     payload.token = this.token;
     payload.counter = this.app.id.counter;
@@ -51,6 +62,13 @@ export class IO {
     try {
       const fs = await import("fs");
       const path = await import("path");
+      if (payload.batch) {
+        for (const [file, json] of Object.entries(payload.batch)) {
+          const filePath = path.join('_db', `${file}.json`);
+          fs.writeFileSync(filePath, JSON.stringify(json, null, 2));
+        }
+        return { ok: true };
+      }
       if (payload.file) {
         const filePath = path.join('_db', `${payload.file}.json`);
         if (payload.content) {
