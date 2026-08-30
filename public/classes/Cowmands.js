@@ -350,15 +350,22 @@ export class Cowmands {
       const expandedMsg = this.expandTemplate(template);
 
       // Handle 'force' / 'force:look' relook use
-      if (action === 'force' || /^force:look/i.test(expandedMsg)) {
-        let lookLoc = (loc && loc !== '0' && loc !== 0) ? loc : this.context.loc;
-        const forceMatch = expandedMsg.match(/^force:look\s*(.*)$/i);
-        if (forceMatch && forceMatch[1].trim()) {
-          const parsedLoc = await this.resolveValue(forceMatch[1].trim().split(',')[0]);
-          if (parsedLoc) lookLoc = parsedLoc;
+      if (action === 'force') {
+        if (/^force:look/i.test(expandedMsg)){
+          let lookLoc = (loc && loc !== '0' && loc !== 0) ? loc : this.context.loc;
+          const forceMatch = expandedMsg.match(/^force:look\s*(.*)$/i);
+          if (forceMatch && forceMatch[1].trim()) {
+            const parsedLoc = await this.resolveValue(forceMatch[1].trim().split(',')[0]);
+            if (parsedLoc) lookLoc = parsedLoc;
+          }
+          await this.statementList.relook(lookLoc || this.context.loc);
+          return;
+        } else if (/^force:examine/i.test(expandedMsg)) {
+          await this.statementList.examine(this.context.target);
+        
         }
-        await this.statementList.relook(lookLoc || this.context.loc);
-        return;
+
+
       }
 
       this.context.trigger = action || 'msg';
@@ -417,6 +424,14 @@ export class Cowmands {
       const loc = await this.resolveValue(rest.trim());
       this.context.loc = loc;
       const data = await this.app.db.listLoc({ ...this.context });
+      await this.app.ui.addMessage(data);
+    },
+    // EXAMINE
+    examine: async (rest) => {
+      const obj = await this.resolveValue(rest.trim());
+      this.context.target = obj;
+      console.log(`${this.app.name} examine ${rest} `, obj);
+      const data = await this.app.db.examine({ ...this.context });
       await this.app.ui.addMessage(data);
     },
     // FLUSH

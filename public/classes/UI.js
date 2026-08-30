@@ -24,6 +24,15 @@ export class UI {
 
   async addMessage(context) {
     // if its not in the players location, or its to the player or loc is all then dont show
+    if (!context) {
+      console.trace(`${this.app.name} no context passed in`);
+      return;
+    }
+    if (!context.loc) {
+      console.trace(`${this.app.name} no loc in context`, context);
+      return;
+    }
+
     if (context.loc != this.app.player.info.loc) {
       console.log(`${this.app.name} --- msg not shown`, context.loc, context.actor, context.msg.slice(0, 30));
       return;
@@ -244,6 +253,7 @@ export class UI {
 
   // set a timeout of 500ms to animate this.top opacity from current (usually 0%) to 50% opacity over a 500ms period. 
   showLoading() {
+    if (!window) return;
     this.loading = setTimeout(() => {
       this.top.style.opacity = '0.25';
     }, 500);
@@ -252,6 +262,7 @@ export class UI {
   // clear this.loading timeout if present 
   // if this.top opacity is > 0% then fade it to 0% over250ms.
   hideLoading() {
+    if (!window) return;
     if (this.loading) {
       clearTimeout(this.loading);
       this.loading = null;

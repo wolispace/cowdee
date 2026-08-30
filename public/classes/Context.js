@@ -37,8 +37,9 @@ export class Context {
     this.cmd_text = rest;
     const code = await this.app.db.findCommand(this);
     if (!code) {
-      this.msg = `[${this.actor}] tries to ${this.cmd}, but nothing happens`,
-        await this.app.ui.addMessage(this);
+      this.msg = `[${this.actor}] tries to ${this.cmd}, but nothing happens`;
+      await this.app.ui.addMessage(this);
+      this.app.ui.hideLoading();
       return;
     };
     await this.runCodeFrom(code, '__start');

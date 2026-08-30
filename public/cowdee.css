@@ -217,3 +217,10 @@ menu {
   display: flex;
   flex-direction: column;
 }
+
+.info {
+  padding: 1rem;
+    border: 3px solid black;
+    border-radius: .5rem;
+    box-shadow: 0 0 1rem black
+}

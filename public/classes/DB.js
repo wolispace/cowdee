@@ -139,6 +139,19 @@ export class DB {
     return codeObj?.code ?? '';
   };
 
+    /**
+   * Retruns the info for the object.id passed in
+   * for consistancy, even tho its just a string, its stored in an array with one element
+   * @param {id} id 
+   * @returns {string}
+   */
+  async getInfo(id) {
+    const set = await this.pools.info.get(id);
+    if (!set || set.size === 0) return '';
+    const infoObj = set.values().next().value;
+    return infoObj?.info ?? '';
+  };
+
   /**
    * Find the first named command (look in player then location then globaly so long as its a command)
    * "find" means look for it somewhere, where as "get" means we know it so get it.
@@ -402,8 +415,8 @@ export class DB {
   /**
    * New lookLoc2 method that structures descriptions dynamically and recursively
    * with limits on sentence group size and rotating templates.
-   * @param {object} context 
-   * @returns {object}
+   * @param {Context} context 
+   * @returns {Context}
    */
   async lookLoc(context) {
     const data = await this.app.lookManager.look(context);
@@ -413,11 +426,21 @@ export class DB {
 
   /**
  * Lits objects in a location
- * @param {object} context 
- * @returns {object}
+ * @param {Context} context 
+ * @returns {Context}
  */
   async listLoc(context) {
     const data = await this.app.lookManager.list(context);
+    return data;
+  }
+
+  /**
+   * BUild the html for display in the #top panel
+   * @param {Context} context 
+   * @returns 
+   */
+  async examine(context) {
+    const data = await this.app.lookManager.examine(context);
     return data;
   }
 

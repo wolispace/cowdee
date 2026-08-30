@@ -5,19 +5,20 @@ No centralised server that processes commands and performs logic.
 
 This simplifies the server code to just a file manager, sharing and storing files.
 
-Each browser that connects to the server processes commands in sequence keeping theor local set of data files up-to-date.
+Each browser that connects to the server processes commands in sequence keeping thir local set of data files up-to-date.
 
 Periodically, any browser can send its copy of files back to the sever so new players can quickly catch up to the latest version of the data.
 
 ## terminology
 
-Players send commands, each one is assigned, by the server, a unique incremental integer id (cid)
+Players send commands, each one is assigned, by the server, a unique id (timestamp to ms + player id)
 
 Ids of objects are stored in base62 eg {id:"Ag2", class="cup", loc:"d8", host:"eW"}
+- the cups id is Ag2 
+- its location it is in has an id of d8 eg: {id:"d8", class:"kitchen" ...}
+- its hosted on object id eW eg: {id:"eW", class:"table" ...}
 
-Data is stored in json format. It is split into types (id, name, loc etc..) and ids within those in base 62 form. eg index_name_A.json holds all names starting with 'A'
-
-A data_cid.txt is stored on the server, along with the json data, that stores the highest know cid at the time the data was written to disk.
+Data is stored in json format. It is split into types (id, name, loc etc..) and shared by the firxt latter in as an ascii number eg: index_name_65.json holds all names starting with 'A'
 
 Messages are shown to the user as the result of running cowscript.
 

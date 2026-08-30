@@ -70,7 +70,7 @@ export class Tester {
 
   async initObjects() {
     let counter = 0;
-    while (counter++ < this.app.settings.max) {
+    while (counter++ < 5) {
       const obj = {
         id: this.app.id.new(),
         class: this.randomName(),
@@ -78,7 +78,7 @@ export class Tester {
         loc: this.app.id.encodeInt(this.context.random(this.app.settings.max)),
         color: this.randomColor()
       };
-      //  obj.info = `It's a pretty ordinary ${obj.class}`;
+      obj.info = `It's a pretty ordinary ${obj.class}`;
       await this.app.db.save(obj);
       if (counter % 10 === 0) {
         process.stdout.write(":");
@@ -167,6 +167,9 @@ export class Tester {
     }, {
       name: "inv",
       code: `list $actor;\n`
+    }, {
+      name: "examine",
+      code: `get $target in $loc;\nsay 'examine',"[$actor] examines [$target]";\nexamine $target;`    
     }
     ];
 

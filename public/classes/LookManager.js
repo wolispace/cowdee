@@ -21,7 +21,7 @@ export class LookManager {
 
   /**
    * Returns an object for adding to the msg queue with a list of all obj
-   * @param {object} context 
+   * @param {Context} context 
    */
   async list(context) {
     this.context = context;
@@ -50,9 +50,27 @@ export class LookManager {
     return this.returnData();
   }
 
+    /**
+   * Returns the html info of the object
+   * @param {Context} context 
+   */
+  async examine(context) {
+    this.context = context;
+    this.sentences = [];
+    let info = await this.app.db.getInfo(context.target);
+    if (!info) {
+      const obj = await this.db.getById(context.target);
+      console.log('ZZZ', context.target, obj);
+      info = `It's a pretty ordinary ${obj.class}`;
+    };
+    this.sentences.push(`<div class='info'>${info}<div>`);
+    console.log(`${this.app.name} examine `, context);
+    return this.returnData();
+  }
+
   /**
    * Returns an object for adding to the msg queue with a paragraph of all obj
-   * @param {object} context 
+   * @param {Context} context 
    */
   async look(context) {
     this.seen = new Set();
