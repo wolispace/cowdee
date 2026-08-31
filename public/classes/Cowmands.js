@@ -416,14 +416,14 @@ export class Cowmands {
     relook: async (rest) => {
       const loc = await this.resolveValue(rest.trim());
       this.context.loc = loc;
-      const data = await this.app.db.lookLoc({ ...this.context });
+      const data = await this.app.lookManager.look({ ...this.context });
       await this.app.ui.addMessage(data);
     },
     // LIST
     list: async (rest) => {
       const loc = await this.resolveValue(rest.trim());
       this.context.loc = loc;
-      const data = await this.app.db.listLoc({ ...this.context });
+      const data = await this.app.lookManager.list({ ...this.context });
       await this.app.ui.addMessage(data);
     },
     // EXAMINE
@@ -434,9 +434,21 @@ export class Cowmands {
         return;
       }
       this.context.target = obj;
-      const data = await this.app.db.examine({ ...this.context });
+      const data = await this.app.lookManager.examine({ ...this.context });
       await this.app.ui.addMessage(data);
     },
+    // CODE
+    code: async (rest) => {
+      const obj = await this.resolveValue(rest.trim());
+      if (!obj) {
+        console.log(`${this.app.name} code '${rest}' failed to resolve obj`);
+        return;
+      }
+      this.context.target = obj;
+      const data = await this.app.lookManager.code({ ...this.context });
+      await this.app.ui.addMessage(data);
+    },
+
     // FLUSH
     flush: ($rest) => {
       this.app.db.flush();

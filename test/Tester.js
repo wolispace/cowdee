@@ -170,6 +170,9 @@ export class Tester {
     }, {
       name: "examine",
       code: `get $target in $loc;\nsay 'examine',"[$actor] examines [$target]";\nexamine $target;`    
+    }, {
+      name: "code",
+      code: `get $target in $loc;\nsay 'code',"[$actor] starts to code [$target]";\ncode $target;`    
     }
     ];
 

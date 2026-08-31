@@ -424,26 +424,6 @@ export class DB {
     return data;
   }
 
-  /**
- * Lits objects in a location
- * @param {Context} context 
- * @returns {Context}
- */
-  async listLoc(context) {
-    const data = await this.app.lookManager.list(context);
-    return data;
-  }
-
-  /**
-   * BUild the html for display in the #top panel
-   * @param {Context} context 
-   * @returns 
-   */
-  async examine(context) {
-    const data = await this.app.lookManager.examine(context);
-    return data;
-  }
-
   debounceSave() {
     // Clear any existing timer
     if (this.saveTimeout) {

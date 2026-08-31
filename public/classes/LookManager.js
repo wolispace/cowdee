@@ -47,6 +47,8 @@ export class LookManager {
       list += `<li>[${id}]</li>`;
     }
     this.sentences.push(list);
+    // TODO: better wany needed to INV shoing what you hold noone
+    this.context.loc = loc.loc;
     return this.returnData();
   }
 
@@ -68,6 +70,28 @@ export class LookManager {
     };
     this.sentences.push(`<div class='info'>${info}</div>`);
     console.log(`${this.app.name} examine `, context);
+    return this.returnData();
+  }
+
+      /**
+   * Returns the html info of the object
+   * @param {Context} context 
+   */
+  async code(context) {
+    this.context = context;
+    this.sentences = [];
+    let code = await this.app.db.getCode(context.target);
+    if (!code) {
+      const obj = await this.db.getById(context.target);
+      if (!obj) {
+        code = `Opps.. I can't find object ID ${context.target}. Reload. `; 
+      } else {
+        code = `It has no code`;
+      }
+    };
+    code = code.replaceAll('\n', "<br/>");
+    this.sentences.push(`<div class='info'>${code}</div>`);
+    console.log(`${this.app.name} code `, context);
     return this.returnData();
   }
 
