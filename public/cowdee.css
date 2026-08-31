@@ -1,6 +1,6 @@
 :root {
   --font-color: rgba(255, 255, 255, 0.75);
-  --background-color: #151924;
+  --background-color: #090a0d;
   --max-width: 800px;
   --splitter-height: 1rem;
   --input-height: 2rem;
@@ -55,6 +55,7 @@ content {
   flex-direction: column;
   overflow: hidden;
   min-height: 0;
+  background-color: #15171f;
   /* allow flex child to shrink below content size */
 }
 
