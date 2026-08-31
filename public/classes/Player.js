@@ -15,7 +15,8 @@ export class Player {
   async welcome() {
     if (!window) return;
     // show dialog, app.handleForm() handles logins
-    this.app.ui.showDialog(this.loginFormContent());    
+    this.app.ui.showDialog(this.loginFormContent()); 
+    document.getElementById('playername').focus();   
   }
 
   loginFormContent() {
