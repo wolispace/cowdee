@@ -56,7 +56,6 @@ export class LookManager {
    */
   async examine(context) {
     this.context = context;
-    if (!console)
     this.sentences = [];
     let info = await this.app.db.getInfo(context.target);
     if (!info) {
