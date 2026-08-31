@@ -56,14 +56,18 @@ export class LookManager {
    */
   async examine(context) {
     this.context = context;
+    if (!console)
     this.sentences = [];
     let info = await this.app.db.getInfo(context.target);
     if (!info) {
       const obj = await this.db.getById(context.target);
-      console.log('ZZZ', context.target, obj);
-      info = `It's a pretty ordinary ${obj.class}`;
+      if (!obj) {
+        info = `Opps.. I can't find object ID ${context.target}. Reload. `; 
+      } else {
+        info = `It's a pretty ordinary ${obj.class}`;
+      }
     };
-    this.sentences.push(`<div class='info'>${info}<div>`);
+    this.sentences.push(`<div class='info'>${info}</div>`);
     console.log(`${this.app.name} examine `, context);
     return this.returnData();
   }

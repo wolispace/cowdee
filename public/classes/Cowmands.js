@@ -429,8 +429,11 @@ export class Cowmands {
     // EXAMINE
     examine: async (rest) => {
       const obj = await this.resolveValue(rest.trim());
+      if (!obj) {
+        console.log(`${this.app.name} examine '${rest}' failed to resolve obj`);
+        return;
+      }
       this.context.target = obj;
-      console.log(`${this.app.name} examine ${rest} `, obj);
       const data = await this.app.db.examine({ ...this.context });
       await this.app.ui.addMessage(data);
     },

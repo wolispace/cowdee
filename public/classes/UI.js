@@ -29,7 +29,7 @@ export class UI {
       return;
     }
     if (!context.loc) {
-      console.trace(`${this.app.name} no loc in context`, context);
+      console.trace(`${this.app.name} no loc in context`, this.app.util.getImmediateCaller());
       return;
     }
 
