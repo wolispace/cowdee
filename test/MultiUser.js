@@ -99,6 +99,15 @@ async function runMultiUserSimulation() {
       throw new Error(`FAILED: Expected new object ID to be over 23, but got ID "${newObjInBobDB}" (Decoded: ${decodedBobId})`);
     }
 
+    await wolis.sendCommand({ cmd: `create a red bus` });
+    await wolis.sendCommand({ cmd: `get the bus` });
+    await wolis.sendCommand({ cmd: `drop the bus` });
+    await bob.sendCommand({ cmd: `get the bus` });
+    await bob.sendCommand({ cmd: `drop the bus` });
+    await wolis.sendCommand({ cmd: `create a green frog` });
+    await wolis.sendCommand({ cmd: `put the frog on the bus` });
+    await bob.sendCommand({ cmd: `pose the frog as sitting` });
+    
     // 6. Test Chat & Spatial Filtering over SSE
     console.log('\n-----------------------------------------------------');
     console.log('TEST 4: Spatial Chat & Message Filtering');

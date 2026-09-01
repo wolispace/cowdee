@@ -34,7 +34,7 @@ export class UI {
     }
 
     if (context.loc != this.app.player.info.loc) {
-      console.log(`${this.app.name} --- msg not shown`, context, context.msg.slice(0, 30));
+      console.log(`${this.app.name} --- msg not shown`, context.loc, context.msg.slice(0, 30));
       return;
     }
 

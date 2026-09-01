@@ -54,6 +54,7 @@ export class App {
         // set essential values
         data.actor = this.player.info.id;
         data.loc = this.player.info.loc;
+        data.loc = this.player.info.it;
         this.handleForm(data);
         const cmdInput = document.getElementById('cmd');
         if (cmdInput) cmdInput.value = '';
@@ -102,6 +103,7 @@ export class App {
     }
     data.actor = data.actor ?? this.player.info.id;
     data.loc = data.loc ?? this.player.info.loc;
+    data.it = data.it ?? this.player.info.it;
     data.lastContext = this.lastContext;
     data.counter = this.id.counter;
     const result = await this.io.fetchJson('server', data);

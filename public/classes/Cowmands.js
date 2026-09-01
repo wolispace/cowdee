@@ -122,6 +122,8 @@ export class Cowmands {
           const resolved = await this.app.db.findByNameInLoc(ntarget, getLocValue);
           this.context.target = resolved || ntarget;
         }
+        // last interacted with target will be the next commands 'it'
+        this.app.player.info.it = this.context.target;  
       }
       if (nsecond) {
         if (await isAlreadyId(nsecond)) {

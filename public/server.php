@@ -34,17 +34,17 @@ function handleInput($request) {
       'ts' => $mstimestamp,
       'counter' => $request['counter'], 
       'actor' => $request['actor'], 
-      'loc' => $request['loc'], 
-      'cmd' => $request['cmd']
+      'loc' => $request['loc'],
+      'it' => $request['it'], 
+      'cmd' => $request['cmd'],
     ];
 
-    if (!is_dir(CONTEXT_DIR)) {
-        // Create the directory
-        mkdir(CONTEXT_DIR, 0755, true);
-        logIt("Folder created successfully!");
-    } else {
-        logIt("Folder already exists.");
-    }
+    // Belt and braces - there will always be a _context folder
+    // if (!is_dir(CONTEXT_DIR)) {
+    //     // Create the directory
+    //     mkdir(CONTEXT_DIR, 0755, true);
+    //     logIt("Folder created successfully!");
+    // }
 
     $filename = CONTEXT_DIR . "/{$mstimestamp}{$request['actor']}" . CONTEXT_EXT ;
     file_put_contents($filename, json_encode($contextData));
