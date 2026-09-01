@@ -35,7 +35,7 @@ export class App {
 
   async start() {
     this.lastContext = this.storage.getItem(LAST_CONTEXT_KEY) || '0';
-    await this.id.load();
+    await this.id.load(); // Node: reads disk; Browser: fetches server counter
     await this.player.load();
 
     // start the SSE now we know the last context seen

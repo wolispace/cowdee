@@ -287,7 +287,6 @@ export class DB {
     if (Object.keys(batch).length > 0) {
       await this.app.io.saveBatch(batch);
     }
-    await this.app.id.save();
     await this.app.io.unLock();
   }
 

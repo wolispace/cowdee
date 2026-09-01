@@ -183,7 +183,6 @@ export class Tester {
       obj.color = this.randomColor();
       await this.app.db.save(obj);
     }
-    await this.app.id.save();
   }
 
 

@@ -109,8 +109,8 @@ function handleInput($request) {
       outputJson(loadJson($file));
     } else {
       $counterFile = DB_DIR . '/' . ID_COUNTER_FILE;
-      $oldCounter = file_get_contents($counterFile);
-      if ($request['counter'] > $oldCounter) {
+      $oldCounter = file_exists($counterFile) ? (int) file_get_contents($counterFile) : 0;
+      if (isset($request['counter']) && $request['counter'] > $oldCounter) {
         logIt("Incremented counter from {$oldCounter} to {$request['counter']}");
         file_put_contents($counterFile, $request['counter']);
       }
@@ -118,7 +118,9 @@ function handleInput($request) {
       outputJson(['ok' => true]);
     }
   } else if (!empty($request['lastContext'])) {
-    outputJson(['lastContext' => get_last_context()]);
+    $counterFile = DB_DIR . '/' . ID_COUNTER_FILE;
+    $serverCounter = file_exists($counterFile) ? (int) file_get_contents($counterFile) : 1;
+    outputJson(['lastContext' => get_last_context(), 'counter' => $serverCounter]);
   } else {
     outputJson(['ok' => false]);
   }

@@ -3,8 +3,7 @@
  * The 16,777,216th object will be id '9999' so plenty of growth wile taking up very little space 
  */
 export class ID {
-  filename = '_db/_counter.txt';
-  counter = 1; // first object is 1, anything without a loc is in the void = 0
+  counter = 1; // first object is 1, anything without a loc is in the void (id=0)
   // if alphabet is 62 char long then we are doing base62 encoding
   alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   chunkSize = 500; // how many objects per file
@@ -12,52 +11,46 @@ export class ID {
 
   constructor(app) {
     this.app = app;
-    this.load();
+    // Note: load() is async — call it via await in App.start(), not here
   }
 
-  /** SHOULD NOT BE USING:
-   * Load the last saved counter so we continue where we left off
-   * @returns 
+  /**
+   * Fetch the current counter from the server on startup so we never
+   * start from 1 after a test rebuild or a fresh tab open.
+   * Awaited by App.start() before any objects are created.
    */
   async load() {
-    if (typeof window === 'undefined') {
-      try {
-        const fs = await import('fs');
-        if (fs.existsSync(this.filename)) {
-          const val = parseInt(fs.readFileSync(this.filename, 'utf8'), 10);
-          if (!isNaN(val) && val > 0) {
-            this.counter = val;
-          }
-        }
-      } catch (e) {
-        // ignore
+    try {
+      const result = await this.app.io.fetchJson('server', { lastContext: this.app.lastContext || '0' });
+      if (result?.counter) {
+        this.sync(result.counter);
       }
-    }
-  }
-
-  /** SHOULD NOT BE USING:
-   * Save the counter
-   */
-  async save() {
-    if (typeof window === 'undefined') {
-      try {
-        const fs = await import('fs');
-        fs.writeFileSync(this.filename, `${this.counter}`);
-      } catch (e) {
-        // ignore
-      }
+    } catch (e) {
+      // non-fatal: stay at counter = 1
     }
   }
 
   /**
-   * Create a new ID - siquential number encoded
+   * Sync the in-memory counter up to the server's known highest value.
+   * Called on startup (load) and on every incoming context (Context.process).
+   * @param {number|string} serverCounter
+   */
+  sync(serverCounter) {
+    const val = parseInt(serverCounter, 10);
+    if (!isNaN(val) && val > this.counter) {
+      this.counter = val;
+    }
+  }
+
+  /**
+   * Create a new ID — sequential number encoded in base62.
+   * The counter is sent to the server with every batch/file save via IO,
+   * so server.php keeps _counter.txt current automatically.
    * @returns {string}
    */
   new() {
     this.counter++;
-    const id = this.encodeInt(this.counter);
-    this.save();
-    return id;
+    return this.encodeInt(this.counter);
   }
 
   // encode the interger into base 62 (or whatever the aphabet is long)

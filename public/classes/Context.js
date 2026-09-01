@@ -11,9 +11,6 @@ export class Context {
     this.app = app;
     this.prepRandom(this.ts);
     this.cowmands = new Cowmands(this.app, this);
-    if (this.counter > this.app.id.counter) {
-      this.app.id.counter = this.counter;
-    }
   }
 
   /**
@@ -28,6 +25,9 @@ export class Context {
    * Entry point for processing this context
    */
   async process() {
+    // Each context carries the counter from the client that created it;
+    // sync up so our counter never falls behind any peer's.
+    this.app.id.sync(this.counter);
     if (this.app.seen(this.key())) return;
     if (!this.cmd) return;
     console.log(`\n${this.app.name} ### processing:`, this.ts, this.actor, 'loc:', this.loc, 'counter:', this.app.id.counter, this.cmd);
