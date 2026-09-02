@@ -100,13 +100,15 @@ async function runMultiUserSimulation() {
     }
 
     await wolis.sendCommand({ cmd: `create a red bus` });
-    await wolis.sendCommand({ cmd: `get the bus` });
-    await wolis.sendCommand({ cmd: `drop the bus` });
+    await wolis.sendCommand({ cmd: `get it` });
+    await wolis.sendCommand({ cmd: `drop it` });
     await bob.sendCommand({ cmd: `get the bus` });
     await bob.sendCommand({ cmd: `drop the bus` });
+    await wolis.sendCommand({ cmd: `paint it dodgerblue` });
+    
     await wolis.sendCommand({ cmd: `create a green frog` });
-    await wolis.sendCommand({ cmd: `put the frog on the bus` });
-    await bob.sendCommand({ cmd: `pose the frog as sitting` });
+    await wolis.sendCommand({ cmd: `put it on the bus` });
+    await bob.sendCommand({ cmd: `pose it as sitting` });
     
     // 6. Test Chat & Spatial Filtering over SSE
     console.log('\n-----------------------------------------------------');

@@ -30,7 +30,11 @@ export class Context {
     this.app.id.sync(this.counter);
     if (this.app.seen(this.key())) return;
     if (!this.cmd) return;
-    console.log(`\n${this.app.name} ### processing:`, this.ts, this.actor, 'loc:', this.loc, 'counter:', this.app.id.counter, this.cmd);
+    // same player then remember the last 'it'
+    if (this.actor === this.app.player.info.id) {
+      this.app.player.info.it = this.it;
+    }
+    console.log(`\n${this.app.name} ### processing:`, this.ts, this.actor, 'loc:', this.loc, 'counter:', this.app.id.counter, 'it:', this.it, this.cmd);
     const { firstword, rest } = this.app.utils.splitFirstWord(this.cmd);
     this.cowmand = firstword;
     this.rest = rest;

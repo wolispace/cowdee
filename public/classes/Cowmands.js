@@ -103,10 +103,10 @@ export class Cowmands {
       }
       // Resolve pronouns
       if (['it', 'them'].includes((this.context.target || '').toLowerCase())) {
-        this.context.target = this.context.lastt;
+        this.context.target = this.context.it;
       }
       if (['it', 'them'].includes((this.context.second || '').toLowerCase())) {
-        this.context.second = this.context.lastt;
+        this.context.second = this.context.it;
       }
       // --- Step 7: Resolve objects (like perl's get_resolve) ---
       const ntarget = this.context.target;
@@ -123,7 +123,10 @@ export class Cowmands {
           this.context.target = resolved || ntarget;
         }
         // last interacted with target will be the next commands 'it'
-        this.app.player.info.it = this.context.target;  
+        if (this.context.actor === this.app.player.info.id) {
+          console.log(`${this.app.name} setting context.it to ${this.context.target}`);
+          this.app.player.info.it = this.context.target;
+        }
       }
       if (nsecond) {
         if (await isAlreadyId(nsecond)) {
@@ -408,7 +411,13 @@ export class Cowmands {
       await this.app.db.save(obj);
       this.context.target = obj.id;
       this.context.lastt = obj.id;
+      this.context.it = obj.id;
       this.context.new_id = obj.id;
+      // last interacted with target will be the next commands 'it'
+      if (this.context.actor === this.app.player.info.id) {
+        console.log(`${this.app.name} setting context.it to ${this.context.target}`);
+        this.app.player.info.it = this.context.target;
+      }
     },
     // RUNSUB
     runsub: async (rest) => {
