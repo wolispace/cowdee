@@ -64,8 +64,9 @@ export class IO {
   }
 
   makeShardFilename(type = '_', key = '_') {
-    const k = String(key);
-    return `${type}_${k.charCodeAt(0)}`;
+    const k = String(key).toUpperCase();
+    // return `${type}_${k.charCodeAt(0)}`;
+    return `${type}_${k[0]}`;
   }
 
   async tryLock() {

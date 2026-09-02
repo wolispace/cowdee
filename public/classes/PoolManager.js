@@ -33,8 +33,10 @@ export class PoolManager {
    */
   populateFromShard(items) {
     if (!items || typeof items !== 'object') return;
-    for (const [k, v] of Object.entries(items)) {
-      this.pool.replace(k, new Set(v ?? []));
+    for (const [key, value] of Object.entries(items)) {
+      for (const item of value) {
+        this.pool.add(key, item);
+      }
     }
   }
 
@@ -51,7 +53,7 @@ export class PoolManager {
     const filename = this.app.io.makeShardFilename(this.type, key);
     const items = await this.app.io.loadJson(filename);
     this.populateFromShard(items);
-    return this.pool.get(key) || new Set();
+    return this.pool.get(key);
   }
 
   /**
@@ -91,7 +93,7 @@ export class PoolManager {
       if (!this.pool.has(key)) {
         await this.get(key);
       }
-      this.pool.add(key, thing);
+      this.pool.set(key, thing);
     }
     this.dirtyUpdated.add(key);
     this.app.db.anyDirty = true;
@@ -147,7 +149,8 @@ export class PoolManager {
    * @returns {boolean}
    */
   isDirty() {
-    return (this.dirtyUpdated.size > 0 || this.dirtyDeleted.size > 0);
+    return this.pool.isDirty();
+    //return (this.dirtyUpdated.size > 0 || this.dirtyDeleted.size > 0);
   }
 
 
@@ -159,49 +162,44 @@ export class PoolManager {
     if (!this.isDirty()) return;
     console.log(`${this.app.name} collectDirty:`, this.type, this.app.utils.getImmediateCaller());
 
-    const files = new Map();
     // Group updated keys by shard file
-    for (const key of this.dirtyUpdated) {
-      if (!key) continue;
-      const filename = this.app.io.makeShardFilename(this.type, key);
-      const set = files.get(filename) ?? { updated: new Set(), deleted: new Set() };
-      set.updated.add(key);
-      files.set(filename, set);
+    for (const prefix of this.pool.dirtyUpdated) {
+      const filename = this.app.io.makeShardFilename(this.type, prefix);
+      batch[filename] = this.pool.getShard(prefix);
     }
     // Group deleted keys by shard file
-    for (const key of this.dirtyDeleted) {
-      const filename = this.app.io.makeShardFilename(this.type, key);
-      const set = files.get(filename) ?? { updated: new Set(), deleted: new Set() };
-      set.deleted.add(key);
-      files.set(filename, set);
+    for (const prefix of this.pool.dirtyDeleted) {
+      const filename = this.app.io.makeShardFilename(this.type, prefix);
+      batch[filename] = this.pool.getShard(prefix);
     }
 
-    // Apply changes directly to batch map without loading over HTTP
-    for (const [filename, { updated, deleted }] of files) {
-      let json = batch[filename] || {};
+    // // Apply changes directly to batch map without loading over HTTP
+    // for (const [filename, { updated, deleted }] of files) {
+    //   let json = batch[filename] || this.pool.getShard(prefix);
 
-      // Apply deletions
-      for (const key of deleted) {
-        delete json[key];
-      }
+    //   // Apply deletions
+    //   for (const key of deleted) {
+    //     delete json[key];
+    //   }
 
-      // Apply updates
-      for (const key of updated) {
-        let poolValue = this.pool.get(key);
-        if (poolValue instanceof Set) {
-          poolValue = [...poolValue]; // convert into an array
-        }
-        json[key] = poolValue;
-        // refresh pool with this content..
-        const item = new Set(json?.[key] ?? undefined);
-        this.pool.replace(key, item);
-      }
+      // // Apply updates
+      // for (const key of updated) {
+      //   let poolValue = this.pool.get(key);
+      //   if (poolValue instanceof Set) {
+      //     poolValue = [...poolValue]; // convert into an array
+      //   }
+      //   json[key] = poolValue;
+      //   // // refresh pool with this content..
+      //   // const item = new Set(json?.[key] ?? undefined);
+      //   // this.pool.set(key, item);
+      // }
 
-      batch[filename] = json;
-    }
+    //  batch[filename] = json;
 
-    this.dirtyUpdated.clear();
-    this.dirtyDeleted.clear();
+    console.log(`${this.app.name} dirty batch`, batch);
+
+    this.pool.dirtyUpdated.clear();
+    this.pool.dirtyDeleted.clear();
   }
 
   /**
@@ -215,6 +213,14 @@ export class PoolManager {
     if (Object.keys(batch).length > 0) {
       await this.app.io.saveBatch(batch);
     }
+  }
+
+  toJson() {
+    return this.pool.toJson();
+  }
+
+  getShard(prefix) {
+    return this.pool.getShard(prefix);
   }
 
 }

@@ -278,7 +278,7 @@ export class DB {
    */
   async savePoolsToDisk() {
     console.log('--- savePoolsToDisk ---');
-    this.anyDirty = false;
+    // this.anyDirty = false;
     if (!await this.app.io.tryLock()) return;
     const batch = {};
     for (const pool of Object.values(this.pools)) {

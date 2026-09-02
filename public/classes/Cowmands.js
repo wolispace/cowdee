@@ -124,7 +124,7 @@ export class Cowmands {
         }
         // last interacted with target will be the next commands 'it'
         if (this.context.actor === this.app.player.info.id) {
-          console.log(`${this.app.name} setting context.it to ${this.context.target}`);
+          console.log(`${this.app.name} ^^ setting player.info.it to ${this.context.target}`);
           this.app.player.info.it = this.context.target;
         }
       }
@@ -415,7 +415,7 @@ export class Cowmands {
       this.context.new_id = obj.id;
       // last interacted with target will be the next commands 'it'
       if (this.context.actor === this.app.player.info.id) {
-        console.log(`${this.app.name} setting context.it to ${this.context.target}`);
+        console.log(`${this.app.name} ^^^ setting player.info.it to ${this.context.target}`);
         this.app.player.info.it = this.context.target;
       }
     },

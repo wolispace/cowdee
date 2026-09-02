@@ -51,10 +51,6 @@ export class App {
         event.preventDefault();
         const form = event.target;
         const data = Object.fromEntries(new FormData(form));
-        // set essential values
-        data.actor = this.player.info.id;
-        data.loc = this.player.info.loc;
-        data.it = this.player.info.it;
         this.handleForm(data);
         const cmdInput = document.getElementById('cmd');
         if (cmdInput) cmdInput.value = '';
@@ -101,6 +97,7 @@ export class App {
     if (typeof data === 'string') {
       data = { cmd: data };
     }
+    // every command sent needs and actor, loc, it, lastContext, counter
     data.actor = data.actor ?? this.player.info.id;
     data.loc = data.loc ?? this.player.info.loc;
     data.it = this.player.info.it;

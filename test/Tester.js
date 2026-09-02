@@ -35,25 +35,25 @@ export class Tester {
     console.log('flushing memory');
     this.app.io.flush();
     console.log('removing files');
-    const dir = "public/_db";
-    for (const file of fs.readdirSync(dir)) {
-      if (file.endsWith(".json")) {
-        fs.rmSync(path.join(dir, file), { force: true });
-      }
-    }
-    const contextDir = "public/_contexts";
-    if (fs.existsSync(contextDir)) {
-      for (const file of fs.readdirSync(contextDir)) {
-        if (file.endsWith(".json")) {
-          fs.rmSync(path.join(contextDir, file), { force: true });
-        }
-      }
-    }
+    // const dir = "public/_db";
+    // for (const file of fs.readdirSync(dir)) {
+    //   if (file.endsWith(".json")) {
+    //     fs.rmSync(path.join(dir, file), { force: true });
+    //   }
+    // }
+    // const contextDir = "public/_contexts";
+    // if (fs.existsSync(contextDir)) {
+    //   for (const file of fs.readdirSync(contextDir)) {
+    //     if (file.endsWith(".json")) {
+    //       fs.rmSync(path.join(contextDir, file), { force: true });
+    //     }
+    //   }
+    // }
     if (typeof localStorage !== 'undefined') {
       try { localStorage.clear(); } catch (e) {}
     }
-    this.app.id.counter = 1;
-    fs.writeFileSync(this.counterFile, '1');
+    // this.app.id.counter = 1;
+    // fs.writeFileSync(this.counterFile, '1');
   }
 
 
