@@ -18,8 +18,12 @@ export class DB2 {
    */
   async get(type, key) {
     const prefix = this.prefix(key);
-    // only ID is mixed case so we can find things like name in mixed case
-    if (type !== 'id') key = key.toLowerCase();
+    // only name is lowercased so we can find things like name in mixed case
+    // id, code, and info are all keyed by object ID which preserves case
+    if (['name'].includes(type)) key = key.toLowerCase();
+    if (!this.memory[type]) {
+      this.memory[type] = {};
+    }
     if (!this.memory[type][prefix]) {
       this.memory[type][prefix] = await this.app.io.loadJson(`${type}_${prefix}`);
     };
@@ -87,7 +91,7 @@ export class DB2 {
    * @returns {string}
    */
   prefix(key = '_') {
-    return key[0].toUpperCase();
+    return String(key)[0].toUpperCase();
   }
 
   // manipulate objects within each type/prefix/key
@@ -98,7 +102,7 @@ export class DB2 {
    */
   async add(obj) {
     // --- ID shard ---
-    this.set('id', obj.id, obj);
+    await this.set('id', obj.id, obj);
 
     // --- NAME shard ---
     // TODO: build name from class and name 
@@ -116,14 +120,12 @@ export class DB2 {
 
     // --- CODE shard ---
     if (obj.code) {
-      this.set('code', obj.id, {loc: obj.loc, code: obj.code});
+      await this.set('code', obj.id, {loc: obj.loc, code: obj.code});
     }
-   // --- INFO shard ---
+    // --- INFO shard ---
     if (obj.info) {
-      this.set('info', obj.id, obj.info);
+      await this.set('info', obj.id, obj.info);
     }
-
-
   }
 
   /**
@@ -166,8 +168,10 @@ export class DB2 {
 
     // --- Remove from ID shard ---
     const prefix = this.prefix(id);
-    const idShard = this.memory.id[prefix];
-    delete idShard[id];
+    if (this.memory.id?.[prefix]) {
+      delete this.memory.id[prefix][id];
+      this.markDirty('id', prefix);
+    }
 
     // --- Remove from NAME shard ---
     const nameKey = name.toLowerCase();
@@ -178,10 +182,19 @@ export class DB2 {
     const locList = await this.get('loc', loc) ?? [];
     await this.set('loc', loc, locList.filter(x => x !== id));
 
-    // --- Remove from CODE chard ---
-    const codeList = await this.get('code', obj.code) ?? {};
-    delete codeList[id];
+    // --- Remove from CODE shard ---
+    const codePrefix = this.prefix(id);
+    if (this.memory.code?.[codePrefix]?.[id]) {
+      delete this.memory.code[codePrefix][id];
+      this.markDirty('code', codePrefix);
+    }
 
+    // --- Remove from INFO shard ---
+    const infoPrefix = this.prefix(id);
+    if (this.memory.info?.[infoPrefix]?.[id]) {
+      delete this.memory.info[infoPrefix][id];
+      this.markDirty('info', infoPrefix);
+    }
   }
 
   /**
