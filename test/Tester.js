@@ -58,11 +58,11 @@ export class Tester {
         process.stdout.write(":");
       }
     }
-    // const house = await this.app.db.get('id', '2');
-    // const old1 = { ...house };
-    // house.class = 'house';
-    // house.loc = '_';
-    // await this.app.db.save(house, old1);
+    const house = await this.app.db.get('id', '2');
+    const old1 = { ...house };
+    house.class = 'house';
+    house.loc = '_';
+    await this.app.db.save(house, old1);
 
     const library = await this.app.db.get('id', '3');
     const old2 = { ...library };

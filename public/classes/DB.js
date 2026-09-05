@@ -1,81 +1,63 @@
-// handles the memory pools
-import { PoolManager } from './PoolManager.js'
-
 export class DB {
-  pools = {};
-  keys = ['id', 'name', 'code', 'loc', 'trigger', 'info'];
-  dir = '_db';
-  interval = 5_000;
-  saveTimeout = null;
-  anyDirty = false; // set by pools to true the moment one pool is dirty, clear after save
 
+  memory = {};
+  dirty = {};
+
+  // see tests/DB2.php for some sample data
 
   constructor(app) {
     this.app = app;
-
-    for (const key of this.keys) {
-      this.pools[key] = new PoolManager(this.app, key);
-    }
   }
 
   /**
-   * Flush all objects from all pools
+   * Returns the obj of this type found matching the key
+   * eg: db.get('id', 'wol') or db.get('name','Wolis')
+   * @param {string} type eg 'id' or 'name'
+   * @param {string} key 
+   * @returns {object}
    */
-  flush() {
-    for (const key of this.keys) {
-      this.pools[key].clear();
+  async get(type, key) {
+    const prefix = this.prefix(key);
+    // only name is lowercased so we can find things like name in mixed case
+    // id, code, and info are all keyed by object ID which preserves case
+    if (['name'].includes(type)) key = key.toLowerCase();
+    if (!this.memory[type]) {
+      this.memory[type] = {};
     }
-    this.app.storage?.clear();
+    if (!this.memory[type][prefix]) {
+      this.memory[type][prefix] = await this.app.io.loadJson(`${type}_${prefix}`);
+    };
+    return this.memory[type][prefix][key];
   }
-
-  /**
-   * console log the contents of the pools
-   */
-  dump() {
-    for (const key of this.keys) {
-      console.log(`pool ${key}`, this.pools[key].pool.entries());
-    }
-  }
-
-
-  /**
+  
+    /**
    * Returns the whole object from a chunked file
    * @param {string} id 
    * @returns {object}
    */
   async getById(id) {
-    const set = await this.pools.id.get(id);
-    if (!set || set.size === 0) return undefined;
-    const obj = set.values().next().value;
-    return obj;
-  };
+    return await this.get('id', id);
+  } 
 
-  async getFormattedById(id) {
-    const obj = await this.getById(id);
-    if (obj) {
-      this.formatObject(obj);
-      return obj;
-    }
-  }
 
   /**
    * Returns an array of IDs with the required word eg: "cat" returns ["AB", "Ax" ...]
-   * @param {string} key 
+   * @param {string} word 
    * @returns {set} of IDs with this name
    */
-  async findByName(key) {
-    const name = key.replace(/^(?:the|an|a)\b/i, '').trim().toLocaleLowerCase();
-    return await this.pools.name.get(name);
+  async findByName(word) {
+    const name = word.replace(/^(?:the|an|a)\b/i, '').trim().toLocaleLowerCase();
+    return await this.get('name', name);
   };
 
-  /**
+   /**
    * Return the obj of the player matching the name
    * TODO: worry about passwords later
    * @param {object} data with data.username and data.pw
    * @returns {object}
    */
   async findPlayer(data) {
-    const candidates = await this.pools.name.get(data.playername.toLocaleLowerCase());
+    const candidates = await this.findByName(data.playername);
     if (!candidates) return undefined;
     // check all candidates to ensure they are class='player'
     // TODO: worry about password later
@@ -89,7 +71,7 @@ export class DB {
     }
   }
 
-  /**
+    /**
    * Find the first named object in the location
    * @param {string} name 
    * @param {string} loc 
@@ -97,61 +79,56 @@ export class DB {
    */
   async findByNameInLoc(name, loc) {
     const inName = await this.findByName(name);
-    if (!inName || inName.size === 0) return undefined;
+    if (!inName || inName.length < 1) return undefined;
     if (loc == 'all') {
-      return inName.values().next().value;
+      return inName[0];
     }
 
     const inLoc = await this.findInLoc(loc);
     if (!inLoc) return undefined;
     for (const key of inLoc) {
-      if (inName.has(key)) {
+      if (inName.includes(key)) {
         return key;
       }
     }
   }
 
-  /**
+
+    /**
    * Returns an array of object IDs in the location
    * @param {string} key 
    * @returns {set}
    */
   async findInLoc(key) {
-    return await this.pools.loc.get(key);
+    return await this.get('loc', key);
   }
 
-  findMatchInLoc(obj, context) {
-    // TODO: for creating a new object that merges with an existing
-    // loop through all objects in the location and if they match the obj.class, obj.color etc..
-    // then return it else return null
-  }
-
-  /**
+    /**
    * Retruns the code for the object.id passed in
    * for consistancy, even tho its just a string, its stored in an array with one element
    * @param {id} id 
    * @returns {string}
    */
   async getCode(id) {
-    const set = await this.pools.code.get(id);
-    if (!set || set.size === 0) return '';
-    const codeObj = set.values().next().value;
+    const set = await this.get('code', id);
+    if (!set || set.size < 1) return '';
+    const codeObj = set[0];
     return codeObj?.code ?? '';
   };
 
-    /**
+  /**
    * Retruns the info for the object.id passed in
    * for consistancy, even tho its just a string, its stored in an array with one element
    * @param {id} id 
    * @returns {string}
    */
   async getInfo(id) {
-    const set = await this.pools.info.get(id);
-    if (!set || set.size === 0) return '';
-    const infoObj = set.values().next().value;
-    return infoObj?.info ?? '';
+    const set = await this.get('info', id);
+    if (!set || set.size < 1) return '';
+    return set[0];
   };
 
+  
   /**
    * Find the first named command (look in player then location then globaly so long as its a command)
    * "find" means look for it somewhere, where as "get" means we know it so get it.
@@ -194,248 +171,232 @@ export class DB {
   };
 
   /**
-   * Runs code from a triggered object
-   * @param {object} context 
-   * @returns 
+   * Wrights into memory the value for this type and key
+   * @param {string} type 
+   * @param {string} key 
+   * @param {any} value 
    */
-  async findTrigger(context) {
-    if (!context) return;
-    const found = await this.pools.trigger.get(context.trigger);
-    if (!found || found.size < 1) return;
-    // loop through these to see if they are in the context.loc
-    const inLoc = await this.pools.loc.get(context.loc);
-    if (!inLoc || inLoc.size < 1) return;
-    const triggerable = new Set(
-      [...found].filter(obj => inLoc.has(obj.id))
-    );
-
-    if (triggerable.size < 1) return;
-
-    // dont do infinate reactions
-    if (this.reactions++ >= this.maxReactions) return;
-
-    for (const triggered of triggerable) {
-      const obj = await this.getById(triggered.id);
-      if (!obj) continue;
-      // prepare the context for this execution
-      context.actor = obj.id;
-      obj.code = await this.getCode(obj.id);
-      await this.app.commandManager.runCodeFrom(obj.code, triggered.block, context);
+  async set(type, key, value) {
+    
+    const prefix = this.prefix(key);
+    // so we can find matching names regardless of case
+    if (['name'].includes(type)) key = key.toLowerCase();
+    
+    console.log(`${this.app.name} - set`, {type, prefix, key, value});
+    // Ensure memory type and shard is in memory
+    let mtype = this.memory[type];
+    if (!mtype) {
+      this.memory[type] = {};
+      console.log(`${this.app.name} - had to make mtype`, type );
     }
+    let shard = this.memory[type][prefix];
+    if (!shard) {
+      shard = await this.app.io.loadJson(`${type}_${prefix}`);
+      console.log(`${this.app.name} - had to make shard`, type, prefix, 'shard', shard);
+      this.memory[type][prefix] = shard;
+    }
+    shard[key] = value;
+    this.markDirty(type, prefix);
+    this.memory[type][prefix] = shard;
+    console.log(`${this.app.name} - added into memory`, type, prefix, 'shard', shard);
+  }
+
+  // mark this shard as dirty for saving to disk later
+  markDirty(type, prefix) {
+   if (!this.dirty[type]) {
+      this.dirty[type] = new Set();
+    }
+    this.dirty[type].add(prefix); 
   }
 
   /**
-   * Add the object to all of the pools updaing and old pools
-   * @param {obj} obj 
-   * @param {object} old 
+   * Save all firty shards to disk
+   */
+  async saveToDisk() {
+    console.log(`${this.app.name} dirty`, this.dirty);
+    const batch = {};
+    for (const type of Object.keys(this.dirty) ) {
+      for (const prefix of this.dirty[type] ) {
+        const filename = `${type}_${prefix}`;
+        const data = this.memory[type][prefix];
+        batch[filename] = data;       
+      }
+    }
+    console.log(`${this.app.name} TODO save batch`, batch);
+    await this.app.io.saveBatch(batch);
+    this.dirty = {};
+  }
+
+  /**
+   * Returns the first latter of the key eg 'w' forom 'wolis'
+   * in production we return the ascii value eg '65' for 'A'
+   * But DEBUG just uppercases the value from easy of finding things
+   * @param {string} key 
+   * @returns {string}
+   */
+  prefix(key = '_') {
+    return String(key)[0].toUpperCase();
+  }
+
+  // manipulate objects within each type/prefix/key
+
+  /**
+   * Adds or updates an object into memory eg {id: 'wol', name: 'Wolis', loc: '2'}
+   * @param {object} obj 
    */
   async save(obj, old) {
-    // if there is already an obj, we maybe changing existing values like its loc from one to another
-    // so clear from all pools
-    if (obj.code) {
-      await this.pools.code.set(obj.id, { id: obj.id, loc: obj.loc, code: obj.code }, null, true);
-      await this.addTriggers(obj);
-      delete obj.code; // const { code, ...rest } = obj; // delete obj.code using destructuring
+    console.log(`${this.app.name} save`, obj, 'old', old);
+    // TODO: optimise this so we only remove/make dirty things that have changed
+    if (old) {
+      await this.remove(old.id);
     }
-    if (obj.info) {
-      await this.pools.info.set(obj.id, obj.info, null, true);
-      delete obj.info; // delete const { info, ...rest } = obj; // delete obj.info using destructuring
-    }
-    this.formatObject(obj);
-    await this.pools.id.set(obj.id, obj, null, true);
-    const oldLongName = `${old?.class ?? ''} ${old?.name ?? ''}`.trim().toLowerCase();
-    const objLongName = `${obj?.class ?? ''} ${obj?.name ?? ''}`.trim().toLowerCase();
 
-    if (oldLongName != objLongName) {
-      for (const name of objLongName.split(' ').filter(Boolean)) {
-        await this.pools.name.set(name, obj.id);
-      }
+    // --- ID shard ---
+    await this.set('id', obj.id, obj);
+
+    // --- NAME shard is built from all words in class and name ---
+    let longName = obj.class;
+    if (obj.name) {
+      longName += ` ${obj.name}`;
     }
-    if (!old || obj.loc !== old.loc) {
-      await this.pools.loc.set(obj.loc, obj.id, old?.loc);
+    const words = longName.split(' ');
+    for ( const word of words) {
+      const nameKey = word.toLowerCase();
+      const nameList = await this.get('name', nameKey) ?? [];
+      nameList.push(obj.id);
+      await this.set('name', nameKey, nameList);
     }
-    this.app.db.debounceSave();
+
+    // --- LOC shard ---
+    const locList = await this.get('loc', obj.loc) ?? [];
+    locList.push(obj.id);
+    await this.set('loc', obj.loc, locList);
+
+    // --- CODE shard ---
+    if (obj.code) {
+      await this.set('code', obj.id, {loc: obj.loc, code: obj.code});
+    }
+    // --- INFO shard ---
+    if (obj.info) {
+      await this.set('info', obj.id, obj.info);
+    }
   }
 
   /**
-   * Adds a trigger word if this code is triggred in some way
-   * @param {object} obj 
+   * Moves object into the new location
+   * @param {string} id 
+   * @param {string} newLoc 
    * @returns 
    */
-  async addTriggers(obj) {
-    // combined
-    const pattern = /\bif\s+(reacting\s+to|target\s+of)\s+(\w+)\s+then\s+(\w+);/i;
-    const match = obj.code.match(pattern);
-    if (!match) return;
-    const type = match[1].includes('target') ? 'target' : 'reacts';
-    const trigger = match[2];
-    const block = match[3];
-    await this.pools.trigger.set(trigger, { id: obj.id, block: block });
+  async move(id, newLoc) {
+    const obj = await this.get('id', id);
+    if (!obj) return;
+
+    const oldLoc = obj.loc;
+
+    // --- Remove from old location ---
+    const oldList = await this.get('loc', oldLoc) ?? [];
+    const filtered = oldList.filter(x => x !== id);
+    await this.set('loc', oldLoc, filtered);
+
+    // --- Add to new location ---
+    const newList = await this.get('loc', newLoc) ?? [];
+    newList.push(id);
+    await this.set('loc', newLoc, newList);
+
+    // --- Update object itself ---
+    obj.loc = newLoc;
+    await this.set('id', id, obj);
   }
 
   /**
-   * Write to disk all of the changed pools in a single batch
+   * Remove the object from existance
+   * @param {string} id 
+   * @returns 
    */
-  async savePoolsToDisk() {
-    console.log('--- savePoolsToDisk ---');
-    // this.anyDirty = false;
-    if (!await this.app.io.tryLock()) return;
-    const batch = {};
-    for (const pool of Object.values(this.pools)) {
-      pool.collectDirty(batch);
-    }
-    if (Object.keys(batch).length > 0) {
-      await this.app.io.saveBatch(batch);
-    }
-    await this.app.io.unLock();
-  }
+  async remove(id) {
+    const obj = await this.get('id', id);
+    if (!obj) return;
 
-
-  /**
-   * Add all referenced objects into this context from "{Ax} says hi to {b2}"
-   * @param {object} data 
-   * @returns nothing, updates obj
-   */
-  async prepContext(data) {
-    data.objs = data.objs ?? {};
-
-    // Phase 1: Process [$var] (bracketed = linkable objects)
-    const matches1 = [...data.msg.matchAll(/\[\$(\w+)\]/g)];
-    for (const m of matches1) {
-      const varName = m[1];
-      const value = data.context[varName] ?? '';
-      const obj = await this.getById(value);
-      if (obj) {
-        data.objs[value] = { id: obj.id, loc: obj.loc, name: obj.name, longname: obj.longname, color: obj.color, link: true };
-      }
+    // --- Remove from ID shard ---
+    const prefix = this.prefix(id);
+    if (this.memory.id?.[prefix]) {
+      delete this.memory.id[prefix][id];
+      this.markDirty('id', prefix);
     }
-    data.msg = data.msg.replace(/\[\$(\w+)\]/g, (_, varName) => {
-      const value = data.context[varName] ?? '';
-      return data.objs[value] ? `{${value}}` : value;
-    });
 
-    // Phase 2: Process $var (non-bracketed = styled but not linked)
-    const matches2 = [...data.msg.matchAll(/\$(\w+)/g)];
-    for (const m of matches2) {
-      const varName = m[1];
-      const value = data.context[varName] ?? '';
-      const obj = await this.getById(value);
-      if (obj && !data.objs[value]) {
-        data.objs[value] = { longname: obj.longname, color: obj.color };
-      }
-    }
-    data.msg = data.msg.replace(/\$(\w+)/g, (_, varName) => {
-      const value = data.context[varName] ?? '';
-      return data.objs[value] ? `{${value}}` : value;
-    });
-
-    if (data.brief) {
-      for (const obj of Object.values(data.objs)) {
-        obj.longname = `the ${obj.class}`;
-        console.log(obj.longname);
-      }
-    }
-  }
-
-  /**
-   * Adds formatted/processed versions of values within the object. Saved to disk so we dont need to reprocess again.
-   * Each time an object is added to the pools its re formatted.
-   * @param {obj} obj 
-   * @returns nothing, the obj is updated
-   */
-  formatObject(obj) {
-    this.formatQty(obj);
-    this.formatPlural(obj);
-    if (obj.qty == 1) {
-      obj.is = 'is';
-      obj.gender = 'it';
-    } else {
-      obj.is = 'are';
-      obj.gender = 'them';
-    }
-    obj.longname = `${obj.qtyText} ${obj.plural}`;
+    // --- NAME shard is built from all words in class and name ---
+    let longName = obj.class;
     if (obj.name) {
-      obj.longname += ' called ' + obj.name;
+      longName += ` ${obj.name}`;
     }
-    if (['player', 'command'].includes(obj.class)) {
-      obj.longname = obj.name;
+    const words = longName.split(' ');
+    for ( const word of words) {
+      const nameKey = word.toLowerCase();
+      const nameList = await this.get('name', nameKey) ?? [];
+      await this.set('name', nameKey, nameList.filter(x => x !== id));
     }
-  }
 
-  /**
-   * Formats the qty as a string eg 30 = many
-   * @param {obj} obj 
-   * @returns nothing, updates obj
-   */
-  formatQty(obj) {
-    obj.qty = !obj.qty ? 1 : obj.qty;
-    obj.qtyText = obj.qty;
-    if (obj.qty == 1) {
-      obj.qtyText = ['a', 'e', 'i', 'o', 'u'].includes(obj.class[0]) ? 'an' : 'a';
-    } else if (obj.qty == 2) {
-      obj.qtyText = 'two';
-    } else if (obj.qty == 3) {
-      obj.qtyText = 'three';
-    } else if (obj.qty == -1) {
-      obj.qtyText = 'the';
-    } else if (obj.qty < 10) {
-      obj.qtyText = obj.qty;
-    } else if (obj.qty < 20) {
-      obj.qtyText = 'some';
-    } else if (obj.qty < 99) {
-      obj.qtyText = 'many';
-    } else if (obj.qty < 999) {
-      obj.qtyText = 'hundreds of';
-    } else if (obj.qty < 999999) {
-      obj.qtyText = 'thousands of';
-    } else if (obj.qty < 999999999) {
-      obj.qtyText = 'millions of';
-    } else {
-      obj.qtyText = 'a mind-boggling quantity of';
+    // --- Remove from LOC shard ---
+    const locList = await this.get('loc', obj.loc) ?? [];
+    await this.set('loc', obj.loc, locList.filter(x => x !== id));
+
+    // --- Remove from CODE shard ---
+    const codePrefix = this.prefix(id);
+    if (this.memory.code?.[codePrefix]?.[id]) {
+      delete this.memory.code[codePrefix][id];
+      this.markDirty('code', codePrefix);
+    }
+
+    // --- Remove from INFO shard ---
+    const infoPrefix = this.prefix(id);
+    if (this.memory.info?.[infoPrefix]?.[id]) {
+      delete this.memory.info[infoPrefix][id];
+      this.markDirty('info', infoPrefix);
     }
   }
 
   /**
-   * Formats the plural version of this object
-   * @param {object} obj 
-   * @returns nothing, updates obj
+   * Renames an object
+   * @param {string} id 
+   * @param {string} newName 
+   * @returns 
    */
-  formatPlural(obj) {
-    obj.plural = '';
-    if (obj.qty > 1) {
-      const plurals = { 'knife': 'knives', 'sheep': 'sheep', 'loaf': 'loaves', 'mouse': 'mice' };
-      const plural = plurals[obj.class];
-      obj.plural = (plural === undefined) ? obj.class + 's' : plural;
-    } else {
-      obj.plural = obj.class;
-    }
+  async rename(id, newName) {
+    const obj = await this.get('id', id);
+    if (!obj) return;
+
+    const oldNameKey = obj.name.toLowerCase();
+    const newNameKey = newName.toLowerCase();
+
+    // --- Remove from old name list ---
+    const oldList = await this.get('name', oldNameKey) ?? [];
+    await this.set('name', oldNameKey, oldList.filter(x => x !== id));
+
+    // --- Add to new name list ---
+    const newList = await this.get('name', newNameKey) ?? [];
+    newList.push(id);
+    await this.set('name', newNameKey, newList);
+
+    // --- Update object ---
+    obj.name = newName;
+    await this.set('id', id, obj);
   }
 
   /**
-   * New lookLoc2 method that structures descriptions dynamically and recursively
-   * with limits on sentence group size and rotating templates.
-   * @param {Context} context 
-   * @returns {Context}
+   * Flush memory and dirty and reset counter
    */
-  async lookLoc(context) {
-    const data = await this.app.lookManager.look(context);
-    // messageManager.add(data);
-    return data;
+  flush() {
+    this.memory = {};
+    this.dirty = {};
+    this.counter = 1;
   }
 
-  debounceSave() {
-    // Clear any existing timer
-    if (this.saveTimeout) {
-      clearTimeout(this.saveTimeout);
-    }
-
-    // Set a new 5-second timer
-    this.saveTimeout = setTimeout(async () => {
-      if (this.anyDirty) {
-        console.log('timeout debounce savePools');
-        this.saveTimeout = null;
-        await this.savePoolsToDisk();
-      }
-    }, this.interval);
+  /**
+   * Returns the entire memory object as a json string
+   * @returns string
+   */
+  toString() {
+    return JSON.stringify(this.memory, null, 2);
   }
 }

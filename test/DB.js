@@ -11,8 +11,8 @@ if (app.settings.generate) {
   app.player.info.id = 'wol';
   app.tester.deleteTestFiles();
   await app.tester.initObjects(app.settings.max);
-  // await app.tester.initPlayers();
-  // await app.tester.initCommands();
+  await app.tester.initPlayers();
+  await app.tester.initCommands();
 
   await app.db.saveToDisk();
 }
