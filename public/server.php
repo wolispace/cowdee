@@ -14,6 +14,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // always recieve json data
 $request = json_decode(file_get_contents('php://input'), true);
 
+logIt('input ' . json_encode($request));
+if (empty($request)) {
+  $request = $_REQUEST;
+}
 handleInput($request);
 
 function handleInput($request) {
@@ -105,6 +109,7 @@ function handleInput($request) {
     outputJson($results);
   } else if (!empty($request['file'])) {
     $file = shardName($request['file']);
+    logIt('read file: ' . $file);
     if (empty($request['content'])) {
       outputJson(loadJson($file));
     } else {
@@ -137,6 +142,7 @@ function shardName($filename) {
 
 function outputJson($data) {
   header('Content-Type: application/json');
+  logIt('output ' . json_encode($data));
   echo json_encode($data);
   exit;
 }

@@ -4,6 +4,7 @@ import { SSE } from './SSE.js';
 import { IO } from './IO.js';
 import { UI } from './UI.js';
 import { DB } from './DB.js';
+import { DB2 } from './DB2.js';
 import { ID } from './ID.js';
 import { Player } from './Player.js';
 import { LookManager } from './LookManager.js';
@@ -27,7 +28,8 @@ export class App {
     this.utils = new Utils(this); // random utils
     this.io = new IO(this); // disk IO - read and write to server
     this.ui = new UI(this); // user interface
-    this.db = new DB(this); // database - read and write objects
+    this.db = new DB2(this); // database - read and write objects
+    this.db2 = new DB2(this); // database - read and write objects
     this.id = new ID(this); // generate unique sequential ids
     this.player = new Player(this);
     this.lookManager = new LookManager(this);

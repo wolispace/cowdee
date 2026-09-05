@@ -1,37 +1,9 @@
 export class DB2 {
 
   memory = {};
+  dirty = {};
 
-  /*
-  memory = { 
-    name: {
-      H: {house: ["2"]},
-      L: {library: ["3"]},
-      B: {basket: ["2a","B2"], bob: ["bob"], build: ["Dw"]},
-      J: {jane: ["jan"]},
-    },
-    id: {
-      2: {2: {id:2, name:"house", loc: "0"}, 2a: {id:2a, name:"basket", loc: "2"}},
-      3: {3: {id:3, name:"library", loc: "0"}},
-      D: {Dw: {id:Dw, name:"build", loc: "3"}},
-      J: {jan: {id:jan, name:"jane", loc: "3"}},
-      B: {bob: {id:bob, name:"bob", loc: "2"}, B2: {id:B2, name:"basket", loc: "3"}},
-    },
-    loc: {
-      2: {2: [2a, bob]},
-      3: {3: [jan, B2]},
-    },
-    code: {
-      D: {Dw: {loc:3, code: "get $text\nnew $text;"}
-    },
-    info: {
-      D: {Dw: "Use this command to build new locations."},
-      B: {B2: "Its a rather special basket"}
-    }
-  }
- 
-
-  */
+  // see tests/DB2.php for some sample data
 
   constructor(app) {
     this.app = app;
@@ -44,37 +16,68 @@ export class DB2 {
    * @param {string} key 
    * @returns {object}
    */
-  get(type, key) {
+  async get(type, key) {
     const prefix = this.prefix(key);
     // only ID is mixed case so we can find things like name in mixed case
     if (type !== 'id') key = key.toLowerCase();
     if (!this.memory[type][prefix]) {
-      this.memory[type][prefix] = this.io.loadJson(`${type}_${prefix}`);
+      this.memory[type][prefix] = await this.app.io.loadJson(`${type}_${prefix}`);
     };
     return this.memory[type][prefix][key];
   }
 
   /**
-   * Writs into memory the value for this type and key
+   * Wrights into memory the value for this type and key
    * @param {string} type 
    * @param {string} key 
    * @param {any} value 
    */
-  set(type, key, value) {
+  async set(type, key, value) {
+    
     const prefix = this.prefix(key);
-    // only ID is mixed case so we can find things like name in mixed case
-    if (type !== 'id') key = key.toLowerCase();
-
-    // Ensure shard is loaded
+    // so we can find matching names regardless of case
+    if (['name'].includes(type)) key = key.toLowerCase();
+    
+    console.log(`${this.app.name} - set`, {type, prefix, key, value});
+    // Ensure memory type and shard is in memory
+    let mtype = this.memory[type];
+    if (!mtype) {
+      this.memory[type] = {};
+      console.log(`${this.app.name} - had to make mtype`, type );
+    }
     let shard = this.memory[type][prefix];
     if (!shard) {
-      shard = this.io.loadJson(`${type}_${prefix}`);
+      shard = await this.app.io.loadJson(`${type}_${prefix}`);
+      console.log(`${this.app.name} - had to make shard`, type, prefix, 'shard', shard);
       this.memory[type][prefix] = shard;
     }
-
     shard[key] = value;
+    this.markDirty(type, prefix);
+    this.memory[type][prefix] = shard;
+    console.log(`${this.app.name} - added into memory`, type, prefix, 'shard', shard);
   }
 
+  // mark this shard as dirty for saving to disk later
+  markDirty(type, prefix) {
+   if (!this.dirty[type]) {
+      this.dirty[type] = new Set();
+    }
+    this.dirty[type].add(prefix); 
+  }
+
+  /**
+   * Save all firty shards to disk
+   */
+  async saveToDisk() {
+    for (const type of Object.keys(this.dirty) ) {
+      for (const prefix of this.dirty[type] ) {
+        const filename = `${type}_${prefix}`;
+        const data = this.memory[type][prefix];
+        await this.app.io.saveJson(filename, data);
+      }
+    }
+    this.dirty = {};
+  }
 
   /**
    * Returns the first latter of the key eg 'w' forom 'wolis'
@@ -83,7 +86,7 @@ export class DB2 {
    * @param {string} key 
    * @returns {string}
    */
-  prefix(key = '') {
+  prefix(key = '_') {
     return key[0].toUpperCase();
   }
 
@@ -93,7 +96,7 @@ export class DB2 {
    * Adds an object into memory eg {id: 'wol', name: 'Wolis', loc: '2'}
    * @param {object} obj 
    */
-  add(obj) {
+  async add(obj) {
     // --- ID shard ---
     this.set('id', obj.id, obj);
 
@@ -102,27 +105,24 @@ export class DB2 {
     // loop through all words and add to the 'name' list
     const word = obj.name
     const nameKey = word.toLowerCase();
-    const nameList = this.get('name', nameKey) ?? [];
-    nameList.push(id);
-    this.set('name', nameKey, nameList);
+    const nameList = await this.get('name', nameKey) ?? [];
+    nameList.push(obj.id);
+    await this.set('name', nameKey, nameList);
 
     // --- LOC shard ---
-    const locList = this.get('loc', obj.loc) ?? [];
-    locList.push(id);
-    this.set('loc', obj.loc, locList);
+    const locList = await this.get('loc', obj.loc) ?? [];
+    locList.push(obj.id);
+    await this.set('loc', obj.loc, locList);
 
     // --- CODE shard ---
     if (obj.code) {
-      const codeList = this.get('code', obj.code) ?? {};
-      codeList[obj.id] = {loc: obj.loc, code: obj.code};
-      this.set('loc', loc, locList);
+      this.set('code', obj.id, {loc: obj.loc, code: obj.code});
     }
    // --- INFO shard ---
     if (obj.info) {
-      const infoList = this.get('info', obj.info) ?? {};
-      infoList[obj.id] = obj.info;
-      this.set('loc', loc, locList);
+      this.set('info', obj.id, obj.info);
     }
+
 
   }
 
@@ -132,25 +132,25 @@ export class DB2 {
    * @param {string} newLoc 
    * @returns 
    */
-  move(id, newLoc) {
-    const obj = this.get('id', id);
+  async move(id, newLoc) {
+    const obj = await this.get('id', id);
     if (!obj) return;
 
     const oldLoc = obj.loc;
 
     // --- Remove from old location ---
-    const oldList = this.get('loc', oldLoc) ?? [];
+    const oldList = await this.get('loc', oldLoc) ?? [];
     const filtered = oldList.filter(x => x !== id);
-    this.set('loc', oldLoc, filtered);
+    await this.set('loc', oldLoc, filtered);
 
     // --- Add to new location ---
-    const newList = this.get('loc', newLoc) ?? [];
+    const newList = await this.get('loc', newLoc) ?? [];
     newList.push(id);
-    this.set('loc', newLoc, newList);
+    await this.set('loc', newLoc, newList);
 
     // --- Update object itself ---
     obj.loc = newLoc;
-    this.set('id', id, obj);
+    await this.set('id', id, obj);
   }
 
   /**
@@ -158,8 +158,8 @@ export class DB2 {
    * @param {string} id 
    * @returns 
    */
-  remove(id) {
-    const obj = this.get('id', id);
+  async remove(id) {
+    const obj = await this.get('id', id);
     if (!obj) return;
 
     const { name, loc } = obj;
@@ -171,15 +171,15 @@ export class DB2 {
 
     // --- Remove from NAME shard ---
     const nameKey = name.toLowerCase();
-    const nameList = this.get('name', nameKey) ?? [];
-    this.set('name', nameKey, nameList.filter(x => x !== id));
+    const nameList = await this.get('name', nameKey) ?? [];
+    await this.set('name', nameKey, nameList.filter(x => x !== id));
 
     // --- Remove from LOC shard ---
-    const locList = this.get('loc', loc) ?? [];
-    this.set('loc', loc, locList.filter(x => x !== id));
+    const locList = await this.get('loc', loc) ?? [];
+    await this.set('loc', loc, locList.filter(x => x !== id));
 
     // --- Remove from CODE chard ---
-    const codeList = this.get('code', obj.code) ?? {};
+    const codeList = await this.get('code', obj.code) ?? {};
     delete codeList[id];
 
   }
@@ -190,25 +190,28 @@ export class DB2 {
    * @param {string} newName 
    * @returns 
    */
-  rename(id, newName) {
-    const obj = this.get('id', id);
+  async rename(id, newName) {
+    const obj = await this.get('id', id);
     if (!obj) return;
 
     const oldNameKey = obj.name.toLowerCase();
     const newNameKey = newName.toLowerCase();
 
     // --- Remove from old name list ---
-    const oldList = this.get('name', oldNameKey) ?? [];
-    this.set('name', oldNameKey, oldList.filter(x => x !== id));
+    const oldList = await this.get('name', oldNameKey) ?? [];
+    await this.set('name', oldNameKey, oldList.filter(x => x !== id));
 
     // --- Add to new name list ---
-    const newList = this.get('name', newNameKey) ?? [];
+    const newList = await this.get('name', newNameKey) ?? [];
     newList.push(id);
-    this.set('name', newNameKey, newList);
+    await this.set('name', newNameKey, newList);
 
     // --- Update object ---
     obj.name = newName;
-    this.set('id', id, obj);
+    await this.set('id', id, obj);
   }
 
+  toString() {
+    return JSON.stringify(this.memory, null, 2);
+  }
 }
