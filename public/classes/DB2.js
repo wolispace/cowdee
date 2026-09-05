@@ -73,13 +73,17 @@ export class DB2 {
    * Save all firty shards to disk
    */
   async saveToDisk() {
+    console.log(`${this.app.name} dirty`, this.dirty);
+    const batch = {};
     for (const type of Object.keys(this.dirty) ) {
       for (const prefix of this.dirty[type] ) {
         const filename = `${type}_${prefix}`;
         const data = this.memory[type][prefix];
-        await this.app.io.saveJson(filename, data);
+        batch[filename] = data;       
       }
     }
+    console.log(`${this.app.name} TODO save batch`, batch);
+    await this.app.io.saveBatch(batch);
     this.dirty = {};
   }
 
@@ -97,21 +101,30 @@ export class DB2 {
   // manipulate objects within each type/prefix/key
 
   /**
-   * Adds an object into memory eg {id: 'wol', name: 'Wolis', loc: '2'}
+   * Adds or updates an object into memory eg {id: 'wol', name: 'Wolis', loc: '2'}
    * @param {object} obj 
    */
-  async add(obj) {
+  async save(obj) {
+    // TODO: optimise this so we only remove/make dirty things that have changed
+    if (await this.get('id', obj.id)) {
+      this.remove(obj.id);
+    }
+
     // --- ID shard ---
     await this.set('id', obj.id, obj);
 
-    // --- NAME shard ---
-    // TODO: build name from class and name 
-    // loop through all words and add to the 'name' list
-    const word = obj.name
-    const nameKey = word.toLowerCase();
-    const nameList = await this.get('name', nameKey) ?? [];
-    nameList.push(obj.id);
-    await this.set('name', nameKey, nameList);
+    // --- NAME shard is built from all words in class and name ---
+    let longName = obj.class;
+    if (obj.name) {
+      longName += ` ${obj.name}`;
+    }
+    const words = longName.split(' ');
+    for ( const word of words) {
+      const nameKey = word.toLowerCase();
+      const nameList = await this.get('name', nameKey) ?? [];
+      nameList.push(obj.id);
+      await this.set('name', nameKey, nameList);
+    }
 
     // --- LOC shard ---
     const locList = await this.get('loc', obj.loc) ?? [];
@@ -156,15 +169,13 @@ export class DB2 {
   }
 
   /**
-   * Remove the object from the existance
+   * Remove the object from existance
    * @param {string} id 
    * @returns 
    */
   async remove(id) {
     const obj = await this.get('id', id);
     if (!obj) return;
-
-    const { name, loc } = obj;
 
     // --- Remove from ID shard ---
     const prefix = this.prefix(id);
@@ -173,14 +184,21 @@ export class DB2 {
       this.markDirty('id', prefix);
     }
 
-    // --- Remove from NAME shard ---
-    const nameKey = name.toLowerCase();
-    const nameList = await this.get('name', nameKey) ?? [];
-    await this.set('name', nameKey, nameList.filter(x => x !== id));
+    // --- NAME shard is built from all words in class and name ---
+    let longName = obj.class;
+    if (obj.name) {
+      longName += ` ${obj.name}`;
+    }
+    const words = longName.split(' ');
+    for ( const word of words) {
+      const nameKey = word.toLowerCase();
+      const nameList = await this.get('name', nameKey) ?? [];
+      await this.set('name', nameKey, nameList.filter(x => x !== id));
+    }
 
     // --- Remove from LOC shard ---
-    const locList = await this.get('loc', loc) ?? [];
-    await this.set('loc', loc, locList.filter(x => x !== id));
+    const locList = await this.get('loc', obj.loc) ?? [];
+    await this.set('loc', obj.loc, locList.filter(x => x !== id));
 
     // --- Remove from CODE shard ---
     const codePrefix = this.prefix(id);
@@ -224,6 +242,19 @@ export class DB2 {
     await this.set('id', id, obj);
   }
 
+  /**
+   * Flush memory and dirty and reset counter
+   */
+  flush() {
+    this.memory = {};
+    this.dirty = {};
+    this.counter = 1;
+  }
+
+  /**
+   * Returns the entire memory object as a json string
+   * @returns string
+   */
   toString() {
     return JSON.stringify(this.memory, null, 2);
   }

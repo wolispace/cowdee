@@ -1,19 +1,8 @@
-import fs from "fs";
-import path from "path";
 import { Context } from '../public/classes/Context.js';
 
 export class Tester {
-
-   counterFile = 'public/_db/_counter.txt';
-
   constructor(app) {
     this.app = app;
-    if (fs.existsSync(this.counterFile)) {
-      const val = parseInt(fs.readFileSync(this.counterFile, 'utf8'), 10);
-      if (!isNaN(val) && val > 0) {
-        this.app.id.counter = val;
-      }
-    }
 
     console.log('CWD:', process.cwd());
 
@@ -31,29 +20,14 @@ export class Tester {
 
   }
 
-  deleteTestFiles() {
-    console.log('flushing memory');
-    this.app.io.flush();
+  async deleteTestFiles() {
+    console.log('flushed memory');
+    this.app.db.flush();
     console.log('removing files');
-    // const dir = "public/_db";
-    // for (const file of fs.readdirSync(dir)) {
-    //   if (file.endsWith(".json")) {
-    //     fs.rmSync(path.join(dir, file), { force: true });
-    //   }
-    // }
-    // const contextDir = "public/_contexts";
-    // if (fs.existsSync(contextDir)) {
-    //   for (const file of fs.readdirSync(contextDir)) {
-    //     if (file.endsWith(".json")) {
-    //       fs.rmSync(path.join(contextDir, file), { force: true });
-    //     }
-    //   }
-    // }
+    await fetch('http://localhost/_emptyDB.php');
     if (typeof localStorage !== 'undefined') {
       try { localStorage.clear(); } catch (e) {}
     }
-    // this.app.id.counter = 1;
-    // fs.writeFileSync(this.counterFile, '1');
   }
 
 
@@ -84,13 +58,13 @@ export class Tester {
         process.stdout.write(":");
       }
     }
-    const house = await this.app.db.getById('2');
+    const house = await this.app.db.get('id', '2');
     const old1 = { ...house };
     house.class = 'house';
     house.loc = '0';
     await this.app.db.save(house, old1);
 
-    const library = await this.app.db.getById('3');
+    const library = await this.app.db.get('id', '3');
     const old2 = { ...library };
     library.class = 'library';
     library.loc = '0';

@@ -40,7 +40,6 @@ export class IO {
   async fetchJson(type, payload) {
     payload.token = this.token;
     payload.counter = this.app.id.counter;
-    console.log(`${this.app.name} fetch`, this.type[type], payload);
     try {
       const response = await fetch(this.type[type], {
         method: 'POST',
@@ -57,17 +56,6 @@ export class IO {
       this.app.ui.hideLoading();
       return null;
     }
-  }
-
-  flush() {
-    console.log(`${this.app.name} flush pools`);
-    this.app.db.flush();
-  }
-
-  makeShardFilename(type = '_', key = '_') {
-    const k = String(key).toUpperCase();
-    // return `${type}_${k.charCodeAt(0)}`;
-    return `${type}_${k[0]}`;
   }
 
   async tryLock() {

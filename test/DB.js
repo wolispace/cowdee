@@ -14,18 +14,8 @@ if (app.settings.generate) {
   await app.tester.initPlayers();
   await app.tester.initCommands();
 
-  console.log('dirty names', app.db.pools['name'].pool.dirtyUpdated, app.db.pools['name'].pool.dirtyDeleted); 
-  await app.db.savePoolsToDisk();
+  await app.db.saveToDisk();
 }
-
-// console.log('name', app.db.pools['name'].toJson());
-
-console.log('shard p', app.db.pools['name'].getShard('p'));
-
-// for (const key of app.db.keys) {
-//   const pool = app.db.pools[key];
-//   console.log(pool.type, pool.pool.toJson());
-// }
  
 console.log('-------------- END ----------------');
 process.exit(0);
