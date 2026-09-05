@@ -104,10 +104,11 @@ export class DB2 {
    * Adds or updates an object into memory eg {id: 'wol', name: 'Wolis', loc: '2'}
    * @param {object} obj 
    */
-  async save(obj) {
+  async save(obj, old) {
+    console.log(`${this.app.name} save`, obj, 'old', old);
     // TODO: optimise this so we only remove/make dirty things that have changed
-    if (await this.get('id', obj.id)) {
-      this.remove(obj.id);
+    if (old) {
+      await this.remove(old.id);
     }
 
     // --- ID shard ---

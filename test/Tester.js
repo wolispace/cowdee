@@ -42,9 +42,9 @@ export class Tester {
   }
 
 
-  async initObjects() {
+  async initObjects(max) {
     let counter = 0;
-    while (counter++ < 5) {
+    while (counter++ < max) {
       const obj = {
         id: this.app.id.new(),
         class: this.randomName(),
@@ -58,16 +58,16 @@ export class Tester {
         process.stdout.write(":");
       }
     }
-    const house = await this.app.db.get('id', '2');
-    const old1 = { ...house };
-    house.class = 'house';
-    house.loc = '0';
-    await this.app.db.save(house, old1);
+    // const house = await this.app.db.get('id', '2');
+    // const old1 = { ...house };
+    // house.class = 'house';
+    // house.loc = '_';
+    // await this.app.db.save(house, old1);
 
     const library = await this.app.db.get('id', '3');
     const old2 = { ...library };
     library.class = 'library';
-    library.loc = '0';
+    library.loc = '_';
     await this.app.db.save(library, old2);
   }
 
