@@ -2,6 +2,7 @@ export class DB {
 
   memory = {};
   dirty = {};
+  interval = 5_000;
 
   // see tests/DB2.php for some sample data
 
@@ -30,7 +31,7 @@ export class DB {
     return this.memory[type][prefix][key];
   }
 
-    /**
+    /** TODO: do we need this still?
    * Preloads all shard files needed for an array/Set of keys in a single batch request
    * @param {Iterable<string>} keys 
    */
@@ -286,6 +287,7 @@ export class DB {
     this.markDirty(type, prefix);
     this.memory[type][prefix] = shard;
     // console.log(`${this.app.name} - added into memory`, type, prefix, 'shard', shard);
+    this.debounceSave();
   }
 
   // mark this shard as dirty for saving to disk later
@@ -468,6 +470,21 @@ export class DB {
     // --- Update object ---
     obj.name = newName;
     await this.set('id', id, obj);
+  }
+
+  async debounceSave() {
+    console.log(`${this.app.name} @@ debounce started `);    
+    // Clear any existing timer
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+    }
+
+    // Set a new 5-second timer
+    this.saveTimeout = setTimeout(async () => {
+      console.log(`${this.app.name} @@ timeout debounce save to disk`);
+      this.saveTimeout = null;
+      await this.saveToDisk();
+    }, this.interval);
   }
 
   /**
