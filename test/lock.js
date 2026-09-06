@@ -10,7 +10,7 @@ wolis.tester.deleteTestFiles();
 await wolis.tester.initObjects();
 await wolis.tester.initPlayers();
 await wolis.tester.initCommands();
-await wolis.db.savePoolsToDisk();
+await wolis.db.saveToDisk();
 await wolis.player.handleLogon({ playername: 'Wolis' });
 await wolis.start();
 
@@ -45,12 +45,6 @@ await wolis.sendCommand({ cmd: `examine the fish` });
 wolis.sse.close();
 bob.sse.close();
 
-
-// const obj = app.db.getById('2');
-// obj.color = 'dodgerblue';
-// app.db.save(obj);
-
-// await app.db.savePoolsToDisk();
 
 console.log('-------------- END ----------------');
 process.exit(0);

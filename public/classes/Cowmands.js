@@ -250,6 +250,7 @@ export class Cowmands {
       const obj = await this.resolveObj(rest.trim());
       if (!obj) return;
       const hosted = await this.app.db.findInLoc(obj.id);
+      if (!hosted) return;
       for (const subId of hosted) {
         const sub = await this.app.db.getById(subId);
         if (!sub) continue;

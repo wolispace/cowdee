@@ -35,7 +35,7 @@ export class LookManager {
     this.found = await this.db.findInLoc(loc.id);
 
     this.sentences = [`In [${loc.id}] you see: `];
-    if (!this.found || this.found.size < 1) {
+    if (!this.found || this.found.length < 1) {
       this.sentences.push('Nothing interesting here');
       return this.returnData();
     }
@@ -126,7 +126,7 @@ export class LookManager {
     // console.log(`found in ${loc.id}`, this.found);
     const inon = 'in';
     this.sentences = [`You are ${inon} [${loc.id}]`];
-    if (!this.found || this.found.size < 1) {
+    if (!this.found || this.found.length < 1) {
       this.sentences.push('Nothing interesting here');
       if (loc) this.objs[loc.id] = loc;
       return this.returnData();
@@ -152,9 +152,9 @@ export class LookManager {
    */
   async populateObjs() {
     const objs = {};
-    if (!this.found || this.found.size === 0) return objs;
+    if (!this.found || this.found.length === 0) return objs;
 
-    await this.db.pools.id.preload(this.found);
+   // await this.db.pools.id.preload(this.found);
 
     for (const id of this.found) {
       const obj = await this.db.getById(id);
@@ -236,7 +236,7 @@ export class LookManager {
       let objCounter = 1;
       for (const id of ids) {
         const sub = this.objs[id];
-        delim = (ids.size > 1 && objCounter++ >= ids.size) ? ' and ' : delim;
+        delim = (ids.length > 1 && objCounter++ >= ids.length) ? ' and ' : delim;
         let objName = ['player','command'].includes(sub.class) ? `${sub.class} called [${id}]` : `[${id}.plural]`;
         let descObj = `[${id}.pose] [${id}]`;
         descObj = `[${id}.qtyText] [${id}.pose] ${objName}`;

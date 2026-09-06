@@ -1,3 +1,5 @@
 call prep
-node --localstorage-file=_storage/local.sqlite test/%1.js
+where node
+node --version
+node --inspect --localstorage-file=_storage/local.sqlite test/%1.js
 

@@ -110,10 +110,9 @@ export class DB {
    * @returns {string}
    */
   async getCode(id) {
-    const set = await this.get('code', id);
-    if (!set || set.size < 1) return '';
-    const codeObj = set[0];
-    return codeObj?.code ?? '';
+    const obj = await this.get('code', id);
+    if (!obj) return '';
+    return obj?.code ?? '';
   };
 
   /**
@@ -123,9 +122,9 @@ export class DB {
    * @returns {string}
    */
   async getInfo(id) {
-    const set = await this.get('info', id);
-    if (!set || set.size < 1) return '';
-    return set[0];
+    const objInfo = await this.get('info', id);
+    if (!objInfo) return '';
+    return objInfo ?? '';
   };
 
   
@@ -136,31 +135,21 @@ export class DB {
    * @param {object} [context] 
    * @returns {string} return the code from the bext match object
    */
-  async findCommand(firstword, context) {
-    let cowmand = '';
-    let ctx = null;
-    if (typeof firstword === 'object') {
-      ctx = firstword;
-      cowmand = ctx.cowmand;
-    } else {
-      cowmand = firstword;
-      ctx = context || {};
-    }
+  async findCommand(context) {
+    const ids = await this.findByName(context.cowmand);
 
-    const ids = await this.findByName(cowmand);
-
-    if (!ids || ids.size < 1) return '';
-    if (ids.size === 1) {
+    if (!ids || ids.length < 1) return '';
+    if (ids.length === 1) {
       const [id] = ids;
       return await this.getCode(id);
     }
     for (const id of ids) {
       const obj = await this.getById(id);
       if (!obj) continue;
-      if (obj.loc === ctx.actor) {
+      if (obj.loc === context.actor) {
         return await this.getCode(id);
       }
-      if (obj.loc === ctx.loc) {
+      if (obj.loc === context.loc) {
         return await this.getCode(id);
       }
       if (obj.class === 'command') {
@@ -169,6 +158,83 @@ export class DB {
     }
     return '';
   };
+
+  
+  /**
+   * Adds formatted/processed versions of values within the object. Saved to disk so we dont need to reprocess again.
+   * Each time an object is added to the pools its re formatted.
+   * @param {obj} obj 
+   * @returns nothing, the obj is updated
+   */
+  formatObject(obj) {
+    this.formatQty(obj);
+    this.formatPlural(obj);
+    if (obj.qty == 1) {
+      obj.is = 'is';
+      obj.gender = 'it';
+    } else {
+      obj.is = 'are';
+      obj.gender = 'them';
+    }
+    obj.longname = `${obj.qtyText} ${obj.plural}`;
+    if (obj.name) {
+      obj.longname += ' called ' + obj.name;
+    }
+    if (['player', 'command'].includes(obj.class)) {
+      obj.longname = obj.name;
+    }
+  }
+
+  /**
+   * Formats the qty as a string eg 30 = many
+   * @param {obj} obj 
+   * @returns nothing, updates obj
+   */
+  formatQty(obj) {
+    obj.qty = !obj.qty ? 1 : obj.qty;
+    obj.qtyText = obj.qty;
+    if (obj.qty == 1) {
+      obj.qtyText = ['a', 'e', 'i', 'o', 'u'].includes(obj.class[0]) ? 'an' : 'a';
+    } else if (obj.qty == 2) {
+      obj.qtyText = 'two';
+    } else if (obj.qty == 3) {
+      obj.qtyText = 'three';
+    } else if (obj.qty == -1) {
+      obj.qtyText = 'the';
+    } else if (obj.qty < 10) {
+      obj.qtyText = obj.qty;
+    } else if (obj.qty < 20) {
+      obj.qtyText = 'some';
+    } else if (obj.qty < 99) {
+      obj.qtyText = 'many';
+    } else if (obj.qty < 999) {
+      obj.qtyText = 'hundreds of';
+    } else if (obj.qty < 999999) {
+      obj.qtyText = 'thousands of';
+    } else if (obj.qty < 999999999) {
+      obj.qtyText = 'millions of';
+    } else {
+      obj.qtyText = 'a mind-boggling quantity of';
+    }
+  }
+
+  /**
+   * Formats the plural version of this object
+   * @param {object} obj 
+   * @returns nothing, updates obj
+   */
+  formatPlural(obj) {
+    obj.plural = '';
+    if (obj.qty > 1) {
+      const plurals = { 'knife': 'knives', 'sheep': 'sheep', 'loaf': 'loaves', 'mouse': 'mice' };
+      const plural = plurals[obj.class];
+      obj.plural = (plural === undefined) ? obj.class + 's' : plural;
+    } else {
+      obj.plural = obj.class;
+    }
+  }
+
+/////////////////////////////////////////////////////////////////////////
 
   /**
    * Wrights into memory the value for this type and key

@@ -148,7 +148,7 @@ function outputJson($data) {
 }
 
 function loadJson($file) {
-  if (!file_exists($file)) return null;
+  if (!file_exists($file)) return `{"error": "No file ${file}"`;
   return json_decode(file_get_contents($file), true);
 }
 

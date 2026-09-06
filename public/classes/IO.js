@@ -41,6 +41,7 @@ export class IO {
     payload.token = this.token;
     payload.counter = this.app.id.counter;
     try {
+      console.log(`${this.app.name} __ fetchJson((${this.type[type]}) file:${payload.file||'save'} payload : `, JSON.stringify(payload));
       const response = await fetch(this.type[type], {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -50,6 +51,7 @@ export class IO {
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
+      console.log(`${this.app.name} __ fetchJson(${this.type[type]}) file:${payload.file||'save'} response:`, JSON.stringify(response.json));
       return await response.json();
     } catch (err) {
       console.log(`${this.app.name} fetch error`, err);

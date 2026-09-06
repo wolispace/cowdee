@@ -9,23 +9,19 @@ async function runMultiUserSimulation() {
   console.log('=====================================================\n');
 
   // 1. Initialize DB fixtures
-  const initApp = new App({settings: { name: 'initApp', generate: true, max: 5 } });
+  const initApp = new App({settings: { name: 'initApp', generate: true, max: 3 } });
   initApp.tester = new Tester(initApp);
-  initApp.tester.deleteTestFiles();
-  await initApp.tester.initObjects();
+  await initApp.tester.deleteTestFiles();
+  await initApp.tester.initObjects(initApp.settings.max);
   await initApp.tester.initPlayers();
   await initApp.tester.initCommands();
-  await initApp.db.savePoolsToDisk();
+  await initApp.db.saveToDisk();
   console.log(`✔ Initialized test database fixtures. DB Counter: ${initApp.id.counter}\n`);
 
   // 2. Create 3 independent real App instances and connect to SSE / Server
   const wolis = new App({settings: {name: 'wolisApp'}});
   const bob = new App({settings: {name: 'bobApp'}});
   const jane = new App({settings: {name: 'janeApp'}});
-
-  await wolis.db.flush();
-  await bob.db.flush();
-  await jane.db.flush();
 
   await wolis.start();
   await bob.start();
@@ -75,7 +71,7 @@ async function runMultiUserSimulation() {
     console.log('\n-----------------------------------------------------');
     console.log(`TEST 3: Bob creates a pink ${newObjName} in Room 2`);
     console.log('-----------------------------------------------------');
-    await bob.sendCommand({ cmd: `create a pink ${newObjName}` });
+    await bob.sendCommand({ actor: 'bob', loc: '2', cmd: `create a pink ${newObjName}` });
 
     // Wait for SSE broadcast across network/server
     await sleep(600);
@@ -99,16 +95,16 @@ async function runMultiUserSimulation() {
       throw new Error(`FAILED: Expected new object ID to be over 23, but got ID "${newObjInBobDB}" (Decoded: ${decodedBobId})`);
     }
 
-    await wolis.sendCommand({ cmd: `create a red bus` });
-    await wolis.sendCommand({ cmd: `get it` });
-    await wolis.sendCommand({ cmd: `drop it` });
-    await bob.sendCommand({ cmd: `get the bus` });
-    await bob.sendCommand({ cmd: `drop the bus` });
-    await wolis.sendCommand({ cmd: `paint it dodgerblue` });
+    await wolis.sendCommand({ actor: 'wol', loc: '2', cmd: `create a red bus` });
+    await wolis.sendCommand({ actor: 'wol', loc: '2', cmd: `get it` });
+    await wolis.sendCommand({ actor: 'wol', loc: '2', cmd: `drop it` });
+    await bob.sendCommand({ actor: 'bob', loc: '2', cmd: `get the bus` });
+    await bob.sendCommand({ actor: 'bob', loc: '2', cmd: `drop the bus` });
+    await wolis.sendCommand({ actor: 'wol', loc: '2', cmd: `paint it dodgerblue` });
     
-    await wolis.sendCommand({ cmd: `create a green frog` });
-    await wolis.sendCommand({ cmd: `put it on the bus` });
-    await bob.sendCommand({ cmd: `pose it as sitting` });
+    await wolis.sendCommand({ actor: 'wol', loc: '2', cmd: `create a green frog` });
+    await wolis.sendCommand({ actor: 'wol', loc: '2', cmd: `put it on the bus` });
+    await bob.sendCommand({ actor: 'bob', loc: '2', cmd: `pose it as sitting` });
     
     // 6. Test Chat & Spatial Filtering over SSE
     console.log('\n-----------------------------------------------------');
@@ -116,7 +112,7 @@ async function runMultiUserSimulation() {
     console.log('-----------------------------------------------------');
     const janeMsgCountBefore = jane.ui.messages.length;
 
-    await bob.sendCommand({ cmd: 'say hello Wolis in the house' });
+    await bob.sendCommand({ actor: 'bob', loc: '2', cmd: 'say hello Wolis in the house' });
 
     // Wait for SSE broadcast
     await sleep(600);
@@ -133,7 +129,7 @@ async function runMultiUserSimulation() {
     console.log('           ALL MULTI-USER TESTS PASSED!              ');
     console.log('=====================================================\n');
   } finally {
-    await wolis.db.savePoolsToDisk();
+    await wolis.db.saveToDisk();
     // Close SSE streams cleanly so process can exit
     wolis.sse.close();
     bob.sse.close();

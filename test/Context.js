@@ -20,8 +20,8 @@ if (app.settings.generate) {
   await app.tester.initObjects();
   await app.tester.initPlayers();
   await app.tester.initCommands();
-  console.log('testing savePools after db init');
-  await app.db.savePoolsToDisk();
+  console.log('testing saveToDisk after db init');
+  await app.db.saveToDisk();
 }
 
 await testCommands();
@@ -45,7 +45,7 @@ async function testCommands() {
   console.log('msg in', app.tester.context.loc, app.tester.context.msg);
   console.log(app.player.info);
 
-  await app.db.savePoolsToDisk();
+  await app.db.saveToDisk();
 }
 
 function testRandom() {
