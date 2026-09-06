@@ -330,42 +330,124 @@ export class DB {
   // manipulate objects within each type/prefix/key
 
   /**
+   * Adds the value to the location list
+   * @param {string} loc
+   * @param {string} value
+   */
+  async addLoc(loc, value) {
+    const locList = await this.get('loc', loc) ?? [];
+    locList.push(value);
+    await this.set('loc', loc, locList);
+  }
+  
+  /**
+   * Removes the value from the location list
+   * @param {strine} loc 
+   * @param {string} value 
+   */
+  async removeLoc(loc, value) {
+    const locList = await this.get('loc', loc) ?? [];
+    const filtered = locList.filter(x => x !== value);
+    await this.set('loc', loc, filtered);
+  }
+
+  /**
+   * Adds each of the words from the array into the names shards
+   * @param {array of strings} words 
+   * @param {string} id 
+   */
+  async addName(words, id) {
+    for ( const word of words) {
+      const nameKey = word.toLowerCase();
+      const nameList = await this.get('name', nameKey) ?? [];
+      nameList.push(id);
+      await this.set('name', nameKey, nameList);
+    }
+  }
+
+  /**
+   * removes each of the words from the array into the names shards
+   * @param {array of strings} words 
+   * @param {string} id 
+   */
+  async removeName(words, id) {
+    for ( const word of words) {
+      const nameKey = word.toLowerCase();
+      const nameList = await this.get('name', nameKey) ?? [];
+      await this.set('name', nameKey, nameList.filter(x => x !== id));
+    }
+  }
+
+  /**
+   * Adds the code into the code shard
+   * @param {object} obj 
+   */
+  async addCode(obj) {
+    await this.set('code', obj.id, {loc: obj.loc, code: obj.code});
+  }
+  
+  /**
+   * Remove code from code shard
+   * @param {object} obj 
+   */
+  async removeCode(obj) {
+    const prefix = this.prefix(obj.id);
+    if (this.memory.code?.[prefix]?.[obj.id]) {
+      delete this.memory.code[prefix][obj.id];
+      this.markDirty('code', prefix);
+    }
+  }
+  
+  /**
+   * Add info into the info shard
+   * @param {object} obj 
+   */
+  async addInfo(obj) {
+    await this.set('info', obj.id, obj.info);
+  }
+
+  /**
+   * Remove info from the info shard
+   * @param {object} obj 
+   */
+  async removeInfo(obj) {
+    const prefix = this.prefix(obj.id);
+    if (this.memory.info?.[prefix]?.[obj.id]) {
+      delete this.memory.info[prefix][obj.id];
+      this.markDirty('info', prefix);
+    }
+  }
+  
+
+  /**
    * Adds or updates an object into memory eg {id: 'wol', name: 'Wolis', loc: '2'}
    * @param {object} obj 
    */
   async save(obj, old) {
     // console.log(`${this.app.name} save`, obj, 'old', old);
-    // TODO: optimise this so we only remove/make dirty things that have changed
+    const className = this.classNameWords(obj);
     if (old) {
-      await this.remove(old.id);
+      const oldClassName = this.classNameWords(old);
+      if (obj.loc !== old.loc) {
+        await this.removeLoc(old.loc, old.id);
+      }
+      if (className !== oldClassName) {
+        await this.removeName(oldClassName, old.id);
+      }
+      if (obj.code !== old.code) {
+        await this.removeCode(old);
+      }
+      if (obj.info !== old.info) {
+        await this.removeInfo(old);
+      }
     }
 
-    // --- ID shard ---
     await this.set('id', obj.id, obj);
-
-    // --- NAME shard is built from all words in class and name ---
-    let longName = obj.class;
-    if (obj.name) {
-      longName += ` ${obj.name}`;
-    }
-    const words = longName.split(' ');
-    for ( const word of words) {
-      const nameKey = word.toLowerCase();
-      const nameList = await this.get('name', nameKey) ?? [];
-      nameList.push(obj.id);
-      await this.set('name', nameKey, nameList);
-    }
-
-    // --- LOC shard ---
-    const locList = await this.get('loc', obj.loc) ?? [];
-    locList.push(obj.id);
-    await this.set('loc', obj.loc, locList);
-
-    // --- CODE shard ---
+    await this.addLoc(obj.loc, obj.id);
+    await this.addName(this.classNameWords(obj), obj.id);
     if (obj.code) {
       await this.set('code', obj.id, {loc: obj.loc, code: obj.code});
     }
-    // --- INFO shard ---
     if (obj.info) {
       await this.set('info', obj.id, obj.info);
     }
@@ -415,12 +497,7 @@ export class DB {
     }
 
     // --- NAME shard is built from all words in class and name ---
-    let longName = obj.class;
-    if (obj.name) {
-      longName += ` ${obj.name}`;
-    }
-    const words = longName.split(' ');
-    for ( const word of words) {
+    for ( const word of this.classNameWords(obj)) {
       const nameKey = word.toLowerCase();
       const nameList = await this.get('name', nameKey) ?? [];
       await this.set('name', nameKey, nameList.filter(x => x !== id));
@@ -472,8 +549,7 @@ export class DB {
     await this.set('id', id, obj);
   }
 
-  async debounceSave() {
-    console.log(`${this.app.name} @@ debounce started `);    
+  async debounceSave() { 
     // Clear any existing timer
     if (this.saveTimeout) {
       clearTimeout(this.saveTimeout);
@@ -503,4 +579,19 @@ export class DB {
   toString() {
     return JSON.stringify(this.memory, null, 2);
   }
+
+  /**
+   * Combines class and name then splits into words
+   * TODO: will add extra and prefix words too, amd exclude common 'called', 'named', 'of' etc..
+   * @param {object} obj 
+   * @returns 
+   */
+  classNameWords(obj) {
+    let className = obj.class;
+    if (obj.name) {
+      className += ` ${obj.name}`;
+    }
+    return className.split(' ');
+  }
+
 }
