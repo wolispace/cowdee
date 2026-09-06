@@ -442,7 +442,7 @@ export class Cowmands {
     examine: async (rest) => {
       const obj = await this.resolveValue(rest.trim());
       if (!obj) {
-        console.log(`${this.app.name} examine '${rest}' failed to resolve obj`);
+        // console.log(`${this.app.name} examine '${rest}' failed to resolve obj`);
         return;
       }
       this.context.target = obj;
@@ -453,7 +453,7 @@ export class Cowmands {
     code: async (rest) => {
       const obj = await this.resolveValue(rest.trim());
       if (!obj) {
-        console.log(`${this.app.name} code '${rest}' failed to resolve obj`);
+        // console.log(`${this.app.name} code '${rest}' failed to resolve obj`);
         return;
       }
       this.context.target = obj;

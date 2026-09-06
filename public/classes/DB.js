@@ -29,6 +29,27 @@ export class DB {
     };
     return this.memory[type][prefix][key];
   }
+
+    /**
+   * Preloads all shard files needed for an array/Set of keys in a single batch request
+   * @param {Iterable<string>} keys 
+   */
+  async preload(keys) {
+    if (!keys) return;
+    const filenames = new Set();
+    for (const key of keys) {
+      if (!this.pool.has(key)) {
+        filenames.add(this.app.io.makeShardFilename(this.type, key));
+      }
+    }
+    if (filenames.size === 0) return;
+
+    const fileMap = await this.app.io.loadFiles([...filenames]);
+    for (const items of Object.values(fileMap)) {
+      this.populateFromShard(items);
+    }
+  }
+
   
     /**
    * Returns the whole object from a chunked file
@@ -248,23 +269,23 @@ export class DB {
     // so we can find matching names regardless of case
     if (['name'].includes(type)) key = key.toLowerCase();
     
-    console.log(`${this.app.name} - set`, {type, prefix, key, value});
+    // console.log(`${this.app.name} - set`, {type, prefix, key, value});
     // Ensure memory type and shard is in memory
     let mtype = this.memory[type];
     if (!mtype) {
       this.memory[type] = {};
-      console.log(`${this.app.name} - had to make mtype`, type );
+      // console.log(`${this.app.name} - had to make mtype`, type );
     }
     let shard = this.memory[type][prefix];
     if (!shard) {
       shard = await this.app.io.loadJson(`${type}_${prefix}`);
-      console.log(`${this.app.name} - had to make shard`, type, prefix, 'shard', shard);
+      // console.log(`${this.app.name} - had to make shard`, type, prefix, 'shard', shard);
       this.memory[type][prefix] = shard;
     }
     shard[key] = value;
     this.markDirty(type, prefix);
     this.memory[type][prefix] = shard;
-    console.log(`${this.app.name} - added into memory`, type, prefix, 'shard', shard);
+    // console.log(`${this.app.name} - added into memory`, type, prefix, 'shard', shard);
   }
 
   // mark this shard as dirty for saving to disk later
@@ -279,7 +300,7 @@ export class DB {
    * Save all firty shards to disk
    */
   async saveToDisk() {
-    console.log(`${this.app.name} dirty`, this.dirty);
+    // console.log(`${this.app.name} dirty`, this.dirty);
     const batch = {};
     for (const type of Object.keys(this.dirty) ) {
       for (const prefix of this.dirty[type] ) {
@@ -288,7 +309,7 @@ export class DB {
         batch[filename] = data;       
       }
     }
-    console.log(`${this.app.name} TODO save batch`, batch);
+    // console.log(`${this.app.name} TODO save batch`, batch);
     await this.app.io.saveBatch(batch);
     this.dirty = {};
   }
@@ -311,7 +332,7 @@ export class DB {
    * @param {object} obj 
    */
   async save(obj, old) {
-    console.log(`${this.app.name} save`, obj, 'old', old);
+    // console.log(`${this.app.name} save`, obj, 'old', old);
     // TODO: optimise this so we only remove/make dirty things that have changed
     if (old) {
       await this.remove(old.id);

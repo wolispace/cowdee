@@ -15,10 +15,6 @@ export class LookManager {
     this.app = app;
   }
 
-  get db() {
-    return this.app.db;
-  }
-
   /**
    * Returns an object for adding to the msg queue with a list of all obj
    * @param {Context} context 
@@ -27,12 +23,12 @@ export class LookManager {
     this.context = context;
     this.sentences = [];
     
-    const loc = await this.db.getById(this.context.loc);
+    const loc = await this.app.db.getById(this.context.loc);
     if (!loc) {
       this.sentences.push('Nothing interesting here');
       return this.returnData();
     }
-    this.found = await this.db.findInLoc(loc.id);
+    this.found = await this.app.db.findInLoc(loc.id);
 
     this.sentences = [`In [${loc.id}] you see: `];
     if (!this.found || this.found.length < 1) {
@@ -61,7 +57,7 @@ export class LookManager {
     this.sentences = [];
     let info = await this.app.db.getInfo(context.target);
     if (!info) {
-      const obj = await this.db.getById(context.target);
+      const obj = await this.app.db.getById(context.target);
       if (!obj) {
         info = `Opps.. I can't find object ID ${context.target}. Reload. `; 
       } else {
@@ -82,7 +78,7 @@ export class LookManager {
     this.sentences = [];
     let code = await this.app.db.getCode(context.target);
     if (!code) {
-      const obj = await this.db.getById(context.target);
+      const obj = await this.app.db.getById(context.target);
       if (!obj) {
         code = `Opps.. I can't find object ID ${context.target}. Reload. `; 
       } else {
@@ -111,18 +107,18 @@ export class LookManager {
       this.sentences.push('You are nowhere');
       return this.returnData();
     }
-    let loc = await this.db.getById(this.context.loc);
+    let loc = await this.app.db.getById(this.context.loc);
     if (!loc) {
-      loc = await this.db.getById(0);
+      loc = await this.app.db.getById(0);
     }
     if (loc) {
-      this.db.formatObject(loc);
+      this.app.db.formatObject(loc);
     }
     if (!loc) {
       this.sentences.push('You are nowhere');
       return this.returnData();
     }
-    this.found = await this.db.findInLoc(loc.id);
+    this.found = await this.app.db.findInLoc(loc.id);
     // console.log(`found in ${loc.id}`, this.found);
     const inon = 'in';
     this.sentences = [`You are ${inon} [${loc.id}]`];
@@ -154,13 +150,14 @@ export class LookManager {
     const objs = {};
     if (!this.found || this.found.length === 0) return objs;
 
+    // this.db.preload() should take a list of IDs and load all id objs
    // await this.db.pools.id.preload(this.found);
 
     for (const id of this.found) {
-      const obj = await this.db.getById(id);
+      const obj = await this.app.db.getById(id);
       if (!obj || obj.pose == 'hidden') continue;
       objs[id] = obj;
-      this.db.formatObject(objs[id]);
+      this.app.db.formatObject(objs[id]);
     }
     return objs;
   }

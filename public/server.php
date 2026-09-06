@@ -68,7 +68,6 @@ function handleInput($request) {
       $contents = file_get_contents($lockfile);
       if ($contents == $request['lock']) {
         outputJson(['status' => unlink($lockfile)]);
-        return;
       }
     } else {
       if (file_exists($lockfile)) {
@@ -78,11 +77,10 @@ function handleInput($request) {
           unlink($lockfile);
         }
         outputJson(['status' => false]);
-        return;
       }
       outputJson(['status' => file_put_contents($lockfile, $request['lock']) > 0]);
     }
-    return ``;
+    outputJson(['status' => 'did nothing']);
   } else if (!empty($request['batch'])) {
     $counterFile = DB_DIR . '/' . ID_COUNTER_FILE;
     if (file_exists($counterFile)) {
