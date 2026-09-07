@@ -324,8 +324,8 @@ export class DB {
    * @returns {string}
    */
   prefix(key = '_') {
-    // return String(key)[0].toUpperCase();
-    return String(key)[0].charCodeAt(0);
+    return String(key)[0].toUpperCase();
+    // return String(key)[0].charCodeAt(0);
   }
 
   // manipulate objects within each type/prefix/key

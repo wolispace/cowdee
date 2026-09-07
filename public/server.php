@@ -39,7 +39,7 @@ function handleInput($request) {
       'counter' => $request['counter'], 
       'actor' => $request['actor'], 
       'loc' => $request['loc'],
-      'it' => $request['it'], 
+      'it' => $request['it'] ?? '', 
       'cmd' => $request['cmd'],
     ];
 
