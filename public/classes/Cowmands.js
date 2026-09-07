@@ -463,6 +463,17 @@ export class Cowmands {
       const data = await this.app.lookManager.code({ ...this.context });
       await this.app.ui.addMessage(data);
     },
+    // EDIT
+    edit: async (rest) => {
+      const obj = await this.resolveValue(rest.trim());
+      if (!obj) {
+        return;
+      }
+      this.context.target = obj;
+      this.context.for = this.context.actor;
+      const data = await this.app.lookManager.edit({ ...this.context });
+      await this.app.ui.addMessage(data);
+    },
 
     // FLUSH
     flush: ($rest) => {

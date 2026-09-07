@@ -55,16 +55,16 @@ export class LookManager {
   async examine(context) {
     this.context = context;
     this.sentences = [];
-    let info = await this.app.db.getInfo(context.target);
-    if (!info) {
+    let val = await this.app.db.getInfo(context.target);
+    if (!val) {
       const obj = await this.app.db.getById(context.target);
       if (!obj) {
-        info = `Opps.. I can't find object ID ${context.target}. Reload. `; 
+        val = `Opps.. I can't find object ID ${context.target}. Reload. `; 
       } else {
-        info = `It's a pretty ordinary ${obj.class}`;
+        val = `It's a pretty ordinary ${obj.class}`;
       }
     };
-    this.sentences.push(`<div class='info'>${info}</div>`);
+    this.sentences.push(`<div class='info'>${val}</div>`);
     console.log(`${this.app.name} examine `, context);
     return this.returnData();
   }
@@ -76,19 +76,39 @@ export class LookManager {
   async code(context) {
     this.context = context;
     this.sentences = [];
-    let code = await this.app.db.getCode(context.target);
-    if (!code) {
+    let val = await this.app.db.getCode(context.target);
+    if (!val) {
       const obj = await this.app.db.getById(context.target);
       if (!obj) {
-        code = `Opps.. I can't find object ID ${context.target}. Reload. `; 
+        val = `Opps.. I can't find object ID ${context.target}. Reload. `; 
       } else {
-        code = `It has no code`;
+        val = ``;
       }
     };
-    code = code.replaceAll('\n', "<br/>");
-    const form = this.wrapEditForm('code', context.target, code);
+    const form = this.wrapEditForm('code', context.target, val);
     this.sentences.push(form);
-    console.log(`${this.app.name} code `, context);
+    return this.returnData();
+  }
+  
+  /**
+   * Returns the html form to edit info of the object
+   * @param {Context} context 
+   */
+  async edit(context) {
+    this.context = context;
+    this.sentences = [];
+    let val = await this.app.db.getInfo(context.target);
+    if (!val) {
+      const obj = await this.app.db.getById(context.target);
+      if (!obj) {
+        val = `Opps.. I can't find object ID ${context.target}. Reload. `; 
+      } else {
+        val = ``;
+      }
+    };
+
+    const form = this.wrapEditForm('info', context.target, val);
+    this.sentences.push(form);
     return this.returnData();
   }
 

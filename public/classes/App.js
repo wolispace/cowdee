@@ -129,7 +129,7 @@ export class App {
     } else if (data.type == 'cmd') {
       await this.sendCommand(data);
     } else if (['code','info'].includes(data.type)) {
-      data.cmd =  `::run set ${data.id}'s ${data.type} to "${data.val.replace(/<br\/>/g, '\n')}";;\nrelook $actor's loc;`;
+      data.cmd =  `::run set ${data.id}'s ${data.type} to "${data.val.replace(/<br\/>/g, '\n')}";;\nrelook $actor's loc;\nsay 'edit',"[$actor] finishes with [4]";`;
       console.log('saving code', data);
       await this.sendCommand(data);
     }
