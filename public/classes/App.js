@@ -126,7 +126,11 @@ export class App {
   async handleForm(data) {
     if (data.type === 'login') {
       await this.player.handleLogon(data);
-    } else {
+    } else if (data.type == 'cmd') {
+      await this.sendCommand(data);
+    } else if (['code','info'].includes(data.type)) {
+      data.cmd =  `::run set ${data.id}'s ${data.type} to "${data.val.replace(/<br\/>/g, '\n')}";;\nrelook $actor's loc;`;
+      console.log('saving code', data);
       await this.sendCommand(data);
     }
   }

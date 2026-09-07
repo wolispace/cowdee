@@ -39,13 +39,18 @@ export class Context {
     this.cowmand = firstword;
     this.rest = rest;
     this.cmd_text = rest;
-    const code = await this.app.db.findCommand(this);
-    if (!code) {
-      this.msg = `[${this.actor}] tries to ${this.cmd}, but nothing happens`;
-      await this.app.ui.addMessage(this);
-      this.app.ui.hideLoading();
-      return;
-    };
+    let code = '';
+    if (this.cowmand === '::run') {
+      code = this.rest;
+    } else {
+      code = await this.app.db.findCommand(this);
+      if (!code) {
+        this.msg = `[${this.actor}] tries to ${this.cmd}, but nothing happens`;
+        await this.app.ui.addMessage(this);
+        this.app.ui.hideLoading();
+        return;
+      };
+    } 
     await this.runCodeFrom(code, '__start');
     this.app.ui.hideLoading();
 

@@ -86,9 +86,20 @@ export class LookManager {
       }
     };
     code = code.replaceAll('\n', "<br/>");
-    this.sentences.push(`<div class='info'>${code}</div>`);
+    const form = this.wrapEditForm('code', context.target, code);
+    this.sentences.push(form);
     console.log(`${this.app.name} code `, context);
     return this.returnData();
+  }
+
+  wrapEditForm(type, id, value) {
+    return `<div class='info'><form>
+      <input type="hidden" name="type" value="${type}">
+      <input type="hidden" name="id" value="${id}">
+      <textarea name="val">${value}</textarea>
+      <input type="submit" value="Save">
+      </form></div>`;
+
   }
 
   /**

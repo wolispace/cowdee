@@ -24,7 +24,7 @@ export class Player {
       <form method="dialog" id="loginform">
       <input type="hidden" name="type" value="login">
         <label for="playername">Your name:</label>
-        <input type="text" id="playername" name="playername" placeholder="Your name in cow" value="" required>
+        <input type="text" id="playername" name="playername" placeholder="Your name in cow" value="Wolis" required>
         <label for="pw">Password: (not used for now)</label>
         <input type="text" id="pw" name="pw" placeholder="Prove your you">
         <!-- <label for="email">Email:</label>

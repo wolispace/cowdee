@@ -194,7 +194,7 @@ export class Cowmands {
     },
     // SET handler
     set: async (rest) => {
-      let match = rest.match(/^(\$[\w'\s]+)\s*'s\s+(\w+)\s+(?:to|=)\s+(.+)$/i);
+      let match = rest.match(/^(\$?\w+)\s*'s\s+(\w+)\s+(?:to|=)\s+(.+)$/i);
       if (!match) return;
       const obj = await this.resolveObj(match[1].trim());
       if (!obj) return;
@@ -506,6 +506,8 @@ export class Cowmands {
    * @returns {object|null}
    */
   async resolveObj(token) {
+    const obj = await this.app.db.getById(token);
+    if (obj) return obj;
     const id = await this.resolveValue(token);
     if (!id) return null;
     return (await this.app.db.getById(id)) || null;

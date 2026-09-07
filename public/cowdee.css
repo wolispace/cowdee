@@ -225,3 +225,10 @@ menu {
     border-radius: .5rem;
     box-shadow: 0 0 1rem black
 }
+
+.info form textarea {
+  width: 100%;
+  height: 100%;
+  color: var(--font-color);
+  background-color: #111216;
+}
