@@ -268,6 +268,7 @@ export class Cowmands {
       this.context.trigger = match[1];
       const template = this.app.utils.trimQuotes(match[2].trim());
       this.context.msg = this.expandTemplate(template);
+      delete this.context.for;
       await this.app.ui.addMessage(this.context);
     },
     // MSG - advanced say where we can control the location and who gets to see the msg
@@ -427,7 +428,6 @@ export class Cowmands {
     relook: async (rest) => {
       const loc = await this.resolveValue(rest.trim());
       this.context.loc = loc;
-      this.context.for = this.context.actor;
       const data = await this.app.lookManager.look({ ...this.context });
       await this.app.ui.addMessage(data);
     },
