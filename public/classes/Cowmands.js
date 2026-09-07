@@ -411,7 +411,6 @@ export class Cowmands {
       obj.id = this.app.id.new();
       await this.app.db.save(obj);
       this.context.target = obj.id;
-      this.context.lastt = obj.id;
       this.context.it = obj.id;
       this.context.new_id = obj.id;
       // last interacted with target will be the next commands 'it'
@@ -428,6 +427,7 @@ export class Cowmands {
     relook: async (rest) => {
       const loc = await this.resolveValue(rest.trim());
       this.context.loc = loc;
+      this.context.for = this.context.actor;
       const data = await this.app.lookManager.look({ ...this.context });
       await this.app.ui.addMessage(data);
     },
@@ -435,6 +435,7 @@ export class Cowmands {
     list: async (rest) => {
       const loc = await this.resolveValue(rest.trim());
       this.context.loc = loc;
+      this.context.for = this.context.actor;
       const data = await this.app.lookManager.list({ ...this.context });
       await this.app.ui.addMessage(data);
     },
@@ -446,6 +447,7 @@ export class Cowmands {
         return;
       }
       this.context.target = obj;
+      this.context.for = this.context.actor;
       const data = await this.app.lookManager.examine({ ...this.context });
       await this.app.ui.addMessage(data);
     },
@@ -457,6 +459,7 @@ export class Cowmands {
         return;
       }
       this.context.target = obj;
+      this.context.for = this.context.actor;
       const data = await this.app.lookManager.code({ ...this.context });
       await this.app.ui.addMessage(data);
     },

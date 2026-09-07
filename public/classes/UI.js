@@ -33,15 +33,15 @@ export class UI {
       return;
     }
 
-    if (context.loc != this.app.player.info.loc) {
+    if (!context.for && context.loc != this.app.player.info.loc) {
       console.log(`${this.app.name} --- msg not shown`, context.loc, context.msg.slice(0, 30));
       return;
     }
-
-    // set the last target so we can refer to it as 'it' or 'them'
-    if (context?.target) {
-      this.app.player.info.lastt = context.target;
-    }
+    // if the for is added then only that entiry can see the msg
+    if (context.for && context.for != this.app.player.info.id) {
+       console.log(`${this.app.name} --- msg not for this player`, context.for, context.msg.slice(0, 30));
+      return;
+    } 
 
     // DEBUG: If the user simply includes 'logoff' in the msg then logoff - make a propper command later
     if (context?.msg?.includes('logoff')) {
