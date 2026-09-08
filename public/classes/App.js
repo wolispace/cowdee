@@ -31,6 +31,12 @@ export class App {
     this.id = new ID(this); // generate unique sequential ids
     this.player = new Player(this);
     this.lookManager = new LookManager(this);
+
+    this.clickCmds = {
+      examine: el => `examine ${el.dataset.id}`,
+      close:   ()  => `look`,
+      doorway: el => `go ${el.dataset.id}`,
+    };
   }
 
   async start() {
@@ -57,27 +63,14 @@ export class App {
         if (cmdInput) cmdInput.value = '';
       });
 
-       /**
+      /**
        * Universal click handler to examine or go through doorways etc..
        */
       document.querySelector('content').addEventListener('click', async (event) => {
-        const link = event.target.closest('.click-examine');
-        if (link) {
-          await this.sendCommand(`examine ${link.dataset.id}`);
-          return;
-        }
-        const close = event.target.closest('.click-close');
-        if (close) {
-          await this.sendCommand(`look`);
-          return;
-        }
-        const doorway = event.target.closest('.click-doorway');
-        if (doorway) {
-          await this.sendCommand(`go ${doorway.dataset.id}`);
-          return;
-        }
-
-
+        const el = event.target.closest('.click');
+        if (!el) return;
+        const cmd = this.clickCmds[el.dataset.cmd];
+        if (cmd) await this.sendCommand(cmd(el));
       });
     }
 

@@ -65,7 +65,7 @@ export class LookManager {
         val = `It's a pretty ordinary ${obj.class}`;
       }
     };
-    this.sentences.push(`<div class='info'>${val}</div><div class="buttonize click-close">X</div>`);
+    this.sentences.push(`<div class='info'>${val}</div><div class="click buttonize click-close" data-cmd="close">X</div>`);
     return this.returnData();
   }
 

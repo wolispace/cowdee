@@ -54,6 +54,7 @@ a {
 
 .click-close:hover {
   color: white;
+    background-color: rgb(143, 31, 31);
 }
 
 a:hover {

@@ -129,7 +129,7 @@ export class UI {
             cmd = 'doorway';
             hint = 'Go'; 
           }
-          return `<span class="click click-${cmd}" ${style} data-id="${id}" title="Examine ${val} [${id}]">${val}</span>`;
+          return `<span class="click" data-cmd="${cmd}" ${style} data-id="${id}" title="${hint} ${val} [${id}]">${val}</span>`;
         } else {
           return val;
         }
