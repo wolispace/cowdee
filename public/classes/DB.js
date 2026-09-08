@@ -134,7 +134,7 @@ export class DB {
   async getCode(id) {
     const obj = await this.get('code', id);
     if (!obj) return '';
-    return obj?.code ?? '';
+    return obj?.code.replaceAll('\\n','\n') ?? '';
   };
 
   /**
@@ -146,7 +146,7 @@ export class DB {
   async getInfo(id) {
     const objInfo = await this.get('info', id);
     if (!objInfo) return '';
-    return objInfo ?? '';
+    return objInfo.replaceAll("\\n","\n") ?? '';
   };
 
   

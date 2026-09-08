@@ -56,6 +56,7 @@ export class LookManager {
     this.context = context;
     this.sentences = [];
     let val = await this.app.db.getInfo(context.target);
+        val = val.replaceAll("\n", "<br/>");
     if (!val) {
       const obj = await this.app.db.getById(context.target);
       if (!obj) {
@@ -113,13 +114,15 @@ export class LookManager {
   }
 
   wrapEditForm(type, id, value) {
+    value = value.replaceAll("\n", "&#10;");
     return `<div class='info'><form>
       <input type="hidden" name="type" value="${type}">
       <input type="hidden" name="id" value="${id}">
       <textarea name="val">${value}</textarea>
-      <input type="submit" value="Save">
+      <div class="buttons">
+      <button type="submit" name="action" value="cancel">Cancel</button>
+      <button type="submit" name="action" value="save">Save</button>
       </form></div>`;
-
   }
 
   /**
