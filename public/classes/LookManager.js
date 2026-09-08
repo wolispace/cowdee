@@ -65,8 +65,7 @@ export class LookManager {
         val = `It's a pretty ordinary ${obj.class}`;
       }
     };
-    this.sentences.push(`<div class='info'>${val}</div>`);
-    console.log(`${this.app.name} examine `, context);
+    this.sentences.push(`<div class='info'>${val}</div><div class="buttonize click-close">X</div>`);
     return this.returnData();
   }
 
@@ -289,6 +288,7 @@ export class LookManager {
       loc: this.context.loc,
       for: this.context.for,
       actor: this.context.actor,
+      trigger: this.context.trigger,
       top: true, // this message replaces the top section if true
     };
   }

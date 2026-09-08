@@ -56,17 +56,31 @@ export class App {
         const cmdInput = document.getElementById('cmd');
         if (cmdInput) cmdInput.value = '';
       });
+
+       /**
+       * Universal click handler to examine or go through doorways etc..
+       */
+      document.querySelector('content').addEventListener('click', async (event) => {
+        const link = event.target.closest('.click-examine');
+        if (link) {
+          await this.sendCommand(`examine ${link.dataset.id}`);
+          return;
+        }
+        const close = event.target.closest('.click-close');
+        if (close) {
+          await this.sendCommand(`look`);
+          return;
+        }
+        const doorway = event.target.closest('.click-doorway');
+        if (doorway) {
+          await this.sendCommand(`go ${link.dataset.id}`);
+          return;
+        }
+
+
+      });
     }
-    /**
-     * Universal click handler to examine or go through doorways etc..
-     */
-    document.querySelector('content').addEventListener('click', async (event) => {
-      const link = event.target.closest('.obj-link');
-      console.log('click', event.target);
-      if (link) {
-        await this.sendCommand(`examine ${link.dataset.id}`);
-      }
-    });
+
   }
 
   wakePlayer() {

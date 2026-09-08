@@ -36,11 +36,11 @@ export class Context {
     }
     console.log(`\n${this.app.name} ### processing:`, this.ts, this.actor, 'loc:', this.loc, 'counter:', this.app.id.counter, 'it:', this.it, 'cmd:', this.cmd);
     const { firstword, rest } = this.app.utils.splitFirstWord(this.cmd);
-    this.cowmand = firstword;
+    this.firstword = firstword;
     this.rest = rest;
     this.cmd_text = rest;
     let code = '';
-    if (this.cowmand === '::run') {
+    if (this.firstword === '::run') {
       code = this.rest;
     } else {
       code = await this.app.db.findCommand(this);

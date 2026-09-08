@@ -25,9 +25,35 @@ a {
   font-weight: bold;
 }
 
-.obj-link {
+.click {
   cursor: pointer;
   font-weight: bold;
+}
+
+.click:hover {
+  background-color: rgba(0, 0, 0, .75);
+}
+
+.click-doorway {
+  cursor: pointer;
+  font-weight: bold;
+  background-color: rgba(0, 0, 0, .45);
+}
+
+.click-close {
+  position:fixed;
+  top: 1rem;
+  right: 3rem;
+  background-color: rgb(143, 31, 31);
+  color: rgba(255, 255, 255, 0.75);
+  padding:0 .2rem;
+  cursor: pointer;
+  text-shadow: -1px -1px 1px black;
+  border-radius: .3rem;
+}
+
+.click-close:hover {
+  color: white;
 }
 
 a:hover {
@@ -161,7 +187,7 @@ section div {
 #menu {
   position: fixed;
   top: 0.5rem;
-  right: 1rem;
+  right: 0.3rem;
   z-index: 1000;
   width: 2rem;
   height: 2rem;

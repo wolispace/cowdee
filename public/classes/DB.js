@@ -158,7 +158,7 @@ export class DB {
    * @returns {string} return the code from the bext match object
    */
   async findCommand(context) {
-    const ids = await this.findByName(context.cowmand);
+    const ids = await this.findByName(context.firstword);
 
     if (!ids || ids.length < 1) return '';
     if (ids.length === 1) {
@@ -198,12 +198,15 @@ export class DB {
       obj.is = 'are';
       obj.gender = 'them';
     }
+    obj.thename = `the ${obj.plural}`;
     obj.longname = `${obj.qtyText} ${obj.plural}`;
     if (obj.name) {
       obj.longname += ' called ' + obj.name;
+      obj.thename = `the ${obj.longname}`;
     }
     if (['player', 'command'].includes(obj.class)) {
       obj.longname = obj.name;
+      obj.thename = obj.name;
     }
   }
 

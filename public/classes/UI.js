@@ -101,10 +101,9 @@ export class UI {
           loadedObjs[id] = await this.app.db.getById(id);
         }
       }
-
       context.msg = context.msg.replace(/\[(\w+)(?:\.(\w+))?\]/g, (match, id, attr) => {
         const obj = loadedObjs[id];
-        if (!obj) return `??${id}??`;
+        if (!obj) return ` (can't find id=${id}) `;
         this.app.db.formatObject(obj);
 
         const prop = attr || 'longname';
@@ -114,17 +113,18 @@ export class UI {
         if (prop === 'longname' && id === context.playerId) {
           val = `${obj.name} (you)`;
         }
-        // TODO: something in the context dictates "a bus" or "the bus"
-        // if (['pus','drop','pose','paint'].includes(context.context.trigger)) {
-        //   val = `the ${obj.longname}`;
-        // }
+
+        if (['put','drop','pose','paint', 'edit', 'code', 'examine'].includes(context.trigger)) {
+          val = obj.thename;
+        }
         if (!['longname', 'name', 'shorname', 'plural'].includes(prop)) {
           return val;
         }
         if (format == 'html') {
           // Format value with styling if color is defined
           const style = obj.color ? `style="color: ${obj.color}"`: '';
-          return `<span class="obj-link" ${style} data-id="${id}" title="Examine ${val} [${id}]">${val}</span>`;
+          const cmd = obj.link ? 'doorway' : 'examine';
+          return `<span class="click click-${cmd}" ${style} data-id="${id}" title="Examine ${val} [${id}]">${val}</span>`;
         } else {
           return val;
         }
