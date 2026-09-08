@@ -57,6 +57,16 @@ export class App {
         if (cmdInput) cmdInput.value = '';
       });
     }
+    /**
+     * Universal click handler to examine or go through doorways etc..
+     */
+    document.querySelector('content').addEventListener('click', async (event) => {
+      const link = event.target.closest('.obj-link');
+      console.log('click', event.target);
+      if (link) {
+        await this.sendCommand(`examine ${link.dataset.id}`);
+      }
+    });
   }
 
   wakePlayer() {

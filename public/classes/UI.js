@@ -123,12 +123,8 @@ export class UI {
         }
         if (format == 'html') {
           // Format value with styling if color is defined
-          const color = obj.color;
-          let styled = val;
-          if (color && val !== '') {
-            styled = `<span style="color: ${color}">${val}</span>`;
-          }
-          return `<a href="#" class="obj-link" data-id="${id}" title="Examine ${val} [${id}]">${styled}</a>`;
+          const style = obj.color ? `style="color: ${obj.color}"`: '';
+          return `<span class="obj-link" ${style} data-id="${id}" title="Examine ${val} [${id}]">${val}</span>`;
         } else {
           return val;
         }

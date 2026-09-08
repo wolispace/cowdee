@@ -25,6 +25,11 @@ a {
   font-weight: bold;
 }
 
+.obj-link {
+  cursor: pointer;
+  font-weight: bold;
+}
+
 a:hover {
   color: white;
   text-decoration: underline;
