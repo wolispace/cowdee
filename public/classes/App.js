@@ -73,7 +73,7 @@ export class App {
         }
         const doorway = event.target.closest('.click-doorway');
         if (doorway) {
-          await this.sendCommand(`go ${link.dataset.id}`);
+          await this.sendCommand(`go ${doorway.dataset.id}`);
           return;
         }
 

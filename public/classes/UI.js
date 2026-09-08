@@ -123,7 +123,12 @@ export class UI {
         if (format == 'html') {
           // Format value with styling if color is defined
           const style = obj.color ? `style="color: ${obj.color}"`: '';
-          const cmd = obj.link ? 'doorway' : 'examine';
+          let cmd = 'examine';
+          let hint = 'Examine';
+          if (obj.link) {
+            cmd = 'doorway';
+            hint = 'Go'; 
+          }
           return `<span class="click click-${cmd}" ${style} data-id="${id}" title="Examine ${val} [${id}]">${val}</span>`;
         } else {
           return val;
