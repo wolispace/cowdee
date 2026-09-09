@@ -25,6 +25,7 @@ export class Context {
    * Entry point for processing this context
    */
   async process() {
+    if (!this.app.player.info.id) return;
     // Each context carries the counter from the client that created it;
     // sync up so our counter never falls behind any peer's.
     this.app.id.sync(this.counter);

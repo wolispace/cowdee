@@ -148,7 +148,7 @@ export class Cowmands {
       const val1 = await this.resolveValue(op1Raw);
       const val2 = await this.resolveValue(op2Raw);
       let conditionMet = false;
-      if ([ '>', '<', '>=', '<=' ].includes(operator)) {
+      if (['>', '<', '>=', '<='].includes(operator)) {
         const num1 = parseFloat(val1) || 0;
         const num2 = parseFloat(val2) || 0;
         if (operator === '>') conditionMet = num1 > num2;
@@ -278,13 +278,13 @@ export class Cowmands {
 
       // A global message everyone can here:
       // msg 0,$actor,0,0,"moves","You can hear [$actor] moving around"
-      
+
       // The 'say' cowmand (see new relook above) in the old perl script would do this: 
       // &add_msg($loc,$actor,0,0,eval($1),$actor,$cmd_text,$niceness); # $action,$msg
-      
+
       // The 'relook' cowmand (see new relook below) in the old perl script would do this: 
       // &add_msg($op1,$actor,0,0,'force',"force:look ".$op1,$actor,$cmd_text,$niceness);
-      
+
       // whisper:
       // msg 0,$actor,$target,$second,'wispers',\"<i>( [$actor] whispers '$text' just to [$target] ) <\/i>\",$actor;
 
@@ -358,7 +358,7 @@ export class Cowmands {
 
       // Handle 'force' / 'force:look' relook use
       if (action === 'force') {
-        if (/^force:look/i.test(expandedMsg)){
+        if (/^force:look/i.test(expandedMsg)) {
           let lookLoc = (loc && loc !== '0' && loc !== 0) ? loc : this.context.loc;
           const forceMatch = expandedMsg.match(/^force:look\s*(.*)$/i);
           if (forceMatch && forceMatch[1].trim()) {
@@ -369,7 +369,7 @@ export class Cowmands {
           return;
         } else if (/^force:examine/i.test(expandedMsg)) {
           await this.statementList.examine(this.context.target);
-        
+
         }
 
 
@@ -528,9 +528,17 @@ export class Cowmands {
    * Parse a natural language object description into its components
    * e.g. "3 small black fluffy mice" → { qty, color, attribs, class, name }
    */
-  parseObj(str) {
+  parseObj_OLD(str) {
     const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'black', 'white', 'grey', 'gray', 'brown', 'silver', 'gold'];
     const sizes = ['tiny', 'small', 'little', 'large', 'big', 'huge', 'giant', 'massive'];
+    const matches = str.trim().replace(/^["']|["']$/g, '').match(/^(.*)(named|called|of)(.*)$/);
+    if (matches) {
+      const [desc, before, , after] = matches;
+      const name = after.trim();
+      const rest = before.trim();
+      return { ...this.parseObj(rest), name };
+    }
+
     const words = str.trim().replace(/^["']|["']$/g, '').split(/\s+/);
     let qty = 1;
     let color = '', attribs = [], cls = '', name = '';
@@ -539,14 +547,155 @@ export class Cowmands {
     const articles = ['a', 'an', 'the', 'some'];
     if (articles.includes(words[i]?.toLowerCase())) i++;
     while (i < words.length) {
-      const w = words[i].toLowerCase();
-      if (!color && colors.includes(w)) { color = w; i++; }
-      else if (sizes.includes(w)) { attribs.push(w); i++; }
+      const word = words[i].toLowerCase();
+      if (!color && colors.includes(word)) { color = w; i++; }
+      else if (sizes.includes(word)) { attribs.push(word); i++; }
       else { break; }
     }
     cls = words[i] || '';
     name = words.slice(i + 1).join(' ');
     return { qty, color, attribs: attribs.join(' '), class: cls, name };
+  }
+
+  // Quantity word lookups from Perl ($qty_list)
+  qtyList(word) {
+    const list = {
+      'the': 0,
+      'a': 1,
+      'an': 1,
+      'one': 1,
+      'some': 20,
+      'many': 30,
+      'innumerable': 50
+    }
+    return list[word] ?? 1;
+  };
+
+  // Converts text quantities ("some", "many") to numbers
+  convQty(qtyStr) {
+    if (!qtyStr) return 0;
+    const lower = qtyStr.toLowerCase();
+    if (!isNaN(lower) && parseInt(lower, 10) > 0) {
+      return parseInt(lower, 10);
+    }
+    return this.qtyList(lower) !== undefined ? this.qtyList(lower) : 0;
+  }
+
+  // Sanitises class/name by removing illegal characters
+  sanitiseName(str) {
+    if (!str) return '';
+    return str.replace(/[?|\\"'/<>]/g, '').trim();
+  }
+
+  // Cleans up material strings, replacing spaces with delimiters
+  cleanMaterial(matStr) {
+    if (!matStr) return '';
+    let ret = matStr.replace(/\s+(of|and|for|to|as|at|in|on)\s+/gi, ' ');
+    ret = ret.replace(/[-|_?."'>\\<]/g, ' ');
+    ret = ret.replace(/\s+/g, ' ').trim();
+    if (!ret) return '';
+    return `_${ret.replace(/\s+/g, '*|*')}*`;
+  }
+
+  parseObj(inputObj) {
+    let thisObj = (inputObj || '').replace(/"/g, ''); // Remove quotes
+    const obj = {class: ''};
+    // -------------------------------------------------------------------------
+    // Step 1: Check for "made of" with trailing description
+    // e.g., "a cup made of gold for drinking"
+    // -------------------------------------------------------------------------
+    let match = thisObj.match(/(.+) (made of) (\w+) (.+)/i);
+    if (match) {
+      thisObj = match[1];
+      obj.extra = `${match[2]} ${match[3]} ${match[4]}`;
+      // TODO: material is match[3] = gold
+    } else {
+      // Step 2: Check for simple "made of"
+      // e.g., "a cup made of gold"
+      match = thisObj.match(/(.+) (made of) (\w+)/i);
+      if (match) {
+        thisObj = match[1];
+        obj.extra = `${match[2]} ${match[3]}`;
+      }
+    }
+    // -------------------------------------------------------------------------
+    // Step 3: Extract extra joining descriptions
+    // (for, which, to, by, who, covered, decorated, adorned, looking)
+    // e.g., "book for coding" -> extra = "for coding"
+    // -------------------------------------------------------------------------
+    match = thisObj.match(/(.+?) (for|which|to|by|who|covered|decorated|adorned|looking) (.+)/i);
+    if (match) {
+      thisObj = match[1];
+      obj.extra = `${match[2]} ${match[3]}`;
+    }
+    // -------------------------------------------------------------------------
+    // Step 4: Extract worth / pennies
+    // e.g., "a leaf worth 5 pennies"
+    // -------------------------------------------------------------------------
+    match = thisObj.match(/(.+) (worth) (\d+)( penn.+|)/i);
+    if (match) {
+      thisObj = match[1];
+      obj.worth = parseInt(match[3], 10);
+    } else {
+      obj.worth = 1; // Default worth
+    }
+    // -------------------------------------------------------------------------
+    // Step 5: Extract quantity and rest string
+    // e.g., "53 mice" -> qty = "53", rest = "mice"
+    // -------------------------------------------------------------------------
+    let rest = '';
+    match = thisObj.match(/(\w+) (.+)/);
+    if (match) {
+      obj.qty = match[1];
+      rest = match[2];
+    } else {
+      obj.qty = this.qtyList('some'); // Default to 20
+      rest = thisObj;
+    }
+    // -------------------------------------------------------------------------
+    // Step 6: Convert textual/numeric quantities
+    // -------------------------------------------------------------------------
+    let numQty = parseInt(obj.qty, 10);
+    if (isNaN(numQty) || numQty < 1) {
+      numQty = this.convQty(obj.qty);
+      if (numQty < 1) {
+        numQty = this.qtyList('some'); // Fallback to 20
+        rest = thisObj;
+      }
+    }
+    obj.qty = numQty || 1;
+    // -------------------------------------------------------------------------
+    // Step 7: Handle "the " prefix for unique named items
+    // e.g., "the void" -> qty = 0
+    // -------------------------------------------------------------------------
+    let pre = rest ?? '';
+    if (/^the /i.test(thisObj)) {
+      obj.qty = 0;
+    }
+    // -------------------------------------------------------------------------
+    // Step 8: Extract joining words "called" or "named"
+    // e.g., "player called bob" / "cat named fred" -> name = "bob"/"fred"
+    // -------------------------------------------------------------------------
+    match = pre.match(/(.+) called (\w+)/i) || pre.match(/(.+) named (\w+)/i);
+    if (match) {
+      pre = match[1];
+      obj.name = match[2];
+    }
+    const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'black', 'white', 'grey', 'gray', 'brown', 'silver', 'gold'];
+    const sizes = ['tiny', 'small', 'little', 'large', 'big', 'huge', 'giant', 'massive'];
+    const words = pre.split(/\s+/);    
+    for (let word of words) {
+      word = word.toLowerCase();
+      if (colors.includes(word)) {
+        obj.color = word;
+      } else if (sizes.includes(word)) {
+        obj.size = word;
+      } else {
+        obj.class += `${word} `;
+      }
+    }
+    obj.class = this.sanitiseName(obj.class);
+    return obj;
   }
 
 
