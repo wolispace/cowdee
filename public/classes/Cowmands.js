@@ -407,9 +407,9 @@ export class Cowmands {
 
       const loc = this.context.loc;
       const obj = { loc, ...parsed };
-      // TODO: app.id need to be loaded from the server when we start
-      // OR pass a new id in the context IF we create a new object
       obj.id = this.app.id.new();
+      obj.creator = this.context.actor;
+      obj.owner = this.context.actor;
       await this.app.db.save(obj);
       this.context.target = obj.id;
       this.context.it = obj.id;
@@ -420,9 +420,27 @@ export class Cowmands {
         this.app.player.info.it = this.context.target;
       }
     },
+    // COPY
+    copy: async (rest) => {
+      const orig = this.app.db.getById(await this.resolveValue(rest.trim()));
+      if (!orig) return;
+      const obj = { loc, ...orig };
+      obj.id = this.app.id.new();
+      obj.creator = this.context.actor;
+      obj.owner = this.context.actor;
+      await this.app.db.save(obj);
+    },
     // RUNSUB
     runsub: async (rest) => {
-      await this.context.runSub(rest);
+      if (!rest.includes('/')) {
+        await this.context.runSub(rest);
+        return;
+      }
+      // random chance ro run eg: 'sayit/3' has a 1 in 3 chance of 'sayit' being run.
+      const [subName, divisor] = rest.split('/');
+      if (Math.floor(Math.random() * parseInt(divisor)) === 0) {
+        await this.context.runSub(subName);
+      }
     },
     // RELOOK
     relook: async (rest) => {
