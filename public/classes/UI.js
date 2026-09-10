@@ -209,15 +209,17 @@ export class UI {
       this.startY = e.clientY;
       this.startTopH = this.top.getBoundingClientRect().height;
       this.startBottomH = this.bottom.getBoundingClientRect().height;
+      this.inputH = this.input.getBoundingClientRect().height;
+      this.splitterH = this.splitter.getBoundingClientRect().height;
       this.splitter.setPointerCapture(e.pointerId);
       e.preventDefault();
     });
 
     this.splitter.addEventListener('pointermove', (e) => {
       if (!this.dragging) return;
-      const dy = e.clientY - this.startY;
+      const dy = e.clientY - this.startY - this.splitterH;
       let newTopH = this.startTopH + dy;
-      let newBottomH = this.startBottomH - dy;
+      let newBottomH = this.startBottomH - dy - this.inputH;
 
       // enforce minimums
       if (newTopH < this.minHeight) {
