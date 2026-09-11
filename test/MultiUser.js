@@ -19,9 +19,9 @@ async function runMultiUserSimulation() {
   console.log(`✔ Initialized test database fixtures. DB Counter: ${initApp.id.counter}\n`);
 
   // 2. Create 3 independent real App instances and connect to SSE / Server
-  const wolis = new App({settings: {name: 'wolisApp'}});
-  const bob = new App({settings: {name: 'bobApp'}});
-  const jane = new App({settings: {name: 'janeApp'}});
+  const wolis = new App({settings: {name: '_wol'}});
+  const bob = new App({settings: {name: '_bob'}});
+  const jane = new App({settings: {name: '_jan'}});
 
   await wolis.start();
   await bob.start();
@@ -74,7 +74,11 @@ async function runMultiUserSimulation() {
     await bob.sendCommand({ actor: '_bob', loc: '_2', cmd: `create a pink ${newObjName}` });
 
     // Wait for SSE broadcast across network/server
-    await sleep(600);
+    await sleep(2000);
+    console.log('bob name PI', bob.db.memory.name.PI);
+    console.log('wolis name PI', wolis.db.memory.name.PI);
+    console.log('jane name PI', jane.db.memory.name.PI);
+    
 
     const newObjInBobDB = await bob.db.findByNameInLoc(newObjName, '_2');
     const newObjInWolisDB = await wolis.db.findByNameInLoc(newObjName, '_2');
