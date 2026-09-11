@@ -54,12 +54,21 @@ function handleInput($request) {
     file_put_contents($filename, json_encode($contextData));
     logIt("saved context file $filename");
 
-    // get all new contexts we have not seen yet
-    $contexts = get_new_contexts($lastContext);
-    if (empty($contexts)) {
-      $contexts = [$contextData];
+    $autoSendNewContexts = false;
+    if ($autoSendNewContexts) {
+      // If we are auto sending contexts, then we don't need to wait for the next request
+      // to send them, we can send them now.
+      // get all new contexts we have not seen yet
+      $contexts = get_new_contexts($lastContext);
+      if (empty($contexts)) {
+        $contexts = [$contextData];
+      }
+      outputJson(['contexts' => $contexts]);
+    } else {
+      outputJson(['status' => 'ok']);
+
     }
-    outputJson(['contexts' => $contexts]);
+
   } else if (!empty($request['lock'])) {
     // send the player ID as the lock value, we set into the lock file ?lock=wol
     // if the option is to clear then we must match the lock file contents ?lock=wol&clear=1
