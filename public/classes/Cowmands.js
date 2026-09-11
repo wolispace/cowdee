@@ -124,7 +124,6 @@ export class Cowmands {
         }
         // last interacted with target will be the next commands 'it'
         if (this.context.actor === this.app.player.info.id) {
-          console.log(`${this.app.name} ^^ setting player.info.it to ${this.context.target}`);
           this.app.player.info.it = this.context.target;
         }
       }
@@ -416,7 +415,6 @@ export class Cowmands {
       this.context.new_id = obj.id;
       // last interacted with target will be the next commands 'it'
       if (this.context.actor === this.app.player.info.id) {
-        console.log(`${this.app.name} ^^^ setting player.info.it to ${this.context.target}`);
         this.app.player.info.it = this.context.target;
       }
     },
@@ -602,7 +600,7 @@ export class Cowmands {
   // Sanitises class/name by removing illegal characters
   sanitiseName(str) {
     if (!str) return '';
-    return str.replace(/[?|\\"'/<>]/g, '').trim();
+    return str.replace(/[^a-z0-9]+/gi, '').trim();
   }
 
   // Cleans up material strings, replacing spaces with delimiters

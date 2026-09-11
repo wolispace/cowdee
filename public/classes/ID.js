@@ -50,7 +50,7 @@ export class ID {
    */
   new() {
     this.counter++;
-    return this.encodeInt(this.counter);
+    return '_' + this.encodeInt(this.counter);
   }
 
   // encode the interger into base 62 (or whatever the aphabet is long)
@@ -78,6 +78,7 @@ export class ID {
 
   // decode the interger out of base 62 (or whatever the aphabet is long)
   decodeInt(str) {
+    str = str.replace(/^_/, ''); // trim off leading '_'
     const base = this.alphabet.length;
     let num = 0;
 

@@ -84,7 +84,6 @@ export class SSE {
       let currentData = '';
 
       while (!this.aborted) {
-        console.log(`${this.app.name} [SSEnode] while `, this.aborted);
         const { value, done } = await reader.read();
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
@@ -112,13 +111,10 @@ export class SSE {
       }
 
       if (!this.aborted) {
-        console.log(`${this.app.name} [SSEnode] shutdown, reconnecting...`);
         setTimeout(() => {
           if (!this.aborted) this.connect();
-          console.log(`${this.app.name} [SSEnode] timeout abored=`,this.aborted);
         }, 250);
       }
-      console.log(`${this.app.name} [SSEnode] looping abored=`,this.aborted);
     } catch (err) {
       if (this.aborted || err.name === 'AbortError') return;
       console.log(`${this.app.name} [SSEnode] error, state:`, err.message);
@@ -145,7 +141,6 @@ export class SSE {
         const context = new Context(this.app, data);
         await context.process();
       } else if (event === 'shutdown') {
-        console.log(`${this.app.name} [SSE] shutdown, reconnecting...`);
         this.close();
         if (!this.aborted) {
           await this.connect();
@@ -158,7 +153,6 @@ export class SSE {
 
   close() {
     this.aborted = true;
-    console.log(`${this.app.name} [SSEnode] close `, this.aborted);
     if (this.sse) {
       if (typeof this.sse.close === 'function') this.sse.close();
       this.sse = null;

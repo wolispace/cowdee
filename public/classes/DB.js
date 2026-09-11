@@ -26,7 +26,7 @@ export class DB {
       this.memory[type] = {};
     }
     if (!this.memory[type][prefix]) {
-      this.memory[type][prefix] = await this.app.io.loadJson(`${type}_${prefix}`);
+      this.memory[type][prefix] = await this.app.io.loadJson(this.makeFileName(type, prefix));
     };
     return this.memory[type][prefix][key];
   }
@@ -282,7 +282,7 @@ export class DB {
     }
     let shard = this.memory[type][prefix];
     if (!shard) {
-      shard = await this.app.io.loadJson(`${type}_${prefix}`);
+      shard = await this.app.io.loadJson(this.makeFileName(type, prefix));
       // console.log(`${this.app.name} - had to make shard`, type, prefix, 'shard', shard);
       this.memory[type][prefix] = shard;
     }
@@ -309,7 +309,7 @@ export class DB {
     const batch = {};
     for (const type of Object.keys(this.dirty) ) {
       for (const prefix of this.dirty[type] ) {
-        const filename = `${type}_${prefix}`;
+        const filename = this.makeFileName(type, prefix);
         const data = this.memory[type][prefix];
         batch[filename] = data;       
       }
@@ -320,15 +320,21 @@ export class DB {
   }
 
   /**
-   * Returns the first latter of the key eg 'w' forom 'wolis'
-   * in production we return the ascii value eg '65' for 'A'
+   * Returns the first two letters of the key eg '_w' for '_wolis'
+   * The leading '_' is so we can distinguish 'get cup' and 'get _cup' the latter being an encoded ID
+   * obj.class and name are not allowed to have '_' 
+   * In production we return the ascii value eg '_65' for 'A'
    * But DEBUG just uppercases the value from easy of finding things
    * @param {string} key 
    * @returns {string}
    */
   prefix(key = '_') {
-    return String(key)[0].toUpperCase();
-    // return String(key)[0].charCodeAt(0);
+    return key.slice(0, 2).toUpperCase();
+    // return key.slice(0, 2).charCodeAt(0);
+  }
+
+  makeFileName(type, prefix) {
+    return `${type}${prefix}`;
   }
 
   // manipulate objects within each type/prefix/key

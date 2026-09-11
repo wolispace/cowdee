@@ -53,7 +53,7 @@ async function runMultiUserSimulation() {
     console.log(`   Bob logged in:   ID="${bob.player.info.id}", Loc="${bob.player.info.loc}", Namespace="${bob.storage.getNamespace()}"`);
     console.log(`   Jane logged in:  ID="${jane.player.info.id}", Loc="${jane.player.info.loc}", Namespace="${jane.storage.getNamespace()}"`);
 
-    if (wolis.storage.getNamespace() !== 'wol' || bob.storage.getNamespace() !== 'bob' || jane.storage.getNamespace() !== 'jan') {
+    if (wolis.storage.getNamespace() !== '_wol' || bob.storage.getNamespace() !== '_bob' || jane.storage.getNamespace() !== '_jan') {
       throw new Error('FAILED: Storage namespace did not update to player ID on login!');
     }
 
@@ -62,22 +62,22 @@ async function runMultiUserSimulation() {
     const bobStoredInfo = JSON.parse(bob.storage.getItem('playerInfo'));
     console.log('   Wolis stored info in storage:', wolisStoredInfo);
     console.log('   Bob stored info in storage:  ', bobStoredInfo);
-    if (wolisStoredInfo.id !== 'wol' || bobStoredInfo.id !== 'bob') {
+    if (wolisStoredInfo.id !== '_wol' || bobStoredInfo.id !== '_bob') {
       throw new Error('FAILED: Storage keys collided between players!');
     }
 
     // 5. Test Object creation & replication across clients over SSE
     const newObjName = 'pig';
     console.log('\n-----------------------------------------------------');
-    console.log(`TEST 3: Bob creates a pink ${newObjName} in Room 2`);
+    console.log(`TEST 3: Bob creates a pink ${newObjName} in Room _2`);
     console.log('-----------------------------------------------------');
-    await bob.sendCommand({ actor: 'bob', loc: '2', cmd: `create a pink ${newObjName}` });
+    await bob.sendCommand({ actor: '_bob', loc: '_2', cmd: `create a pink ${newObjName}` });
 
     // Wait for SSE broadcast across network/server
     await sleep(600);
 
-    const newObjInBobDB = await bob.db.findByNameInLoc(newObjName, '2');
-    const newObjInWolisDB = await wolis.db.findByNameInLoc(newObjName, '2');
+    const newObjInBobDB = await bob.db.findByNameInLoc(newObjName, '_2');
+    const newObjInWolisDB = await wolis.db.findByNameInLoc(newObjName, '_2');
     const decodedBobId = newObjInBobDB ? bob.id.decodeInt(newObjInBobDB) : -1;
     const decodedWolisId = newObjInWolisDB ? wolis.id.decodeInt(newObjInWolisDB) : -1;
 
@@ -95,16 +95,16 @@ async function runMultiUserSimulation() {
       throw new Error(`FAILED: Expected new object ID to be over 23, but got ID "${newObjInBobDB}" (Decoded: ${decodedBobId})`);
     }
 
-    await wolis.sendCommand({ actor: 'wol', loc: '2', cmd: `create a red bus` });
-    await wolis.sendCommand({ actor: 'wol', loc: '2', cmd: `get it` });
-    await wolis.sendCommand({ actor: 'wol', loc: '2', cmd: `drop it` });
-    await bob.sendCommand({ actor: 'bob', loc: '2', cmd: `get the bus` });
-    await bob.sendCommand({ actor: 'bob', loc: '2', cmd: `drop the bus` });
-    await wolis.sendCommand({ actor: 'wol', loc: '2', cmd: `paint it dodgerblue` });
+    await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `create a red bus` });
+    await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `get it` });
+    await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `drop it` });
+    await bob.sendCommand({ actor: '_bob', loc: '_2', cmd: `get the bus` });
+    await bob.sendCommand({ actor: '_bob', loc: '_2', cmd: `drop the bus` });
+    await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `paint it dodgerblue` });
     
-    await wolis.sendCommand({ actor: 'wol', loc: '2', cmd: `create a green frog` });
-    await wolis.sendCommand({ actor: 'wol', loc: '2', cmd: `put it on the bus` });
-    await bob.sendCommand({ actor: 'bob', loc: '2', cmd: `pose it as sitting` });
+    await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `create a green frog` });
+    await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `put it on the bus` });
+    await bob.sendCommand({ actor: '_bob', loc: '_2', cmd: `pose it as sitting` });
     
     // 6. Test Chat & Spatial Filtering over SSE
     console.log('\n-----------------------------------------------------');
@@ -112,7 +112,7 @@ async function runMultiUserSimulation() {
     console.log('-----------------------------------------------------');
     const janeMsgCountBefore = jane.ui.messages.length;
 
-    await bob.sendCommand({ actor: 'bob', loc: '2', cmd: 'say hello Wolis in the house' });
+    await bob.sendCommand({ actor: '_bob', loc: '_2', cmd: 'say hello Wolis in the house' });
 
     // Wait for SSE broadcast
     await sleep(600);

@@ -49,7 +49,7 @@ export class Tester {
         id: this.app.id.new(),
         class: this.randomName(),
         qty: 1,
-        loc: this.app.id.encodeInt(this.context.random(this.app.settings.max)),
+        loc: '_' + this.app.id.encodeInt(this.context.random(this.app.settings.max)),
         color: this.randomColor()
       };
       obj.info = `It's a pretty ordinary ${obj.class}`;
@@ -58,24 +58,24 @@ export class Tester {
         process.stdout.write(":");
       }
     }
-    const house = await this.app.db.get('id', '2');
+    const house = await this.app.db.get('id', '_2');
     const old1 = { ...house };
     house.class = 'house';
-    house.loc = '_';
+    house.loc = '__';
     await this.app.db.save(house, old1);
 
-    const library = await this.app.db.get('id', '3');
+    const library = await this.app.db.get('id', '_3');
     const old2 = { ...library };
     library.class = 'library';
-    library.loc = '_';
+    library.loc = '__';
     await this.app.db.save(library, old2);
   }
 
   async initPlayers() {
     const players = [
-      { loc: '2', name: 'Wolis', id: 'wol' },
-      { loc: '2', name: 'Bob', id: 'bob' },
-      { loc: '3', name: 'Jane', id: 'jan' },
+      { loc: '_2', name: 'Wolis', id: '_wol' },
+      { loc: '_2', name: 'Bob', id: '_bob' },
+      { loc: '_3', name: 'Jane', id: '_jan' },
     ];
 
     for (const player of players) {
@@ -155,7 +155,7 @@ export class Tester {
 
     for (const obj of commands) {
       obj.id = this.app.id.new();
-      obj.loc = '3';
+      obj.loc = '_3';
       obj.class = 'command';
       obj.color = this.randomColor();
       await this.app.db.save(obj);

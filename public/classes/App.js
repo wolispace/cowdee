@@ -147,7 +147,6 @@ export class App {
     } else if (data.type == 'cmd') {
       await this.sendCommand(data);
     } else if (['code','info'].includes(data.type)) {
-      console.log('handleForm', {... data});
       if (data.button === 'cancel') {
         // cancel edit and sent 'look'
         data.cmd = 'look';
