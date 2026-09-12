@@ -75,9 +75,9 @@ async function runMultiUserSimulation() {
 
     // Wait for SSE broadcast across network/server
     await sleep(2000);
-    console.log('bob name PI', bob.db.memory.name.PI);
-    console.log('wolis name PI', wolis.db.memory.name.PI);
-    console.log('jane name PI', jane.db.memory.name.PI);
+    console.log('bob name _P', bob.db.memory.name._P);
+    console.log('wolis name _P', wolis.db.memory.name._P);
+    console.log('jane name _P', jane.db.memory.name._P);
     
 
     const newObjInBobDB = await bob.db.findByNameInLoc(newObjName, '_2');
