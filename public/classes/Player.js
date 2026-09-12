@@ -50,20 +50,20 @@ export class Player {
     return `
       <form method="dialog" id="loginform">
       <input type="hidden" name="type" value="newplayer">
-        Welcome back ${this.app.player.info.playername}
-        <label for="pw">Set your password:</label>
+        Welcome new player ${this.app.player.info.playername}.
+        <label for="pw">Set your new password:</label>
         <input type="text" id="pw" name="pw" placeholder="So you can prove you are you">
         <menu>
           <button value="submit" class="buttonize">Continue</button>
         </menu>
       </form>
     `;
-
   }
-
 
   async handleLogon(data) {
     const obj = await this.app.db.findPlayer(data);
+
+    console.log(`${this.app.name} logon `, obj);
     if (obj) {
       this.app.player.info.playername = obj.name;
       this.app.player.info.id = obj.id;
@@ -72,6 +72,7 @@ export class Player {
       document.getElementById('pw').focus(); 
     } else {
       // show new player dialog
+      this.app.player.info.playername = data.playername;
       this.app.ui.showDialog(this.newPlayerContent(data)); 
       document.getElementById('pw').focus(); 
     }  
@@ -81,17 +82,24 @@ export class Player {
     const obj = await this.app.db.getById(this.app.player.info.id);
     if (obj) {
       // DEBUG dont check password
-      this.app.ui.closeDialog();
-      this.logon(obj);
-      await this.wake();
+      await this.logon(obj);
     } else {
       this.app.ui.alert(`Faild to find ${this.app.player.info.playername} id=${this.app.player.info.id}`);
     }
-
   }
 
-  handleNewPlayer(data) {
+  async handleNewPlayer(data) {
+    const startingLocation = '_2';
+    const obj = {
+      id: this.app.id.new(), 
+      class:'player', 
+      name: this.info.playername, 
+      loc: startingLocation, 
+      color: 'gold',
+      pw: data.pw};
     console.log(`${this.app.name} create new player ${this.app.player.info.playername}`);
+    this.app.db.save(obj);
+    await this.logon(obj);
   }
 
   /**
@@ -106,6 +114,7 @@ export class Player {
     this.save();
     this.app.name = obj.id;
     console.log(`${this.app.name} logs in`);
+    await this.wake();
   }
 
   // clear player and show logoff message
@@ -119,6 +128,7 @@ export class Player {
     console.log(` ${this.app.name} wake `, result);
     this.app.lastContext = result?.lastContext || '0';
     await this.app.sendCommand({ cmd: 'look', actor: this.info.id, loc: this.info.loc });
+    this.app.ui.closeDialog();
   }
 
   /**
