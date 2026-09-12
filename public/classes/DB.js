@@ -18,7 +18,7 @@ export class DB {
    * @returns {object}
    */
   async get(type, key) {
-    const prefix = this.prefix(key);
+    const prefix = this.prefix(type, key);
     // only name is lowercased so we can find things like name in mixed case
     // id, code, and info are all keyed by object ID which preserves case
     if (['name'].includes(type)) key = key.toLowerCase();
@@ -269,7 +269,7 @@ export class DB {
    */
   async set(type, key, value) {
     
-    const prefix = this.prefix(key);
+    const prefix = this.prefix(type, key);
     // so we can find matching names regardless of case
     if (['name'].includes(type)) key = key.toLowerCase();
     
@@ -320,7 +320,7 @@ export class DB {
   }
 
   /**
-   * Returns the first two letters of the key eg '_w' for '_wolis'
+   * Returns the first two letters of the key eg '_b' for '_b4'
    * The leading '_' is so we can distinguish 'get cup' and 'get _cup' the latter being an encoded ID
    * obj.class and name are not allowed to have '_' 
    * In production we return the ascii value eg '_65' for 'A'
@@ -328,8 +328,12 @@ export class DB {
    * @param {string} key 
    * @returns {string}
    */
-  prefix(key = '_') {
-    return key.slice(0, 2).toUpperCase();
+  prefix(type, key = '_') {
+    if (['name'].includes(type)) {
+      return '_' + key.slice(0, 1).toUpperCase();
+    } else {
+      return key.slice(0, 2).toUpperCase();
+    }
     // return key.slice(0, 2).charCodeAt(0);
   }
 
@@ -401,7 +405,7 @@ export class DB {
    * @param {object} obj 
    */
   async removeCode(obj) {
-    const prefix = this.prefix(obj.id);
+    const prefix = this.prefix('code', obj.id);
     if (this.memory.code?.[prefix]?.[obj.id]) {
       delete this.memory.code[prefix][obj.id];
       this.markDirty('code', prefix);
@@ -421,7 +425,7 @@ export class DB {
    * @param {object} obj 
    */
   async removeInfo(obj) {
-    const prefix = this.prefix(obj.id);
+    const prefix = this.prefix('info', obj.id);
     if (this.memory.info?.[prefix]?.[obj.id]) {
       delete this.memory.info[prefix][obj.id];
       this.markDirty('info', prefix);
@@ -500,7 +504,7 @@ export class DB {
     if (!obj) return;
 
     // --- Remove from ID shard ---
-    const prefix = this.prefix(id);
+    const prefix = this.prefix('id', id);
     if (this.memory.id?.[prefix]) {
       delete this.memory.id[prefix][id];
       this.markDirty('id', prefix);
@@ -518,14 +522,14 @@ export class DB {
     await this.set('loc', obj.loc, locList.filter(x => x !== id));
 
     // --- Remove from CODE shard ---
-    const codePrefix = this.prefix(id);
+    const codePrefix = this.prefix('code', id);
     if (this.memory.code?.[codePrefix]?.[id]) {
       delete this.memory.code[codePrefix][id];
       this.markDirty('code', codePrefix);
     }
 
     // --- Remove from INFO shard ---
-    const infoPrefix = this.prefix(id);
+    const infoPrefix = this.prefix('info', id);
     if (this.memory.info?.[infoPrefix]?.[id]) {
       delete this.memory.info[infoPrefix][id];
       this.markDirty('info', infoPrefix);
