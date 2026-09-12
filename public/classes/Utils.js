@@ -111,27 +111,5 @@ export class Utils {
   sentenceCaseString(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
-
-  /**
-   * Returns the calling function for debugging purposes only
-   * @returns {string}
-   */
-  getImmediateCaller() {
-    const originalFunc = Error.prepareStackTrace;
-    // Override the stack formatter to return structured call sites
-    Error.prepareStackTrace = (_, stack) => stack;
-    const err = new Error();
-    const stack = err.stack;
-    // Restore the original formatter
-    Error.prepareStackTrace = originalFunc;
-    // stack[0] is getImmediateCaller
-    // stack[1] is the function that called getImmediateCaller
-    // stack[2] is the parent/immediate caller you are looking for
-    if (stack && stack[2]) {
-      return stack[2].getFunctionName() || 'anonymous';
-    }
-    return 'unknown';
-  }
-
 }
 

@@ -23,13 +23,8 @@ export class Player {
     return `
       <form method="dialog" id="loginform">
       <input type="hidden" name="type" value="login">
-        <label for="playername">Your name:</label>
+        <label for="playername">Who are you?</label>
         <input type="text" id="playername" name="playername" placeholder="Your name in cow" value="Wolis" required>
-        <label for="pw">Password: (not used for now)</label>
-        <input type="text" id="pw" name="pw" placeholder="Prove your you">
-        <!-- <label for="email">Email:</label>
-        <input type="text" id="email" name="email" placeholder="Optional. For email recovery">
-        -->
         <menu>
           <button value="submit" class="buttonize">Login</button>
         </menu>
@@ -37,38 +32,80 @@ export class Player {
     `;
   }
 
+  checkPwContent() {
+    return `
+      <form method="dialog" id="loginform">
+      <input type="hidden" name="type" value="checkpw">
+        Welcome back ${this.app.player.info.playername}
+        <label for="pw">What is your password?</label>
+        <input type="text" id="pw" name="pw" placeholder="Prove you are you">
+        <menu>
+          <button value="submit" class="buttonize">Continue</button>
+        </menu>
+      </form>
+    `;
+  }
+
+  newPlayerContent() {
+    return `
+      <form method="dialog" id="loginform">
+      <input type="hidden" name="type" value="newplayer">
+        Welcome back ${this.app.player.info.playername}
+        <label for="pw">Set your password:</label>
+        <input type="text" id="pw" name="pw" placeholder="So you can prove you are you">
+        <menu>
+          <button value="submit" class="buttonize">Continue</button>
+        </menu>
+      </form>
+    `;
+
+  }
+
+
   async handleLogon(data) {
-    const isLoggedIn = await this.logon(data);
-    if (isLoggedIn) {
+    const obj = await this.app.db.findPlayer(data);
+    if (obj) {
+      this.app.player.info.playername = obj.name;
+      this.app.player.info.id = obj.id;
+      // show checkpw dialog
+      this.app.ui.showDialog(this.checkPwContent(data)); 
+      document.getElementById('pw').focus(); 
+    } else {
+      // show new player dialog
+      this.app.ui.showDialog(this.newPlayerContent(data)); 
+      document.getElementById('pw').focus(); 
+    }  
+  }
+
+  async handleCheckPw(data) {
+    const obj = await this.app.db.getById(this.app.player.info.id);
+    if (obj) {
+      // DEBUG dont check password
       this.app.ui.closeDialog();
+      this.logon(obj);
       await this.wake();
     } else {
-      if (!window) {
-        console.warn(`Player ${data.playername} not found.`);
-      } else {
-        alert(`Player ${data.playername} not found.`);
-      }
+      this.app.ui.alert(`Faild to find ${this.app.player.info.playername} id=${this.app.player.info.id}`);
     }
+
+  }
+
+  handleNewPlayer(data) {
+    console.log(`${this.app.name} create new player ${this.app.player.info.playername}`);
   }
 
   /**
-   * Validate player, return true if logged in OK
-   * @return {boolean}
+   * Finalise login of player, saving into local storage for fast login next time
+   * @params {object} obj
    */
-  async logon(data) {
-    const obj = await this.app.db.findPlayer(data);
-    if (obj) {
-      this.info.id = obj.id;
-      this.info.loc = obj.loc;
-      this.info.name = obj.name;
-      this.app.storage?.setNamespace(this.info.id);
-      this.save();
-      this.app.name = obj.id;
-      console.log(`${this.app.name} logs in`);
- 
-      return true;
-    }
-    return false;
+  async logon(obj) {
+    this.info.id = obj.id;
+    this.info.loc = obj.loc;
+    this.info.name = obj.name;
+    this.app.storage?.setNamespace(this.info.id);
+    this.save();
+    this.app.name = obj.id;
+    console.log(`${this.app.name} logs in`);
   }
 
   // clear player and show logoff message

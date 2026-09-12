@@ -144,6 +144,10 @@ export class App {
   async handleForm(data) {
     if (data.type === 'login') {
       await this.player.handleLogon(data);
+    } else if (data.type == 'checkpw') {
+      await this.player.handleCheckPw(data);
+    } else if (data.type == 'newplayer') {
+      await this.player.handleNewPlayer(data);
     } else if (data.type == 'cmd') {
       await this.sendCommand(data);
     } else if (['code','info'].includes(data.type)) {

@@ -29,7 +29,7 @@ export class UI {
       return;
     }
     if (!context.loc) {
-      console.trace(`${this.app.name} no loc in context`, this.app.util.getImmediateCaller());
+      console.trace(`${this.app.name} no loc in context`);
       return;
     }
 
@@ -275,4 +275,15 @@ export class UI {
       this.top.style.opacity = '1';
     }
   }
+
+  /**
+   * Show msg in browser and add to console log
+   * @param {string} msg 
+   */
+  alert(msg) {
+    if (window) {
+      alert(msg);
+    }
+    console.warn(msg);
+}
 };
