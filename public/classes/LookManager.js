@@ -133,6 +133,7 @@ export class LookManager {
     this.groups = new SetMap();
     this.sentenceCounter = 0;
     this.context = context;
+    this.context.trigger = 'look';
     this.sentences = [];
     this.objs = {};
     if (!this.context.loc) {
