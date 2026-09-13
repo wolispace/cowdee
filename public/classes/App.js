@@ -163,7 +163,8 @@ export class App {
   }
 
   buildSaveCommand(data) {
-    let cmd = `::run set ${data.id}'s ${data.type} to "${data.val.replace(/\n/g, '\\n')}";`;
+    let encoded = this.utils.encodeString(data.val);
+    let cmd = `::run set ${data.id}'s ${data.type} to "${encoded}";`;
     cmd += `relook $actor's loc;`;
     cmd += `say 'edit',"[$actor] finishes with [${data.id}]";`;
     return cmd;

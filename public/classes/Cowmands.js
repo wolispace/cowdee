@@ -265,7 +265,7 @@ export class Cowmands {
       const match = rest.match(/^['"](\w+)['"]\s*,\s*(.+)$/i);
       if (!match) return;
       this.context.trigger = match[1];
-      const template = this.app.utils.trimQuotes(match[2].trim());
+      const template = this.app.utils.decodeString(this.app.utils.trimQuotes(match[2].trim()));
       this.context.msg = this.expandTemplate(template);
       delete this.context.for;
       await this.app.ui.addMessage(this.context);
@@ -353,6 +353,7 @@ export class Cowmands {
       template = template.replace(/\\\//g, '/');
       // Handle perl-style string concatenation if present (e.g. "force:look " . $op1)
       template = template.replace(/["']\s*\.\s*["']?/g, '');
+      template = this.app.utils.decodeString(template);
       const expandedMsg = this.expandTemplate(template);
 
       // Handle 'force' / 'force:look' relook use
@@ -508,10 +509,10 @@ export class Cowmands {
         t = t.replace(/[$"']/g, '');
         return this.context[t];
       } else {
-        return t.replace(/["']/g, '');
+        return this.app.utils.decodeString(t.slice(1, -1));
       }
     }
-    if (!t.startsWith('$')) return t;
+    if (!t.startsWith('$')) return this.app.utils.decodeString(t);
 
     const parts = t.split("'s ");
     const varName = parts[0].substring(1);

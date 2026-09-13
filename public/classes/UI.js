@@ -10,7 +10,7 @@ export class UI {
 
   constructor(app) {
     this.app = app;
-    if (!window) return;
+    if (typeof window === 'undefined' || !window) return;
     this.splitter = document.getElementById('splitter');
     this.panels = document.getElementById('panels');
     this.top = document.getElementById('top');
@@ -285,5 +285,5 @@ export class UI {
       alert(msg);
     }
     console.warn(msg);
-}
+  }
 };

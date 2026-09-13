@@ -4,6 +4,38 @@
  */
 export class Utils {
 
+  constructor(app) {
+    this.app = app;
+  }
+
+  /**
+   * Universal string encoder - safe for transport, JSON, HTML, cowscript commands, and DB.
+   * Encodes special characters including quotes, newlines, semicolons, dollar signs, and hashes.
+   * @param {string} str 
+   * @returns {string}
+   */
+  encodeString(str) {
+    if (str === null || str === undefined) return '';
+    if (typeof str !== 'string') str = String(str);
+    return encodeURIComponent(str).replace(/[!'()*~]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+  }
+
+  /**
+   * Universal string decoder - restores a string previously encoded with encodeString().
+   * Safely returns the original string if decoding fails or if it's already plain text.
+   * @param {string} str 
+   * @returns {string}
+   */
+  decodeString(str) {
+    if (str === null || str === undefined) return '';
+    if (typeof str !== 'string') return str;
+    try {
+      return decodeURIComponent(str);
+    } catch (e) {
+      return str;
+    }
+  }
+
   /**
    * Generate a random number form 0 to max eg 0 - 10 without a seed (unlike ID.random())
    * @param {int} max 
