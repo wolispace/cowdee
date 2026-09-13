@@ -425,6 +425,7 @@ export class Cowmands {
       if (!orig) return;
       const obj = { ...orig };
       obj.id = this.app.id.new();
+      this.context.new_id = obj.id;
       obj.creator = this.context.actor;
       obj.owner = this.context.actor;
       await this.app.db.save(obj);
