@@ -352,7 +352,7 @@ export class DB {
    */
   async addLoc(loc, value) {
     const locList = await this.get('loc', loc) ?? [];
-    locList.push(value);
+    if (!locList.includes(value)) locList.push(value);
     await this.set('loc', loc, locList);
   }
   

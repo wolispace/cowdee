@@ -89,9 +89,6 @@ async function runMultiUserSimulation() {
     console.log(`   newObj in Bob's local DB:   ${newObjInBobDB ? 'YES (ID: ' + newObjInBobDB + ', Decoded: ' + decodedBobId + ')' : 'NO'}`);
     console.log(`   newObj in Wolis's local DB: ${newObjInWolisDB ? 'YES (ID: ' + newObjInWolisDB + ', Decoded: ' + decodedWolisId + ')' : 'NO'}`);
 
-    // wolis.storage.dump();
-    // bob.storage.dump();
-
     if (!newObjInBobDB || !newObjInWolisDB) {
       throw new Error('FAILED: Created newObj was not replicated to local DBs!');
     }
@@ -108,9 +105,20 @@ async function runMultiUserSimulation() {
     await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `paint it dodgerblue` });
     
     await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `create a green frog` });
-    await bob.sendCommand({ actor: '_wol', loc: '_2', cmd: `put the frog on the bus` });
+    await bob.sendCommand({ actor: '_bob', loc: '_2', cmd: `put the frog on the bus` });
     await bob.sendCommand({ actor: '_bob', loc: '_2', cmd: `pose it as sitting` });
+    // Wait for SSE broadcast
+    await sleep(600);
     await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `look` });
+    console.log('   Wolis heard:', wolis.ui.messages[wolis.ui.messages.length - 1]);
+
+    await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `build a door to a pantry` });
+    await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `create a handle` });
+    await bob.sendCommand({ actor: '_bob', loc: '_2', cmd: `put the handle on the door` });
+    // Wait for SSE broadcast
+    await sleep(600);
+    await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `look` });
+    console.log('   Wolis heard:', wolis.ui.messages[wolis.ui.messages.length - 1]);    
     
     
     // 6. Test Chat & Spatial Filtering over SSE
