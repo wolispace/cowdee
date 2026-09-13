@@ -24,7 +24,7 @@ export class Player {
       <form method="dialog" id="loginform">
       <input type="hidden" name="type" value="login">
         <label for="playername">Who are you?</label>
-        <input type="text" id="playername" name="playername" placeholder="Your name in cow" value="Wolis" required>
+        <input type="text" id="playername" name="playername" placeholder="Your name in cow" value="" required>
         <menu>
           <button value="submit" class="buttonize">Login</button>
         </menu>
