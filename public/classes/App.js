@@ -30,6 +30,7 @@ export class App {
     this.player = new Player(this);
     this.lookManager = new LookManager(this);
 
+    // ui elements with click commands will execute these:
     this.clickCmds = {
       examine: el => `examine ${el.dataset.id}`,
       close:   ()  => `look`,

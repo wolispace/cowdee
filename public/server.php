@@ -129,12 +129,12 @@ function handleInput($request) {
       saveJson($file, json_decode($request['content'], true));
       outputJson(['ok' => true]);
     }
-  } else if (!empty($request['lastContext'])) {
+  } else if (isset($request['lastContext'])) {
     $counterFile = DB_DIR . '/' . ID_COUNTER_FILE;
     $serverCounter = file_exists($counterFile) ? (int) file_get_contents($counterFile) : 1;
     outputJson(['lastContext' => get_last_context(), 'counter' => $serverCounter]);
   } else {
-    outputJson(['ok' => false]);
+    outputJson(['counter' => $serverCounter, 'src' => $counterFile]);
   }
 }
 

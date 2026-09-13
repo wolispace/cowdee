@@ -71,7 +71,7 @@ export class SSE {
         signal: this.abortController.signal
       });
 
-      console.log(`${this.app.name} [SSEnode] response `, response.status);
+      //console.log(`${this.app.name} [SSEnode] response `, response.status);
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status} ${response.statusText}`);

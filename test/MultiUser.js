@@ -16,6 +16,7 @@ async function runMultiUserSimulation() {
   await initApp.tester.initPlayers();
   await initApp.tester.initCommands();
   await initApp.db.saveToDisk();
+  await sleep(300);
   console.log(`✔ Initialized test database fixtures. DB Counter: ${initApp.id.counter}\n`);
 
   // 2. Create 3 independent real App instances and connect to SSE / Server
