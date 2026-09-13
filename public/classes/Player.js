@@ -13,7 +13,7 @@ export class Player {
    * show the logon form 
    */
   async welcome() {
-    if (!window) return;
+    if (!this.app.window) return;
     // show dialog, app.handleForm() handles logins
     this.app.ui.showDialog(this.loginFormContent()); 
     document.getElementById('playername').focus();   
@@ -67,9 +67,13 @@ export class Player {
     if (obj) {
       this.app.player.info.playername = obj.name;
       this.app.player.info.id = obj.id;
-      // show checkpw dialog
-      this.app.ui.showDialog(this.checkPwContent(data)); 
-      document.getElementById('pw').focus(); 
+      if (this.app.window) {
+        // show checkpw dialog
+        this.app.ui.showDialog(this.checkPwContent(data)); 
+        document.getElementById('pw').focus(); 
+      } else {
+        await this.logon(obj);
+      }
     } else {
       // show new player dialog
       this.app.player.info.playername = data.playername;

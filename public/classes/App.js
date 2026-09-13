@@ -11,14 +11,12 @@ import { Context } from './Context.js';
 
 const LAST_CONTEXT_KEY = 'lastContext'; // how we local store the last seen context key
 
-if (typeof window === "undefined") {
-  global.window = false;
-}
-
 export class App {
   lastContext = '0'; // last seen context.key
 
   constructor(options = {}) {
+    this.window = (typeof window !== "undefined"); 
+
     this.settings = options.settings || { generate: false, max: 5 };
     this.name = this.settings.name || 'cowdee';
     this.webroot = this.getWebroot();
@@ -51,7 +49,7 @@ export class App {
       await this.sse.connect();
     }
 
-    if (typeof document !== 'undefined') {
+    if (this.window) {
       // universal form submit we pass to the handler for forms
       document.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -82,7 +80,7 @@ export class App {
 
   // returns this font-rne js or node script communicates with
   getWebroot() {
-    if (!window) {
+    if (!this.window) {
       // return 'http://localhost:8880'; 
       return 'http://localhost';
     } else {

@@ -10,7 +10,7 @@ export class UI {
 
   constructor(app) {
     this.app = app;
-    if (typeof window === 'undefined' || !window) return;
+    if (!this.app.window) return;
     this.splitter = document.getElementById('splitter');
     this.panels = document.getElementById('panels');
     this.top = document.getElementById('top');
@@ -51,7 +51,7 @@ export class UI {
     }
     context.playerId = this.app.player.info.id;
 
-    if (!window) {
+    if (!this.app.window) {
       context.msg = await this.expand(context, 'text');
       if (context.msg) {
         this.messages.push(context.msg);
@@ -257,7 +257,7 @@ export class UI {
 
   // set a timeout of 500ms to animate this.top opacity from current (usually 0%) to 50% opacity over a 500ms period. 
   showLoading() {
-    if (!window) return;
+    if (!this.app.window) return;
     this.loading = setTimeout(() => {
       this.top.style.opacity = '0.25';
     }, 500);
@@ -266,7 +266,7 @@ export class UI {
   // clear this.loading timeout if present 
   // if this.top opacity is > 0% then fade it to 0% over250ms.
   hideLoading() {
-    if (!window) return;
+    if (!this.app.window) return;
     if (this.loading) {
       clearTimeout(this.loading);
       this.loading = null;
@@ -281,7 +281,7 @@ export class UI {
    * @param {string} msg 
    */
   alert(msg) {
-    if (window) {
+    if (this.app.window) {
       alert(msg);
     }
     console.warn(msg);
