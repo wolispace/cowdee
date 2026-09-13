@@ -421,9 +421,9 @@ export class Cowmands {
     },
     // COPY
     copy: async (rest) => {
-      const orig = this.app.db.getById(await this.resolveValue(rest.trim()));
+      const orig = await this.app.db.getById(await this.resolveValue(rest.trim()));
       if (!orig) return;
-      const obj = { loc, ...orig };
+      const obj = { ...orig };
       obj.id = this.app.id.new();
       obj.creator = this.context.actor;
       obj.owner = this.context.actor;
