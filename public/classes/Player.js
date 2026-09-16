@@ -20,11 +20,12 @@ export class Player {
   }
 
   loginFormContent() {
+    const defaultName = this.app.local ? 'Wolis' : '';
     return `
       <form method="dialog" id="loginform">
       <input type="hidden" name="type" value="login">
         <label for="playername">Who are you?</label>
-        <input type="text" id="playername" name="playername" placeholder="Your name in cow" value="Wolis" required>
+        <input type="text" id="playername" name="playername" placeholder="Your name in cow" value="${defaultName}" required>
         <menu>
           <button value="submit" class="buttonize">Login</button>
         </menu>
@@ -67,7 +68,7 @@ export class Player {
     if (obj) {
       this.app.player.info.playername = obj.name;
       this.app.player.info.id = obj.id;
-      if (this.app.window) {
+      if (this.app.window && !this.app.local) {
         // show checkpw dialog
         this.app.ui.showDialog(this.checkPwContent(data)); 
         document.getElementById('pw').focus(); 
