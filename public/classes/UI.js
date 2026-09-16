@@ -20,6 +20,11 @@ export class UI {
 
     this.setupEvents();
     this.initDialog();
+
+    // When the tab regains focus, clear any unread '*' indicator from the title
+    window.addEventListener('focus', () => {
+      document.title = document.title.replace(/\*$/, '');
+    });
   }
 
   async addMessage(context) {
@@ -39,9 +44,9 @@ export class UI {
     }
     // if the for is added then only that entiry can see the msg
     if (context.for && context.for != this.app.player.info.id) {
-       console.log(`${this.app.name} --- msg not for this player`, context.for, context.msg.slice(0, 30));
+      console.log(`${this.app.name} --- msg not for this player`, context.for, context.msg.slice(0, 30));
       return;
-    } 
+    }
 
     // DEBUG: If the user simply includes 'logoff' in the msg then logoff - make a propper command later
     if (context?.msg?.includes('logoff')) {
@@ -80,7 +85,41 @@ export class UI {
         // TODO: only scroll if the current scroll position is at the bottom before appending the content
         info.scrollTop = info.scrollHeight;
       }
+      this.blinkTitle(1000);
     }
+  }
+
+  /**
+   * Flashes a '*' on and off in the tab title for the given duration to signal
+   * a new message has arrived. Settles with '*' if the tab is unfocused, or
+   * without if it has focus.
+   *
+   * @param {number} duration  Total animation time in milliseconds (default 500).
+   * @param {number} tickMs    How fast '*' toggles on/off (default 100ms).
+   */
+  blinkTitle(duration = 500, tickMs = 100) {
+    // Cancel any in-progress animation so overlapping calls restart cleanly
+    if (this._blinkTimer) {
+      clearInterval(this._blinkTimer);
+      this._blinkTimer = null;
+    }
+
+    const original = document.title.replace(/ \*$/, '');
+    const end = Date.now() + duration;
+    let shown = false;
+
+    this._blinkTimer = setInterval(() => {
+      if (Date.now() >= end) {
+        clearInterval(this._blinkTimer);
+        this._blinkTimer = null;
+        // Settle: keep '*' only if the tab is still unfocused
+        const unfocused = document.visibilityState === 'hidden' || !document.hasFocus();
+        document.title = original + (unfocused ? ' *' : '');
+        return;
+      }
+      shown = !shown;
+      document.title = original + (shown ? ' *' : '');
+    }, tickMs);
   }
 
   /**
@@ -114,7 +153,7 @@ export class UI {
           val = `${obj.name} (you)`;
         }
 
-        if (['put','drop','pose','paint', 'edit', 'code', 'examine'].includes(context.trigger)) {
+        if (['put', 'drop', 'pose', 'paint', 'edit', 'code', 'examine'].includes(context.trigger)) {
           val = obj.thename;
         }
         if (!['longname', 'name', 'shorname', 'plural'].includes(prop)) {
@@ -122,12 +161,12 @@ export class UI {
         }
         if (format == 'html') {
           // Format value with styling if color is defined
-          const style = obj.color ? `style="color: ${obj.color}"`: '';
+          const style = obj.color ? `style="color: ${obj.color}"` : '';
           let cmd = 'examine';
           let hint = 'Examine';
           if (obj.link) {
             cmd = 'doorway';
-            hint = 'Go'; 
+            hint = 'Go';
           }
           return `<span class="click" data-cmd="${cmd}" ${style} data-id="${id}" title="${hint} ${val} [${id}]">${val}</span>`;
         } else {
