@@ -257,7 +257,7 @@ menu {
   border: 3px solid black;
   border-radius: .5rem;
   box-shadow: 0 0 1rem black;
-  height: 8rem;
+  height: 100%;
 }
 
 .info form textarea {

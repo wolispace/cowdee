@@ -153,7 +153,7 @@ export class UI {
           val = `${obj.name} (you)`;
         }
 
-        if (['put', 'drop', 'pose', 'paint', 'edit', 'code', 'examine'].includes(context.trigger)) {
+        if (['put', 'drop', 'pose', 'paint', 'edit', 'code', 'examine', 'read'].includes(context.trigger)) {
           val = obj.thename;
         }
         if (!['longname', 'name', 'shorname', 'plural'].includes(prop)) {
