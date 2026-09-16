@@ -458,7 +458,6 @@ export class DB {
       }
     }
 
-    await this.set('id', obj.id, obj);
     await this.addLoc(obj.loc, obj.id);
     await this.addName(this.classNameWords(obj), obj.id);
     if (obj.code) {
@@ -467,6 +466,12 @@ export class DB {
     if (obj.info) {
       await this.set('info', obj.id, obj.info);
     }
+    // remove things we dont need to save into id:
+    const clearList = ['info', 'code'];
+    for(const prop of clearList) {
+      delete obj[prop];
+    }
+    await this.set('id', obj.id, obj);
   }
 
   /**
