@@ -104,7 +104,7 @@ export class UI {
       this._blinkTimer = null;
     }
 
-    const original = document.title.replace(/ \*$/, '');
+    const original = document.title.replace(/\*$/, '');
     const end = Date.now() + duration;
     let shown = false;
 
@@ -114,11 +114,11 @@ export class UI {
         this._blinkTimer = null;
         // Settle: keep '*' only if the tab is still unfocused
         const unfocused = document.visibilityState === 'hidden' || !document.hasFocus();
-        document.title = original + (unfocused ? ' *' : '');
+        document.title = original + (unfocused ? '*' : '');
         return;
       }
       shown = !shown;
-      document.title = original + (shown ? ' *' : '');
+      document.title = original + (shown ? '*' : '');
     }, tickMs);
   }
 
