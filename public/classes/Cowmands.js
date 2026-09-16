@@ -198,10 +198,8 @@ export class Cowmands {
         match = rest.match(/^\$(\w+)\s+(?:to|=)\s+(.+)$/i);
         if (!match) return;
         const val = await this.resolveValue(match[2].trim());
-        if (['actor','target', 'second', 'loc'].includes(match[1])) {
-          this.context[match[1]] = val;
-          return;
-        }
+        this.context[match[1]] = val;
+        return;
       }
       const obj = await this.resolveObj(match[1].trim());
       const val = await this.resolveValue(match[3].trim());

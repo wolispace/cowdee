@@ -125,7 +125,7 @@ export class Tester {
       code: `get $target in $loc;\nvar $tlink to $target's link;\nsay 'leaves',\"[$actor] leaves via [$target]\";\nvar $loc to $tlink's loc;\nset $actor's loc to $loc;\nsay 'arrives',\"[$actor] appears via [$tlink]\";\nrelook $loc;`
     }, {
       name: "into",
-      code: `get $target in $loc;\nset $loc = $target;\nset $actor's loc to $loc;\nsay 'leaves',"[$actor] disapears inside [$target]!";\nrelook $loc;`
+      code: `set $oldloc to $loc;\nget $target in $loc;\nsay 'leaves',"[$actor] disapears inside [$target]!";\nset $loc = $target;\nset $actor's loc to $loc;\nrelook $loc;\nrelook $oldloc;`
     }, {
       name: "outof",
       code: `set $target = $loc;\nset $loc = $target's loc;\nset $actor's loc to $loc;\nsay 'arrives',"[$actor] apears outside [$target]!";\nrelook $loc;`
