@@ -130,6 +130,7 @@ export class Context {
     } else {
       console.warn(`No handler found for statement keyword: "${firstword}"`);
     }
+    console.log('actor',this.actor, 'target', this.target, 'loc', this.loc);
   }
 
   /**

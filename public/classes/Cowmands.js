@@ -194,11 +194,19 @@ export class Cowmands {
     // SET handler
     set: async (rest) => {
       let match = rest.match(/^(\$?\w+)\s*'s\s+(\w+)\s+(?:to|=)\s+(.+)$/i);
-      if (!match) return;
+      if (!match) {
+        match = rest.match(/^\$(\w+)\s+(?:to|=)\s+(.+)$/i);
+        if (!match) return;
+        const val = await this.resolveValue(match[2].trim());
+        if (['actor','target', 'second', 'loc'].includes(match[1])) {
+          this.context[match[1]] = val;
+          return;
+        }
+      }
       const obj = await this.resolveObj(match[1].trim());
+      const val = await this.resolveValue(match[3].trim());
       if (!obj) return;
       const prop = match[2].toLowerCase();
-      const val = await this.resolveValue(match[3].trim());
       const oldObj = { ...obj };
       obj[prop] = val;
       await this.app.db.save(obj, oldObj);

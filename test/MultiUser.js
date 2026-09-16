@@ -72,7 +72,7 @@ async function runMultiUserSimulation() {
     console.log('\n-----------------------------------------------------');
     console.log(`TEST 3: Bob creates a pink ${newObjName} in Room _2`);
     console.log('-----------------------------------------------------');
-    await bob.sendCommand({ actor: '_bob', loc: '_2', cmd: `create a pink ${newObjName}` });
+    await bob.sendCommand({cmd: `create a pink ${newObjName}` });
 
     // Wait for SSE broadcast across network/server
     await sleep(2000);
@@ -97,27 +97,27 @@ async function runMultiUserSimulation() {
       throw new Error(`FAILED: Expected new object ID to be over 23, but got ID "${newObjInBobDB}" (Decoded: ${decodedBobId})`);
     }
 
-    await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `create a red bus` });
-    await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `get it` });
-    await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `drop it` });
-    await bob.sendCommand({ actor: '_bob', loc: '_2', cmd: `get the bus` });
-    await bob.sendCommand({ actor: '_bob', loc: '_2', cmd: `drop the bus` });
-    await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `paint it dodgerblue` });
+    await wolis.sendCommand({cmd: `create a red bus` });
+    await wolis.sendCommand({cmd: `get it` });
+    await wolis.sendCommand({cmd: `drop it` });
+    await bob.sendCommand({cmd: `get the bus` });
+    await bob.sendCommand({cmd: `drop the bus` });
+    await wolis.sendCommand({cmd: `paint it dodgerblue` });
     
-    await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `create a green frog` });
-    await bob.sendCommand({ actor: '_bob', loc: '_2', cmd: `put the frog on the bus` });
-    await bob.sendCommand({ actor: '_bob', loc: '_2', cmd: `pose it as sitting` });
+    await wolis.sendCommand({cmd: `create a green frog` });
+    await bob.sendCommand({cmd: `put the frog on the bus` });
+    await bob.sendCommand({cmd: `pose it as sitting` });
     // Wait for SSE broadcast
     await sleep(600);
-    await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `look` });
+    await wolis.sendCommand({cmd: `look` });
     console.log('   Wolis heard:', wolis.ui.messages[wolis.ui.messages.length - 1]);
 
-    await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `build a door to a pantry` });
-    await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `create a handle` });
-    await bob.sendCommand({ actor: '_bob', loc: '_2', cmd: `put the handle on the door` });
+    await wolis.sendCommand({cmd: `build a door to a pantry` });
+    await wolis.sendCommand({cmd: `create a handle` });
+    await bob.sendCommand({cmd: `put the handle on the door` });
     // Wait for SSE broadcast
     await sleep(600);
-    await wolis.sendCommand({ actor: '_wol', loc: '_2', cmd: `look` });
+    await wolis.sendCommand({cmd: `look` });
     console.log('   Wolis heard:', wolis.ui.messages[wolis.ui.messages.length - 1]);    
     
     
@@ -127,7 +127,7 @@ async function runMultiUserSimulation() {
     console.log('-----------------------------------------------------');
     const janeMsgCountBefore = jane.ui.messages.length;
 
-    await bob.sendCommand({ actor: '_bob', loc: '_2', cmd: 'say hello Wolis in the house' });
+    await bob.sendCommand({cmd: 'say hello Wolis in the house' });
 
     // Wait for SSE broadcast
     await sleep(600);
