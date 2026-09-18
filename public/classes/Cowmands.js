@@ -581,17 +581,77 @@ export class Cowmands {
     return { qty, color, attribs: attribs.join(' '), class: cls, name };
   }
 
-  // Quantity word lookups from Perl ($qty_list)
-  qtyList(word) {
-    const list = {
+  /**
+   * Returns a list of known color names sorted by hue
+   * @returns {array}
+   */
+  colorNames() {
+    return [
+      "red", "darkred", "firebrick", "crimson", "indianred", "lightcoral", "salmon",
+      "darksalmon", "lightsalmon", "orangered", "tomato", "coral", "darkorange",
+      "orange", "gold", "yellow", "lightyellow", "lemonchiffon", "lightgoldenrodyellow",
+      "papayawhip", "moccasin", "peachpuff", "palegoldenrod", "khaki", "darkkhaki",
+      "beige", "cornsilk", "blanchedalmond", "bisque", "navajowhite", "wheat", "burlywood",
+      "tan", "rosybrown", "sandybrown", "peru", "chocolate", "saddlebrown", "sienna",
+      "brown", "maroon",
+
+      "olive", "darkolivegreen", "olivedrab", "yellowgreen", "greenyellow", "chartreuse",
+      "lawngreen", "lime", "limegreen", "palegreen", "lightgreen", "mediumspringgreen",
+      "springgreen", "mediumseagreen", "seagreen", "forestgreen", "green", "darkgreen",
+
+      "lightseagreen", "darkcyan", "teal", "aqua", "cyan", "lightcyan", "paleturquoise",
+      "aquamarine", "turquoise", "mediumturquoise", "darkturquoise",
+
+      "cadetblue", "lightblue", "powderblue", "lightsteelblue", "skyblue", "lightskyblue",
+      "deepskyblue", "dodgerblue", "cornflowerblue", "steelblue", "royalblue", "blue",
+      "mediumblue", "darkblue", "navy", "midnightblue",
+
+      "indigo", "purple", "darkmagenta", "darkorchid", "blueviolet", "darkviolet",
+      "mediumorchid", "orchid", "violet", "plum", "thistle", "magenta", "fuchsia",
+      "mediumvioletred", "deeppink", "hotpink", "palevioletred", "lightpink", "pink",
+
+      "rebeccapurple",
+
+      "lavender", "ghostwhite", "aliceblue", "azure", "mintcream", "honeydew", "ivory",
+      "seashell", "snow", "floralwhite", "linen", "oldlace", "whitesmoke", "gainsboro",
+      "lightgray", "lightgrey", "silver", "darkgray", "darkgrey", "gray", "grey", "dimgray",
+      "dimgrey", "slategray", "slategrey", "lightslategray", "lightslategrey",
+
+      "black", "white"
+    ];
+  }
+
+  /**
+   * Returns a list of size names
+   * @returns {array}
+   */
+  sizeNames() {
+    return ['tiny', 'small', 'little', 'large', 'big', 'huge', 'giant', 'massive'];
+  }
+
+
+  /**
+   * Returns a list of words that map to a quantity number
+   * @returns {array}
+   */
+  qtyNames() {
+    return {
       'the': 0,
+      'a piece of': 0.5,
+      'a part of': 0.5,
+      'a section of': 0.5,
       'a': 1,
       'an': 1,
       'one': 1,
       'some': 20,
       'many': 30,
       'innumerable': 50
-    }
+    };
+  }
+
+  // Quantity word lookups from Perl ($qty_list)
+  qtyList(word) {
+    const list = this.qtyNames();
     return list[word] ?? 1;
   };
 
@@ -608,7 +668,7 @@ export class Cowmands {
   // Sanitises class/name by removing illegal characters
   sanitiseName(str) {
     if (!str) return '';
-    return str.replace(/[^a-z0-9]+/gi, '').trim();
+    return str.replace(/[^a-z0-9 ]+/gi, '').trim();
   }
 
   // Cleans up material strings, replacing spaces with delimiters
@@ -623,7 +683,7 @@ export class Cowmands {
 
   parseObj(inputObj) {
     let thisObj = (inputObj || '').replace(/"/g, ''); // Remove quotes
-    const obj = {class: ''};
+    const obj = { class: '', qty: 1, worth: 1, gender: 'it' };
     // -------------------------------------------------------------------------
     // Step 1: Check for "made of" with trailing description
     // e.g., "a cup made of gold for drinking"
@@ -631,7 +691,7 @@ export class Cowmands {
     let match = thisObj.match(/(.+) (made of) (\w+) (.+)/i);
     if (match) {
       thisObj = match[1];
-      obj.extra = `${match[2]} ${match[3]} ${match[4]}`;
+      obj.extra = this.sanitiseName(`${match[2]} ${match[3]} ${match[4]}`);
       // TODO: material is match[3] = gold
     } else {
       // Step 2: Check for simple "made of"
@@ -639,7 +699,7 @@ export class Cowmands {
       match = thisObj.match(/(.+) (made of) (\w+)/i);
       if (match) {
         thisObj = match[1];
-        obj.extra = `${match[2]} ${match[3]}`;
+        obj.extra = this.sanitiseName(`${match[2]} ${match[3]}`);
       }
     }
     // -------------------------------------------------------------------------
@@ -647,10 +707,10 @@ export class Cowmands {
     // (for, which, to, by, who, covered, decorated, adorned, looking)
     // e.g., "book for coding" -> extra = "for coding"
     // -------------------------------------------------------------------------
-    match = thisObj.match(/(.+?) (for|which|to|by|who|covered|decorated|adorned|looking) (.+)/i);
+    match = thisObj.match(/(.+?) (for|which|that|to|by|who|covered|decorated|adorned|looking|designed) (.+)/i);
     if (match) {
       thisObj = match[1];
-      obj.extra = `${match[2]} ${match[3]}`;
+      obj.extra = this.sanitiseName(`${match[2]} ${match[3]}`);
     }
     // -------------------------------------------------------------------------
     // Step 4: Extract worth / pennies
@@ -660,54 +720,31 @@ export class Cowmands {
     if (match) {
       thisObj = match[1];
       obj.worth = parseInt(match[3], 10);
-    } else {
-      obj.worth = 1; // Default worth
     }
     // -------------------------------------------------------------------------
-    // Step 5: Extract quantity and rest string
+    // Step 5: Extract quantity
     // e.g., "53 mice" -> qty = "53", rest = "mice"
     // -------------------------------------------------------------------------
-    let rest = '';
-    match = thisObj.match(/(\w+) (.+)/);
-    if (match) {
-      obj.qty = match[1];
-      rest = match[2];
-    } else {
-      obj.qty = this.qtyList('some'); // Default to 20
-      rest = thisObj;
-    }
-    // -------------------------------------------------------------------------
-    // Step 6: Convert textual/numeric quantities
-    // -------------------------------------------------------------------------
-    let numQty = parseInt(obj.qty, 10);
-    if (isNaN(numQty) || numQty < 1) {
-      numQty = this.convQty(obj.qty);
-      if (numQty < 1) {
-        numQty = this.qtyList('some'); // Fallback to 20
-        rest = thisObj;
+    for (const [str, num] of Object.entries(this.qtyNames())) {
+      if (thisObj.startsWith(str + ' ')) {
+        obj.qty = num;
+        this.qtyStr = str;
+        thisObj = thisObj.substring(str.length + 1);
+        break;
       }
-    }
-    obj.qty = numQty || 1;
-    // -------------------------------------------------------------------------
-    // Step 7: Handle "the " prefix for unique named items
-    // e.g., "the void" -> qty = 0
-    // -------------------------------------------------------------------------
-    let pre = rest ?? '';
-    if (/^the /i.test(thisObj)) {
-      obj.qty = 0;
     }
     // -------------------------------------------------------------------------
     // Step 8: Extract joining words "called" or "named"
     // e.g., "player called bob" / "cat named fred" -> name = "bob"/"fred"
     // -------------------------------------------------------------------------
-    match = pre.match(/(.+) called (\w+)/i) || pre.match(/(.+) named (\w+)/i);
+    match = thisObj.match(/(.+) called (\w+)/i) || thisObj.match(/(.+) named (\w+)/i);
     if (match) {
-      pre = match[1];
+      thisObj = match[1];
       obj.name = match[2];
     }
-    const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'black', 'white', 'grey', 'gray', 'brown', 'silver', 'gold'];
-    const sizes = ['tiny', 'small', 'little', 'large', 'big', 'huge', 'giant', 'massive'];
-    const words = pre.split(/\s+/);    
+    const colors = this.colorNames();
+    const sizes = this.sizeNames();
+    const words = thisObj.split(/\s+/);
     for (let word of words) {
       word = word.toLowerCase();
       if (colors.includes(word)) {

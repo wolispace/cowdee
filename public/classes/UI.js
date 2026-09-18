@@ -159,6 +159,10 @@ export class UI {
         if (!['longname', 'name', 'shorname', 'plural'].includes(prop)) {
           return val;
         }
+        if (obj.extra) {
+          val = `${val} ${obj.extra.trim() }`;
+        }
+        
         if (format == 'html') {
           // Format value with styling if color is defined
           const style = obj.color ? `style="color: ${obj.color}"` : '';

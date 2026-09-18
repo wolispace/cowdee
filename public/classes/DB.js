@@ -218,15 +218,19 @@ export class DB {
    * @returns nothing, updates obj
    */
   formatQty(obj) {
+
     obj.qty = !obj.qty ? 1 : obj.qty;
     obj.qtyText = obj.qty;
-    if (obj.qty == 1) {
+    if (obj.qty < 1 && obj.qty > 0) {
+      // TODO: use our Cowmands.qtyNames() and reverse it
+      obj.qtyText = 'a piece of';
+    } else if(obj.qty == 1) {
       obj.qtyText = ['a', 'e', 'i', 'o', 'u'].includes(obj.class[0]) ? 'an' : 'a';
     } else if (obj.qty == 2) {
       obj.qtyText = 'two';
     } else if (obj.qty == 3) {
       obj.qtyText = 'three';
-    } else if (obj.qty == -1) {
+    } else if (obj.qty == 0) {
       obj.qtyText = 'the';
     } else if (obj.qty < 10) {
       obj.qtyText = obj.qty;
