@@ -70,7 +70,12 @@ export class App {
         const el = event.target.closest('.click');
         if (!el) return;
         const cmd = this.clickCmds[el.dataset.cmd];
-        if (cmd) await this.sendCommand(cmd(el));
+        if (cmd) {
+          await this.sendCommand(cmd(el));
+        } else {
+          const thisCmd = el.dataset.cmd.replace(/{id}/, el.dataset.id);
+          await this.sendCommand(thisCmd); 
+        }
       });
     }
 

@@ -21,30 +21,37 @@ export class LookManager {
    */
   async list(context) {
     this.context = context;
-    this.sentences = [];
-    
     const loc = await this.app.db.getById(this.context.loc);
-    if (!loc) {
-      this.sentences.push('Nothing interesting here');
-      return this.returnData();
+    if (this.context.found) {
+      this.sentences = [`Which one do you choose: `];
+      this.found = this.context.found;
+    } else {
+      if (!loc) {
+        this.sentences.push('Nothing interesting here');
+        return this.returnData();
+      }
+      this.found = await this.app.db.findInLoc(loc.id);
+      this.sentences = [`In [${loc.id}] you see: `];
+      if (!this.found || this.found.length < 1) {
+        this.sentences.push('Nothing interesting here');
+        return this.returnData();
+      }
     }
-    this.found = await this.app.db.findInLoc(loc.id);
-
-    this.sentences = [`In [${loc.id}] you see: `];
-    if (!this.found || this.found.length < 1) {
-      this.sentences.push('Nothing interesting here');
-      return this.returnData();
-    }
-
+    
     this.objs = await this.populateObjs();
-    this.objs[loc.id] = loc;
+    // add the location into the list of objects here .. do we need this?
+    if (loc) {
+      this.objs[loc.id] = loc;
+    }
     let list = '';
     for (const id of this.found) {
       list += `<li>[${id}]</li>`;
     }
     this.sentences.push(list);
-    // TODO: better wany needed to INV shoing what you hold noone
-    this.context.loc = loc.loc;
+    // TODO: better way needed to INV shoing what you hold noone
+    if (this.loc) {
+      this.context.loc = loc.loc;
+    }
     return this.returnData();
   }
 
@@ -289,6 +296,7 @@ export class LookManager {
       loc: this.context.loc,
       for: this.context.for,
       actor: this.context.actor,
+      cmd: this.context.clickcmd,
       trigger: this.context.trigger,
       top: true, // this message replaces the top section if true
     };

@@ -162,7 +162,7 @@ export class UI {
         if (obj.extra) {
           val = `${val} ${obj.extra.trim() }`;
         }
-        
+
         if (format == 'html') {
           // Format value with styling if color is defined
           const style = obj.color ? `style="color: ${obj.color}"` : '';
@@ -171,6 +171,10 @@ export class UI {
           if (obj.link) {
             cmd = 'doorway';
             hint = 'Go';
+          }
+          if (context.cmd != '') {
+            cmd = context.cmd;
+            hint = `Choose this to ${context.cmd}`;
           }
           return `<span class="click" data-cmd="${cmd}" ${style} data-id="${id}" title="${hint} ${val} [${id}]">${val}</span>`;
         } else {
@@ -329,4 +333,73 @@ export class UI {
     }
     console.warn(msg);
   }
+
+    /**
+   * Returns a list of known color names sorted by hue
+   * @returns {array}
+   */
+  colorNames() {
+    return [
+      "red", "darkred", "firebrick", "crimson", "indianred", "lightcoral", "salmon",
+      "darksalmon", "lightsalmon", "orangered", "tomato", "coral", "darkorange",
+      "orange", "gold", "yellow", "lightyellow", "lemonchiffon", "lightgoldenrodyellow",
+      "papayawhip", "moccasin", "peachpuff", "palegoldenrod", "khaki", "darkkhaki",
+      "beige", "cornsilk", "blanchedalmond", "bisque", "navajowhite", "wheat", "burlywood",
+      "tan", "rosybrown", "sandybrown", "peru", "chocolate", "saddlebrown", "sienna",
+      "brown", "maroon",
+
+      "olive", "darkolivegreen", "olivedrab", "yellowgreen", "greenyellow", "chartreuse",
+      "lawngreen", "lime", "limegreen", "palegreen", "lightgreen", "mediumspringgreen",
+      "springgreen", "mediumseagreen", "seagreen", "forestgreen", "green", "darkgreen",
+
+      "lightseagreen", "darkcyan", "teal", "aqua", "cyan", "lightcyan", "paleturquoise",
+      "aquamarine", "turquoise", "mediumturquoise", "darkturquoise",
+
+      "cadetblue", "lightblue", "powderblue", "lightsteelblue", "skyblue", "lightskyblue",
+      "deepskyblue", "dodgerblue", "cornflowerblue", "steelblue", "royalblue", "blue",
+      "mediumblue", "darkblue", "navy", "midnightblue",
+
+      "indigo", "purple", "darkmagenta", "darkorchid", "blueviolet", "darkviolet",
+      "mediumorchid", "orchid", "violet", "plum", "thistle", "magenta", "fuchsia",
+      "mediumvioletred", "deeppink", "hotpink", "palevioletred", "lightpink", "pink",
+
+      "rebeccapurple",
+
+      "lavender", "ghostwhite", "aliceblue", "azure", "mintcream", "honeydew", "ivory",
+      "seashell", "snow", "floralwhite", "linen", "oldlace", "whitesmoke", "gainsboro",
+      "lightgray", "lightgrey", "silver", "darkgray", "darkgrey", "gray", "grey", "dimgray",
+      "dimgrey", "slategray", "slategrey", "lightslategray", "lightslategrey",
+
+      "black", "white"
+    ];
+  }
+
+  /**
+   * Returns a list of size names
+   * @returns {array}
+   */
+  sizeNames() {
+    return ['tiny', 'small', 'little', 'large', 'big', 'huge', 'giant', 'massive'];
+  }
+
+
+  /**
+   * Returns a list of words that map to a quantity number
+   * @returns {array}
+   */
+  qtyNames() {
+    return {
+      'the': 0,
+      'a piece of': 0.5,
+      'a part of': 0.5,
+      'a section of': 0.5,
+      'a': 1,
+      'an': 1,
+      'one': 1,
+      'some': 20,
+      'many': 30,
+      'innumerable': 50
+    };
+  }
+
 };

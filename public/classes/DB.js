@@ -94,25 +94,26 @@ export class DB {
   }
 
     /**
-   * Find the first named object in the location
-   * @param {string} name 
-   * @param {string} loc 
+   * Finds all objects matching the name in the location or all
+   * @param {string} name
+   * @param {string} loc
    * @returns {string} the ID of the found object
    */
   async findByNameInLoc(name, loc) {
-    const inName = await this.findByName(name);
-    if (!inName || inName.length < 1) return undefined;
+    let candidates = await this.findByName(name);
+    if (!candidates || candidates.length < 1) return undefined;
     if (loc == 'all') {
-      return inName[0];
+      return candidates;
     }
-
+    const found = [];
     const inLoc = await this.findInLoc(loc);
     if (!inLoc) return undefined;
     for (const key of inLoc) {
-      if (inName.includes(key)) {
-        return key;
+      if (candidates.includes(key)) {
+        found.push(key);
       }
     }
+    return found;
   }
 
 

@@ -110,6 +110,18 @@ export class Context {
  * @param {string} statement 
  */
   async executeStatement(statement) {
+    if (this.found && this.found.length > 0) {
+      console.log(`${this.app.name} we found more that one of these`);
+      if (this.actor === this.app.player.info.id) {
+        // present the user with a list of objects
+        const data = await this.app.lookManager.list({ ...this });
+        await this.app.ui.addMessage(data);
+        return;
+      } else {
+        console.log(`${this.app.name} not the player so abandon this context`);
+        return;
+      }
+    }
     console.log(`${this.app.name} -- executeCowmand [${statement}]`);
     const trimmed = statement.trim();
     if (!trimmed) return;

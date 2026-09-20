@@ -115,6 +115,9 @@ export class Tester {
       name: "look",
       code: `say 'look',"[$actor] looks around";\nrelook $loc;`
     }, {
+      name: "list",
+      code: `list $loc;`
+    }, {      
       name: "put",
       code: `get $target,$rel,$second in $loc,$loc;\nset $target's hosthow to \"$rel\";\nset $target's host to $second;\nset $target's hosthow to \"$rel\";\nset $target's pose to '';\nsay 'put',\"[$actor] put [$target] $rel [$second]\";\nrelook $loc;`
     }, {

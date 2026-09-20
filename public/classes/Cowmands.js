@@ -119,8 +119,13 @@ export class Cowmands {
         if (await isAlreadyId(ntarget)) {
           this.context.target = ntarget;
         } else {
-          const resolved = await this.app.db.findByNameInLoc(ntarget, getLocValue);
-          this.context.target = resolved || ntarget;
+          this.context.found = await this.app.db.findByNameInLoc(ntarget, getLocValue);
+          if (this.context.found.length == 1) {
+            this.context.target = this.context.found[0];
+          }
+          // more that one possible target so present a list of the user to choose from
+          this.context.clickcmd = this.context.cmd.replace(ntarget, '{id}');
+
         }
         // last interacted with target will be the next commands 'it'
         if (this.context.actor === this.app.player.info.id) {
@@ -581,77 +586,10 @@ export class Cowmands {
     return { qty, color, attribs: attribs.join(' '), class: cls, name };
   }
 
-  /**
-   * Returns a list of known color names sorted by hue
-   * @returns {array}
-   */
-  colorNames() {
-    return [
-      "red", "darkred", "firebrick", "crimson", "indianred", "lightcoral", "salmon",
-      "darksalmon", "lightsalmon", "orangered", "tomato", "coral", "darkorange",
-      "orange", "gold", "yellow", "lightyellow", "lemonchiffon", "lightgoldenrodyellow",
-      "papayawhip", "moccasin", "peachpuff", "palegoldenrod", "khaki", "darkkhaki",
-      "beige", "cornsilk", "blanchedalmond", "bisque", "navajowhite", "wheat", "burlywood",
-      "tan", "rosybrown", "sandybrown", "peru", "chocolate", "saddlebrown", "sienna",
-      "brown", "maroon",
-
-      "olive", "darkolivegreen", "olivedrab", "yellowgreen", "greenyellow", "chartreuse",
-      "lawngreen", "lime", "limegreen", "palegreen", "lightgreen", "mediumspringgreen",
-      "springgreen", "mediumseagreen", "seagreen", "forestgreen", "green", "darkgreen",
-
-      "lightseagreen", "darkcyan", "teal", "aqua", "cyan", "lightcyan", "paleturquoise",
-      "aquamarine", "turquoise", "mediumturquoise", "darkturquoise",
-
-      "cadetblue", "lightblue", "powderblue", "lightsteelblue", "skyblue", "lightskyblue",
-      "deepskyblue", "dodgerblue", "cornflowerblue", "steelblue", "royalblue", "blue",
-      "mediumblue", "darkblue", "navy", "midnightblue",
-
-      "indigo", "purple", "darkmagenta", "darkorchid", "blueviolet", "darkviolet",
-      "mediumorchid", "orchid", "violet", "plum", "thistle", "magenta", "fuchsia",
-      "mediumvioletred", "deeppink", "hotpink", "palevioletred", "lightpink", "pink",
-
-      "rebeccapurple",
-
-      "lavender", "ghostwhite", "aliceblue", "azure", "mintcream", "honeydew", "ivory",
-      "seashell", "snow", "floralwhite", "linen", "oldlace", "whitesmoke", "gainsboro",
-      "lightgray", "lightgrey", "silver", "darkgray", "darkgrey", "gray", "grey", "dimgray",
-      "dimgrey", "slategray", "slategrey", "lightslategray", "lightslategrey",
-
-      "black", "white"
-    ];
-  }
-
-  /**
-   * Returns a list of size names
-   * @returns {array}
-   */
-  sizeNames() {
-    return ['tiny', 'small', 'little', 'large', 'big', 'huge', 'giant', 'massive'];
-  }
-
-
-  /**
-   * Returns a list of words that map to a quantity number
-   * @returns {array}
-   */
-  qtyNames() {
-    return {
-      'the': 0,
-      'a piece of': 0.5,
-      'a part of': 0.5,
-      'a section of': 0.5,
-      'a': 1,
-      'an': 1,
-      'one': 1,
-      'some': 20,
-      'many': 30,
-      'innumerable': 50
-    };
-  }
 
   // Quantity word lookups from Perl ($qty_list)
   qtyList(word) {
-    const list = this.qtyNames();
+    const list = this.app.ui.qtyNames();
     return list[word] ?? 1;
   };
 
@@ -725,7 +663,7 @@ export class Cowmands {
     // Step 5: Extract quantity
     // e.g., "53 mice" -> qty = "53", rest = "mice"
     // -------------------------------------------------------------------------
-    for (const [str, num] of Object.entries(this.qtyNames())) {
+    for (const [str, num] of Object.entries(this.app.ui.qtyNames())) {
       if (thisObj.startsWith(str + ' ')) {
         obj.qty = num;
         this.qtyStr = str;
@@ -742,8 +680,8 @@ export class Cowmands {
       thisObj = match[1];
       obj.name = match[2];
     }
-    const colors = this.colorNames();
-    const sizes = this.sizeNames();
+    const colors = this.app.ui.colorNames();
+    const sizes = this.app.ui.sizeNames();
     const words = thisObj.split(/\s+/);
     for (let word of words) {
       word = word.toLowerCase();
