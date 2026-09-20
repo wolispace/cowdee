@@ -30,7 +30,7 @@ function logIt($str) {
   foreach ($files as $file) {
     $ts = substr(basename($file), 0, 13);
     if ($ts < (time() - 3600) * 1000) { 
-      unlink($file);
+      @unlink($file);
       logIt('kill old file ' . $file . ', ' . $ts . ' < ' . (time() - 3600) * 1000); 
       continue; 
     }
