@@ -69,7 +69,8 @@ export class DB {
    * @returns {set} of IDs with this name
    */
   async findByName(word) {
-    const name = word.replace(/^(?:the|an|a)\b/i, '').trim().toLocaleLowerCase();
+    let name = word.replace(/^(?:the|an|a)\b/i, '').trim().toLocaleLowerCase();
+    name = this.guessSingular(name);
     return await this.get('name', name);
   };
 
@@ -279,14 +280,8 @@ export class DB {
    */
   setPluralName(obj) {
     if (obj.qty > 1) {
-      // if obj.class ends in 's' or 'es' then we know the player typed 'create some boxes'
-      if (obj.class.endsWith('s') || obj.class.endsWith('es')) {
-        obj.plural = obj.class;
-        obj.class = obj.class.replace(/(es|s)$/, '');
-      } else {
-        obj.plural = obj.class;
-        obj.class = this.pluralNames[obj.plural];
-      }
+      obj.plural = obj.class; // what they typed was the plural name
+      obj.class = this.guessSingular(obj.plural);
     } else {
       obj.plural = this.singleNames[obj.class] ?? obj.class + 's';
       // 1. Irregulars first
@@ -297,6 +292,19 @@ export class DB {
       } else {
         obj.plural = obj.class + 's';
       }
+    }
+  }
+
+  /**
+   * Given a potential plural 'boxes', 'chairs' guess the singular 'box', 'chair' as we store names for lookup as singular
+   * @param {string} plural 
+   * @returns {string}
+   */
+  guessSingular(plural) {
+    if (this.pluralNames[plural]) {
+      return this.pluralNames[plural];
+    } else {
+       return plural.replace(/(es|s)$/, ''); // guess at singular
     }
   }
 
