@@ -114,18 +114,18 @@ export class Cowmands {
       // Restore previous target/second before resolving
       this.context.target = ltarget;
       this.context.second = lsecond;
-      const isAlreadyId = async (val) => !!(await this.app.db.getById(val));
       if (ntarget) {
-        if (await isAlreadyId(ntarget)) {
+        if (this.app.db.isId(ntarget)) {
           this.context.target = ntarget;
         } else {
           this.context.found = await this.app.db.findByNameInLoc(ntarget, getLocValue);
           if (this.context.found.length == 1) {
             this.context.target = this.context.found[0];
+            delete this.context.found;
+          } else {
+            // more that one possible target so present a list of the user to choose from
+            this.context.clickcmd = this.context.cmd.replace(ntarget, '{id}');
           }
-          // more that one possible target so present a list of the user to choose from
-          this.context.clickcmd = this.context.cmd.replace(ntarget, '{id}');
-
         }
         // last interacted with target will be the next commands 'it'
         if (this.context.actor === this.app.player.info.id) {
@@ -133,11 +133,17 @@ export class Cowmands {
         }
       }
       if (nsecond) {
-        if (await isAlreadyId(nsecond)) {
+        if (this.app.db.isId(nsecond)) {
           this.context.second = nsecond;
         } else {
-          const resolved = await this.app.db.findByNameInLoc(nsecond, getSecondLocValue);
-          this.context.second = resolved || nsecond;
+          this.context.found = await this.app.db.findByNameInLoc(nsecond, getSecondLocValue);
+          if (this.context.found.length == 1) {
+            this.context.second = this.context.found[0];
+            delete this.context.found;
+          } else {
+            // more that one possible target so present a list of the user to choose from
+            this.context.clickcmd = this.context.cmd.replace(nsecond, '{id}');
+          }
         }
       }
     },

@@ -172,7 +172,7 @@ export class UI {
             cmd = 'doorway';
             hint = 'Go';
           }
-          if (context.cmd != '') {
+          if (context.cmd && context.cmd != '') {
             cmd = context.cmd;
             hint = `Choose this to ${context.cmd}`;
           }

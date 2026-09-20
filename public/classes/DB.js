@@ -344,8 +344,23 @@ export class DB {
     // return key.slice(0, 2).charCodeAt(0);
   }
 
+  /**
+   * Returns the filename for the type and prefix
+   * @param {string} type
+   * @param {string} prefix
+   * @returns {string}
+   */
   makeFileName(type, prefix) {
     return `${type}${prefix}`;
+  }
+
+  /**
+   * Return true if the string passed in represents an ID eg '_wol' as comared to 'wolis'
+   * @param {string} str 
+   * @returns {boolean}
+   */
+  isId(str) {
+    return str[0] === '_';
   }
 
   // manipulate objects within each type/prefix/key
