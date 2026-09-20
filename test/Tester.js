@@ -78,6 +78,8 @@ export class Tester {
   }
 
   async initPlayers() {
+    // pw hash of 'aaa' is:
+    const hash = "$2b$10$KrEhOb\/LpXNnqimUWwfKdO\/IITbgYbtImzEHQQZ\/a5OV\/VjoDU.3q";
     const players = [
       { loc: '_2', name: 'Wolis', id: '_wol' },
       { loc: '_2', name: 'Bob', id: '_bob' },
@@ -89,6 +91,7 @@ export class Tester {
       obj.id = player.id;
       obj.loc = player.loc;
       obj.name = player.name;
+      obj.pw = hash;
       obj.class = 'player';
       obj.color = 'goldenrod';
       await this.app.db.save(obj);
