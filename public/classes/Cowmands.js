@@ -427,6 +427,7 @@ export class Cowmands {
       obj.id = this.app.id.new();
       obj.creator = this.context.actor;
       obj.owner = this.context.actor;
+      this.app.db.setPluralName(obj);
       await this.app.db.save(obj);
       this.context.target = obj.id;
       this.context.it = obj.id;

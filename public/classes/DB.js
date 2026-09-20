@@ -8,6 +8,7 @@ export class DB {
 
   constructor(app) {
     this.app = app;
+    this.buildPlurals();
   }
 
   /**
@@ -31,10 +32,10 @@ export class DB {
     return this.memory[type][prefix][key];
   }
 
-    /** TODO: do we need this still?
-   * Preloads all shard files needed for an array/Set of keys in a single batch request
-   * @param {Iterable<string>} keys 
-   */
+  /** TODO: do we need this still?
+ * Preloads all shard files needed for an array/Set of keys in a single batch request
+ * @param {Iterable<string>} keys 
+ */
   async preload(keys) {
     if (!keys) return;
     const filenames = new Set();
@@ -51,15 +52,15 @@ export class DB {
     }
   }
 
-  
-    /**
-   * Returns the whole object from a chunked file
-   * @param {string} id 
-   * @returns {object}
-   */
+
+  /**
+ * Returns the whole object from a chunked file
+ * @param {string} id 
+ * @returns {object}
+ */
   async getById(id) {
     return await this.get('id', id);
-  } 
+  }
 
 
   /**
@@ -72,12 +73,12 @@ export class DB {
     return await this.get('name', name);
   };
 
-   /**
-   * Return the obj of the player matching the name
-   * TODO: worry about passwords later
-   * @param {object} data with data.username and data.pw
-   * @returns {object}
-   */
+  /**
+  * Return the obj of the player matching the name
+  * TODO: worry about passwords later
+  * @param {object} data with data.username and data.pw
+  * @returns {object}
+  */
   async findPlayer(data) {
     const candidates = await this.findByName(data.playername);
     if (!candidates) return undefined;
@@ -93,12 +94,12 @@ export class DB {
     }
   }
 
-    /**
-   * Finds all objects matching the name in the location or all
-   * @param {string} name
-   * @param {string} loc
-   * @returns {string} the ID of the found object
-   */
+  /**
+ * Finds all objects matching the name in the location or all
+ * @param {string} name
+ * @param {string} loc
+ * @returns {string} the ID of the found object
+ */
   async findByNameInLoc(name, loc) {
     let candidates = await this.findByName(name);
     if (!candidates || candidates.length < 1) return undefined;
@@ -117,25 +118,25 @@ export class DB {
   }
 
 
-    /**
-   * Returns an array of object IDs in the location
-   * @param {string} key 
-   * @returns {set}
-   */
+  /**
+ * Returns an array of object IDs in the location
+ * @param {string} key 
+ * @returns {set}
+ */
   async findInLoc(key) {
     return await this.get('loc', key);
   }
 
-    /**
-   * Retruns the code for the object.id passed in
-   * for consistancy, even tho its just a string, its stored in an array with one element
-   * @param {id} id 
-   * @returns {string}
-   */
+  /**
+ * Retruns the code for the object.id passed in
+ * for consistancy, even tho its just a string, its stored in an array with one element
+ * @param {id} id 
+ * @returns {string}
+ */
   async getCode(id) {
     const obj = await this.get('code', id);
     if (!obj) return '';
-    const raw = obj?.code.replaceAll('\\n','\n') ?? '';
+    const raw = obj?.code.replaceAll('\\n', '\n') ?? '';
     return this.app.utils.decodeString(raw);
   };
 
@@ -148,7 +149,7 @@ export class DB {
   async getInfo(id) {
     const objInfo = await this.get('info', id);
     if (!objInfo) return '';
-    const raw = objInfo.replaceAll("\\n","\n") ?? '';
+    const raw = objInfo.replaceAll("\\n", "\n") ?? '';
     return this.app.utils.decodeString(raw);
   };
 
@@ -161,7 +162,7 @@ export class DB {
     return await this.get('pw', id);
   }
 
-  
+
   /**
    * Find the first named command (look in player then location then globaly so long as its a command)
    * "find" means look for it somewhere, where as "get" means we know it so get it.
@@ -193,7 +194,7 @@ export class DB {
     return '';
   };
 
-  
+
   /**
    * Adds formatted/processed versions of values within the object. Saved to disk so we dont need to reprocess again.
    * Each time an object is added to the pools its re formatted.
@@ -201,24 +202,25 @@ export class DB {
    * @returns nothing, the obj is updated
    */
   formatObject(obj) {
-    this.formatQty(obj);
-    this.formatPlural(obj);
+    this.setQty(obj);
     if (obj.qty == 1) {
       obj.is = 'is';
       obj.gender = 'it';
+      obj.thename = `the ${obj.class}`;
+      obj.longname = `${obj.qtyText} ${obj.class}`;
     } else {
       obj.is = 'are';
       obj.gender = 'them';
+      obj.thename = `the ${obj.plural}`;
+      obj.longname = `${obj.qtyText} ${obj.plural}`;
     }
-    obj.thename = `the ${obj.plural}`;
-    obj.longname = `${obj.qtyText} ${obj.plural}`;
     if (obj.name) {
-      obj.longname += ' called ' + obj.name;
       obj.thename = `the ${obj.longname}`;
+      obj.longname += ' called ' + obj.name;
     }
     if (['player', 'command'].includes(obj.class)) {
-      obj.longname = obj.name;
       obj.thename = obj.name;
+      obj.longname = obj.name;
     }
   }
 
@@ -227,14 +229,13 @@ export class DB {
    * @param {obj} obj 
    * @returns nothing, updates obj
    */
-  formatQty(obj) {
-
+  setQty(obj) {
     obj.qty = !obj.qty ? 1 : obj.qty;
     obj.qtyText = obj.qty;
     if (obj.qty < 1 && obj.qty > 0) {
       // TODO: use our Cowmands.qtyNames() and reverse it
       obj.qtyText = 'a piece of';
-    } else if(obj.qty == 1) {
+    } else if (obj.qty == 1) {
       obj.qtyText = ['a', 'e', 'i', 'o', 'u'].includes(obj.class[0]) ? 'an' : 'a';
     } else if (obj.qty == 2) {
       obj.qtyText = 'two';
@@ -242,17 +243,17 @@ export class DB {
       obj.qtyText = 'three';
     } else if (obj.qty == 0) {
       obj.qtyText = 'the';
-    } else if (obj.qty < 10) {
+    } else if (obj.qty <= 10) {
       obj.qtyText = obj.qty;
-    } else if (obj.qty < 20) {
+    } else if (obj.qty <= 20) {
       obj.qtyText = 'some';
-    } else if (obj.qty < 99) {
+    } else if (obj.qty <= 99) {
       obj.qtyText = 'many';
-    } else if (obj.qty < 999) {
+    } else if (obj.qty <= 999) {
       obj.qtyText = 'hundreds of';
-    } else if (obj.qty < 999999) {
+    } else if (obj.qty <= 999999) {
       obj.qtyText = 'thousands of';
-    } else if (obj.qty < 999999999) {
+    } else if (obj.qty <= 999999999) {
       obj.qtyText = 'millions of';
     } else {
       obj.qtyText = 'a mind-boggling quantity of';
@@ -260,22 +261,47 @@ export class DB {
   }
 
   /**
-   * Formats the plural version of this object
-   * @param {object} obj 
-   * @returns nothing, updates obj
+   * Sets up two objects: singleNames {single: plural} and pluralNames {plural: single}
    */
-  formatPlural(obj) {
-    obj.plural = '';
+  buildPlurals() {
+    this.singleNames = { 'knife': 'knives', 'sheep': 'sheep', 'loaf': 'loaves', 'mouse': 'mice', 'shelf': 'shelves' };
+    this.pluralNames = Object.fromEntries(
+      Object.entries(this.singleNames).map(([singular, plural]) => [plural, singular])
+    );
+  }
+
+  /**
+   * Updates the new object (new: cowmand) with both class and plural set according to the obj.qty
+   * If qty > 1 then we have to assume obj.class is the plural eg 'glasses' so we set the plural and calculate the singular
+   * If qty = 1 then we leave obj.class and calculate obj.plural
+   * @param {object} obj
+   * @returns {object} 
+   */
+  setPluralName(obj) {
     if (obj.qty > 1) {
-      const plurals = { 'knife': 'knives', 'sheep': 'sheep', 'loaf': 'loaves', 'mouse': 'mice' };
-      const plural = plurals[obj.class];
-      obj.plural = (plural === undefined) ? obj.class + 's' : plural;
+      // if obj.class ends in 's' or 'es' then we know the player typed 'create some boxes'
+      if (obj.class.endsWith('s') || obj.class.endsWith('es')) {
+        obj.plural = obj.class;
+        obj.class = obj.class.replace(/(es|s)$/, '');
+      } else {
+        obj.plural = obj.class;
+        obj.class = this.pluralNames[obj.plural];
+      }
     } else {
-      obj.plural = obj.class;
+      obj.plural = this.singleNames[obj.class] ?? obj.class + 's';
+      // 1. Irregulars first
+      if (this.singleNames[obj.class]) {
+        obj.plural = this.singleNames[obj.class];
+      } else if (/(s|x|z|ch|sh)$/i.test(obj.class)) {
+        obj.plural = obj.class + 'es';
+      } else {
+        obj.plural = obj.class + 's';
+      }
     }
   }
 
-/////////////////////////////////////////////////////////////////////////
+
+  /////////////////////////////////////////////////////////////////////////
 
   /**
    * Wrights into memory the value for this type and key
@@ -284,11 +310,11 @@ export class DB {
    * @param {any} value 
    */
   async set(type, key, value) {
-    
+
     const prefix = this.prefix(type, key);
     // so we can find matching names regardless of case
     if (['name'].includes(type)) key = key.toLowerCase();
-    
+
     // console.log(`${this.app.name} - set`, {type, prefix, key, value});
     // Ensure memory type and shard is in memory
     let mtype = this.memory[type];
@@ -311,10 +337,10 @@ export class DB {
 
   // mark this shard as dirty for saving to disk later
   markDirty(type, prefix) {
-   if (!this.dirty[type]) {
+    if (!this.dirty[type]) {
       this.dirty[type] = new Set();
     }
-    this.dirty[type].add(prefix); 
+    this.dirty[type].add(prefix);
   }
 
   /**
@@ -323,11 +349,11 @@ export class DB {
   async saveToDisk() {
     // console.log(`${this.app.name} dirty`, this.dirty);
     const batch = {};
-    for (const type of Object.keys(this.dirty) ) {
-      for (const prefix of this.dirty[type] ) {
+    for (const type of Object.keys(this.dirty)) {
+      for (const prefix of this.dirty[type]) {
         const filename = this.makeFileName(type, prefix);
         const data = this.memory[type][prefix];
-        batch[filename] = data;       
+        batch[filename] = data;
       }
     }
     // console.log(`${this.app.name} TODO save batch`, batch);
@@ -384,7 +410,7 @@ export class DB {
     if (!locList.includes(value)) locList.push(value);
     await this.set('loc', loc, locList);
   }
-  
+
   /**
    * Removes the value from the location list
    * @param {strine} loc 
@@ -402,7 +428,7 @@ export class DB {
    * @param {string} id 
    */
   async addName(words, id) {
-    for ( const word of words) {
+    for (const word of words) {
       const nameKey = word.toLowerCase();
       const nameList = await this.get('name', nameKey) ?? [];
       nameList.push(id);
@@ -416,7 +442,7 @@ export class DB {
    * @param {string} id 
    */
   async removeName(words, id) {
-    for ( const word of words) {
+    for (const word of words) {
       const nameKey = word.toLowerCase();
       const nameList = await this.get('name', nameKey) ?? [];
       await this.set('name', nameKey, nameList.filter(x => x !== id));
@@ -428,9 +454,9 @@ export class DB {
    * @param {object} obj 
    */
   async addCode(obj) {
-    await this.set('code', obj.id, {loc: obj.loc, code: obj.code});
+    await this.set('code', obj.id, { loc: obj.loc, code: obj.code });
   }
-  
+
   /**
    * Remove code from code shard
    * @param {object} obj 
@@ -442,7 +468,7 @@ export class DB {
       this.markDirty('code', prefix);
     }
   }
-  
+
   /**
    * Add info into the info shard
    * @param {object} obj 
@@ -462,7 +488,7 @@ export class DB {
       this.markDirty('info', prefix);
     }
   }
-  
+
 
   /**
    * Adds or updates an object into memory eg {id: 'wol', name: 'Wolis', loc: '2'}
@@ -490,7 +516,7 @@ export class DB {
     await this.addLoc(obj.loc, obj.id);
     await this.addName(this.classNameWords(obj), obj.id);
     if (obj.code) {
-      await this.set('code', obj.id, {loc: obj.loc, code: obj.code});
+      await this.set('code', obj.id, { loc: obj.loc, code: obj.code });
     }
     if (obj.info) {
       await this.set('info', obj.id, obj.info);
@@ -500,7 +526,7 @@ export class DB {
     }
     // remove things we dont need to save into id:
     const clearList = ['info', 'code', 'pw'];
-    for(const prop of clearList) {
+    for (const prop of clearList) {
       delete obj[prop];
     }
     await this.set('id', obj.id, obj);
@@ -550,7 +576,7 @@ export class DB {
     }
 
     // --- NAME shard is built from all words in class and name ---
-    for ( const word of this.classNameWords(obj)) {
+    for (const word of this.classNameWords(obj)) {
       const nameKey = word.toLowerCase();
       const nameList = await this.get('name', nameKey) ?? [];
       await this.set('name', nameKey, nameList.filter(x => x !== id));
@@ -602,7 +628,7 @@ export class DB {
     await this.set('id', id, obj);
   }
 
-  async debounceSave() { 
+  async debounceSave() {
     // Clear any existing timer
     if (this.saveTimeout) {
       clearTimeout(this.saveTimeout);
