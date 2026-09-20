@@ -20,8 +20,10 @@ if (empty($request)) {
 }
 handleInput($request);
 
-function handleInput($request) {
-  if (!$request) return;
+function handleInput($request)
+{
+  if (!$request)
+    return;
 
   if (!empty($request['cmd'])) {
     $mstimestamp = round(microtime(true) * 1000);
@@ -36,10 +38,10 @@ function handleInput($request) {
 
     $contextData = [
       'ts' => $mstimestamp,
-      'counter' => $request['counter'], 
-      'actor' => $request['actor'], 
+      'counter' => $request['counter'],
+      'actor' => $request['actor'],
       'loc' => $request['loc'],
-      'it' => $request['it'] ?? '', 
+      'it' => $request['it'] ?? '',
       'cmd' => $request['cmd'],
     ];
 
@@ -50,7 +52,7 @@ function handleInput($request) {
     //     logIt("Folder created successfully!");
     // }
 
-    $filename = CONTEXT_DIR . "/{$mstimestamp}{$request['actor']}" . CONTEXT_EXT ;
+    $filename = CONTEXT_DIR . "/{$mstimestamp}{$request['actor']}" . CONTEXT_EXT;
     file_put_contents($filename, json_encode($contextData));
     logIt("saved context file $filename");
 
@@ -143,23 +145,28 @@ function handleInput($request) {
  * @param {string} type
  * @param {string} key
  */
-function shardName($filename) {
+function shardName($filename)
+{
   return DB_DIR . "/{$filename}" . DB_EXT;
 }
 
-function outputJson($data) {
+function outputJson($data)
+{
   header('Content-Type: application/json');
   logIt('output ' . json_encode($data));
   echo json_encode($data);
   exit;
 }
 
-function loadJson($file) {
-  if (!file_exists($file)) return `{"error": "No file ${file}"`;
+function loadJson($file)
+{
+  if (!file_exists($file))
+    return ['error' => "No file {$file}"];
   return json_decode(file_get_contents($file), true);
 }
 
-function saveJson($file, $data) {
+function saveJson($file, $data)
+{
   logIt('save ' . $file . ' ' . json_encode($data));
   file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
 }

@@ -15,7 +15,7 @@ export class App {
   lastContext = '0'; // last seen context.key
 
   constructor(options = {}) {
-    this.window = (typeof window !== "undefined"); 
+    this.window = (typeof window !== "undefined");
     this.local = this.window && window.location.hostname === 'localhost';
 
     this.settings = options.settings || { generate: false, max: 5 };
@@ -34,7 +34,7 @@ export class App {
     // ui elements with click commands will execute these:
     this.clickCmds = {
       examine: el => `examine ${el.dataset.id}`,
-      close:   ()  => `look`,
+      close: () => `look`,
       doorway: el => `go ${el.dataset.id}`,
     };
   }
@@ -57,8 +57,8 @@ export class App {
         event.preventDefault();
         const form = event.target;
         const data = Object.fromEntries(new FormData(form));
-        data.button = event.submitter?.value;  
-        this.handleForm(data);
+        data.button = event.submitter?.value;
+        await this.handleForm(data);
         const cmdInput = document.getElementById('cmd');
         if (cmdInput) cmdInput.value = '';
       });
@@ -74,7 +74,7 @@ export class App {
           await this.sendCommand(cmd(el));
         } else {
           const thisCmd = el.dataset.cmd.replace(/{id}/, el.dataset.id);
-          await this.sendCommand(thisCmd); 
+          await this.sendCommand(thisCmd);
         }
       });
     }
@@ -155,7 +155,7 @@ export class App {
       await this.player.handleNewPlayer(data);
     } else if (data.type == 'cmd') {
       await this.sendCommand(data);
-    } else if (['code','info'].includes(data.type)) {
+    } else if (['code', 'info'].includes(data.type)) {
       if (data.button === 'cancel') {
         // cancel edit and sent 'look'
         data.cmd = 'look';

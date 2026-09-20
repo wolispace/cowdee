@@ -152,6 +152,15 @@ export class DB {
     return this.app.utils.decodeString(raw);
   };
 
+  /**
+   * Returns the pw hash 
+   * @param {string} id 
+   * @returns {string}
+   */
+  async getPw(id) {
+    return await this.get('pw', id);
+  }
+
   
   /**
    * Find the first named command (look in player then location then globaly so long as its a command)
@@ -486,8 +495,11 @@ export class DB {
     if (obj.info) {
       await this.set('info', obj.id, obj.info);
     }
+    if (obj.pw) {
+      await this.set('pw', obj.id, obj.pw);
+    }
     // remove things we dont need to save into id:
-    const clearList = ['info', 'code'];
+    const clearList = ['info', 'code', 'pw'];
     for(const prop of clearList) {
       delete obj[prop];
     }

@@ -6,7 +6,7 @@ console.log(bcrypt);
 // handles current player info, logging in, updating local storage
 export class Player {
 
-  info = {id: '', loc: ''};
+  info = { id: '', loc: '' };
   PLAYER_INFO_KEY = 'playerInfo';
 
   constructor(app) {
@@ -20,8 +20,8 @@ export class Player {
   async welcome() {
     if (!this.app.window) return;
     // show dialog, app.handleForm() handles logins
-    this.app.ui.showDialog(this.loginFormContent()); 
-    document.getElementById('playername').focus();   
+    this.app.ui.showDialog(this.loginFormContent());
+    document.getElementById('playername').focus();
   }
 
   loginFormContent() {
@@ -75,49 +75,50 @@ export class Player {
       this.app.player.info.id = obj.id;
       if (this.app.window) { //  && !this.app.local
         // show checkpw dialog
-        this.app.ui.showDialog(this.checkPwContent(data)); 
-        document.getElementById('pw').focus(); 
+        this.app.ui.showDialog(this.checkPwContent(data));
+        document.getElementById('pw').focus();
       } else {
         await this.logon(obj);
       }
     } else {
       // show new player dialog
       this.app.player.info.playername = data.playername;
-      this.app.ui.showDialog(this.newPlayerContent(data)); 
-      document.getElementById('pw').focus(); 
-    }  
+      this.app.ui.showDialog(this.newPlayerContent(data));
+      document.getElementById('pw').focus();
+    }
   }
 
   async handleCheckPw(data) {
+    const objPw = await this.app.db.getPw(this.app.player.info.id);
     const obj = await this.app.db.getById(this.app.player.info.id);
-    if (obj) {
-      const pwOk = await bcrypt.compare(data.pw, obj.pw);
+
+    if (obj && objPw) {
+      const pwOk = await bcrypt.compare(data.pw, objPw);
       console.log(`${this.app.name} password ${data.pw} is ${pwOk}`);
       if (pwOk) {
-        // DEBUG dont check password
         await this.logon(obj);
       } else {
-        this.app.ui.alert(`Wrong password`);
+        this.app.ui.alert(`Hmm... that didn't match. Try again`);
       }
     } else {
-      this.app.ui.alert(`Faild to find ${this.app.player.info.playername} id=${this.app.player.info.id}`);
+      this.app.ui.alert(`${this.app.player.info.playername} id=${this.app.player.info.id} can't be found`);
     }
   }
 
   async handleNewPlayer(data) {
-    
+
     const hash = await bcrypt.hash(data.pw, 10);
     const startingLocation = '_2';
     const obj = {
-      id: this.app.id.new(), 
-      class:'player', 
-      name: this.info.playername, 
-      loc: startingLocation, 
+      id: this.app.id.new(),
+      class: 'player',
+      name: this.info.playername,
+      loc: startingLocation,
       color: 'gold',
       pw: hash
     };
     console.log(`${this.app.name} create new player ${this.app.player.info.playername}`);
-    this.app.db.save(obj);
+    await this.app.db.save(obj);
     await this.logon(obj);
   }
 
