@@ -1,3 +1,8 @@
+import './bcrypt.js';
+const bcrypt = globalThis.bcrypt;
+console.log(bcrypt);
+
+
 // handles current player info, logging in, updating local storage
 export class Player {
 
@@ -68,7 +73,7 @@ export class Player {
     if (obj) {
       this.app.player.info.playername = obj.name;
       this.app.player.info.id = obj.id;
-      if (this.app.window && !this.app.local) {
+      if (this.app.window) { //  && !this.app.local
         // show checkpw dialog
         this.app.ui.showDialog(this.checkPwContent(data)); 
         document.getElementById('pw').focus(); 
@@ -86,14 +91,22 @@ export class Player {
   async handleCheckPw(data) {
     const obj = await this.app.db.getById(this.app.player.info.id);
     if (obj) {
-      // DEBUG dont check password
-      await this.logon(obj);
+      const pwOk = await bcrypt.compare(data.pw, obj.pw);
+      console.log(`${this.app.name} password ${data.pw} is ${pwOk}`);
+      if (pwOk) {
+        // DEBUG dont check password
+        await this.logon(obj);
+      } else {
+        this.app.ui.alert(`Wrong password`);
+      }
     } else {
       this.app.ui.alert(`Faild to find ${this.app.player.info.playername} id=${this.app.player.info.id}`);
     }
   }
 
   async handleNewPlayer(data) {
+    
+    const hash = await bcrypt.hash(data.pw, 10);
     const startingLocation = '_2';
     const obj = {
       id: this.app.id.new(), 
@@ -101,7 +114,8 @@ export class Player {
       name: this.info.playername, 
       loc: startingLocation, 
       color: 'gold',
-      pw: data.pw};
+      pw: hash
+    };
     console.log(`${this.app.name} create new player ${this.app.player.info.playername}`);
     this.app.db.save(obj);
     await this.logon(obj);
