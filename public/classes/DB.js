@@ -29,8 +29,18 @@ export class DB {
     if (!this.memory[type][prefix]) {
       this.memory[type][prefix] = await this.app.io.loadJson(this.makeFileName(type, prefix));
     };
-    return this.memory[type][prefix][key];
+    let match = this.memory[type][prefix][key];
+    if (['name'].includes(type) && !match) {
+      match = [];
+      for (const [word, ids] of Object.entries(this.memory[type][prefix])) {
+        if (word.startsWith(key)) {
+          match.push(...ids);
+        }
+      }
+    }
+    return match;
   }
+
 
   /** TODO: do we need this still?
  * Preloads all shard files needed for an array/Set of keys in a single batch request
@@ -73,6 +83,22 @@ export class DB {
     name = this.guessSingular(name);
     return await this.get('name', name);
   };
+
+  async findByPrefix(prefix) {
+  const shardKey = prefix[0].toUpperCase();
+  const shard = this.memory.name[shardKey] ?? this.io.loadJson(`name_${shardKey}`);
+
+  const results = [];
+
+  for (const [word, ids] of Object.entries(shard)) {
+    if (word.startsWith(prefix)) {
+      results.push(...ids);
+    }
+  }
+
+  return results;
+}
+
 
   /**
   * Return the obj of the player matching the name

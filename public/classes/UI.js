@@ -156,7 +156,7 @@ export class UI {
         if (['put', 'drop', 'pose', 'paint', 'edit', 'code', 'examine', 'read'].includes(context.trigger)) {
           val = obj.thename;
         }
-        if (!['longname', 'name', 'shorname', 'plural'].includes(prop)) {
+        if (!['longname', 'name', 'shorname', 'class'].includes(prop)) {
           return val;
         }
         if (obj.extra) {

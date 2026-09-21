@@ -275,12 +275,13 @@ export class LookManager {
       for (const id of ids) {
         const sub = this.objs[id];
         delim = (ids.length > 1 && objCounter++ >= ids.length) ? ' and ' : delim;
-        let objName = ['player','command'].includes(sub.class) ? `${sub.class} called [${id}]` : `[${id}.plural]`;
+        let objName = ['player','command'].includes(sub.class) ? `${sub.class} called [${id}]` : `[${id}.class]`;
         let descObj = `[${id}.pose] [${id}]`;
         descObj = `[${id}.qtyText] [${id}.pose] ${objName}`;
         sentence += `${delim}${descObj}`;
         delim = ', ';
       }
+      // console.log(sentence);
       this.sentences.push(sentence);
       lastHost = obj.id;
     }

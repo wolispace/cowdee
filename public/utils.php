@@ -36,7 +36,7 @@ function logIt($str) {
     }
     $data = json_decode(file_get_contents($file), true);
     $lastCounter = file_get_contents(DB_DIR . '/' . ID_COUNTER_FILE);
-    if ($data['counter'] < $lastCounter) {
+    if (empty($data['counter']) || $data['counter'] < $lastCounter) {
       $data['counter'] = $lastCounter;
     }
     $key = "{$data['ts']}{$data['actor']}";
