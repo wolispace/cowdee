@@ -30,7 +30,16 @@ export class Player {
       <form method="dialog" id="loginform">
       <input type="hidden" name="type" value="login">
         <label for="playername">Who are you?</label>
-        <input type="text" id="playername" name="playername" placeholder="Your name in cow" value="${defaultName}" required>
+        <input type="text" id="playername" name="playername" 
+          placeholder="Your name in cow" value="${defaultName}" 
+          required
+          autofocus 
+          spellcheck="false"
+          inputmode="text"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+        />
         <menu>
           <button value="submit" class="buttonize">Login</button>
         </menu>
@@ -44,7 +53,15 @@ export class Player {
       <input type="hidden" name="type" value="checkpw">
         Welcome back ${this.app.player.info.playername}
         <label for="pw">What is your password?</label>
-        <input type="text" id="pw" name="pw" placeholder="Prove you are you">
+        <input type="text" id="pw" name="pw" placeholder="Prove you are you"
+          required
+          autofocus 
+          spellcheck="false"
+          inputmode="password"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+        />
         <menu>
           <button value="submit" class="buttonize">Continue</button>
         </menu>
@@ -58,7 +75,15 @@ export class Player {
       <input type="hidden" name="type" value="newplayer">
         Welcome new player ${this.app.player.info.playername}.
         <label for="pw">Set your new password:</label>
-        <input type="text" id="pw" name="pw" placeholder="So you can prove you are you">
+        <input type="text" id="pw" name="pw" placeholder="So you can prove you are you"
+          required
+          autofocus 
+          spellcheck="false"
+          inputmode="password"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"        
+        />
         <menu>
           <button value="submit" class="buttonize">Continue</button>
         </menu>

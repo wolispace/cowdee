@@ -1,11 +1,14 @@
 <!DOCTYPE html>
+<?php 
+  $version = '0.5.0'; 
+  $rnd = rand(0, 999999); ?>
 <html>
   <head>
     <meta charset='utf-8'>
-    <title>cowdee 0.5.0</title>
+    <title>cowdee <?=$version?></title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
-      <link rel='stylesheet' href='cowdee.css?0_5_0' />
-      <script type="module" src='cowdee.js?0_5_0'></script>
+      <link rel='stylesheet' href='cowdee.css?<?=$rnd?>' />
+      <script type="module" src='cowdee.js?<?=$rnd?>'></script>
   </head>
   <body>
     <content>
@@ -23,7 +26,15 @@
       <form id="input" class="commandform" autocomplete="off">
         <input type="hidden" name="type" value="cmd" />
         <label for="cmd" class="commandlabel">Cmd </label>
-        <input type="text" class="commandterm" name="cmd" id="cmd" placeholder="What do you want to do?" value="" autocomplete="off" />
+        <input type="text" class="commandterm" name="cmd" id="cmd" placeholder="What do you want to do?" 
+          value="" 
+          autofocus 
+          spellcheck="false"
+          inputmode="text"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+           />
         <input type="submit" class="commandbutton" value="Go" />
       </form> 
     </content>

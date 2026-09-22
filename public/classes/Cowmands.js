@@ -213,9 +213,9 @@ export class Cowmands {
         return;
       }
       const obj = await this.resolveObj(match[1].trim());
+      if (!obj) return;
 
       // dont set anything if its locked and the actor is not the owner
-      console.log(`${this.app.name} obj.lock:${obj.lock} actor:${this.context.actor} owner:${obj.owner}`);
       if (obj.lock != null) {
         if (obj.owner !== this.context.actor) {
           this.context.msg = `Opps... ${obj.longname} is locked.`;
@@ -227,7 +227,6 @@ export class Cowmands {
       }
 
       const val = await this.resolveValue(match[3].trim());
-      if (!obj) return;
       const prop = match[2].toLowerCase();
       const oldObj = { ...obj };
       
