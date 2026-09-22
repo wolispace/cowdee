@@ -101,6 +101,7 @@ export class Context {
     for (const statement of statements) {
       const trimmedStatement = statement.trim();
       if (!trimmedStatement) continue;
+      if (this.end) return;
       await this.executeStatement(trimmedStatement);
     }
   }
@@ -142,7 +143,7 @@ export class Context {
     } else {
       console.warn(`No handler found for statement keyword: "${firstword}"`);
     }
-    console.log('actor',this.actor, 'target', this.target, 'loc', this.loc);
+    // console.log('actor',this.actor, 'target', this.target, 'loc', this.loc);
   }
 
   /**

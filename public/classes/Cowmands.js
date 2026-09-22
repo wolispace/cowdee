@@ -119,7 +119,7 @@ export class Cowmands {
           this.context.target = ntarget;
         } else {
           this.context.found = await this.app.db.findByNameInLoc(ntarget, getLocValue);
-          if (this.context.found.length == 1) {
+          if (this.context.found && this.context.found.length == 1) {
             this.context.target = this.context.found[0];
             delete this.context.found;
           } else {
@@ -137,7 +137,7 @@ export class Cowmands {
           this.context.second = nsecond;
         } else {
           this.context.found = await this.app.db.findByNameInLoc(nsecond, getSecondLocValue);
-          if (this.context.found.length == 1) {
+          if (this.context.found && this.context.found.length == 1) {
             this.context.second = this.context.found[0];
             delete this.context.found;
           } else {
@@ -213,10 +213,23 @@ export class Cowmands {
         return;
       }
       const obj = await this.resolveObj(match[1].trim());
+
+      // dont set anything if its locked and the actor is not the owner
+      console.log(`${this.app.name} obj.lock:${obj.lock} actor:${this.context.actor} owner:${obj.owner}`);
+      if (obj.lock && obj.lock !== '') {
+        if (obj.owner !== this.context.actor) {
+          this.context.msg = `${obj.longname} is locked.`;
+          this.app.ui.addMessage(this.context);
+          this.context.end = true;
+          return;
+        }
+      }
+
       const val = await this.resolveValue(match[3].trim());
       if (!obj) return;
       const prop = match[2].toLowerCase();
       const oldObj = { ...obj };
+      
       obj[prop] = val;
       await this.app.db.save(obj, oldObj);
       // update the players location

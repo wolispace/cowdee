@@ -176,7 +176,8 @@ export class UI {
             cmd = context.cmd;
             hint = `Choose this to ${context.cmd}`;
           }
-          return `<span class="click" data-cmd="${cmd}" ${style} data-id="${id}" title="${hint} ${val} [${id}]">${val}</span>`;
+          const locked = (obj.lock && obj.lock != '') ? 'locked' : '';
+          return `<span class="click ${locked}" data-cmd="${cmd}" ${style} data-id="${id}" title="${hint} ${val} [${id}]">${val}</span>`;
         } else {
           return val;
         }

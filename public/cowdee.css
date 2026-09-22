@@ -22,12 +22,14 @@ body {
 a {
   color: #cbced2;
   text-decoration: none;
-  font-weight: bold;
+}
+
+.locked {
+    font-weight: bold;
 }
 
 .click {
   cursor: pointer;
-  font-weight: bold;
 }
 
 .click:hover {
@@ -36,7 +38,6 @@ a {
 
 .click-doorway {
   cursor: pointer;
-  font-weight: bold;
   background-color: rgba(0, 0, 0, .45);
 }
 

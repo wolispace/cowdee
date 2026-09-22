@@ -26,7 +26,7 @@ export class Tester {
     console.log('removing files');
     await fetch('http://localhost/_emptyDB.php');
     if (typeof localStorage !== 'undefined') {
-      try { localStorage.clear(); } catch (e) {}
+      try { localStorage.clear(); } catch (e) { }
     }
   }
 
@@ -49,6 +49,7 @@ export class Tester {
         id: this.app.id.new(),
         class: this.randomName(),
         qty: 1,
+        owner: '_wol',
         loc: '_' + this.app.id.encodeInt(this.context.random(this.app.settings.max)),
         color: this.randomColor()
       };
@@ -63,6 +64,7 @@ export class Tester {
     const old1 = { ...house };
     house.class = 'house';
     house.loc = '__';
+    house.lock = 1;
     this.app.db.setPluralName(house);
     await this.app.db.save(house, old1);
 
@@ -70,10 +72,20 @@ export class Tester {
     const old2 = { ...library };
     library.class = 'library';
     library.loc = '__';
+    library.lock = 1;
     this.app.db.setPluralName(library);
     await this.app.db.save(library, old2);
 
-    const sign = {id: this.app.id.new(), loc: '_2', class: 'sign', color:'white', qty: 1, info: `Type short commands and press Enter \n'look' shows you where you are.\n'say hello', 'think I wonder if..' and 'do sits down' are ways of communicating with others\n\nYou can 'create' simple one word objects like 'create a book' or 'create a table'\nYou can 'paint', 'put', 'pose' and 'push' objects eg \n'paint the table orange'\n'put the book on the table'\n'pose the book as sitting'\n'push the book' (so its not sitting on the table)\n\nYou can 'get' and 'drop' things and use 'inv' to see what you are carrying.\n\nNew locations can be built in two ways:\n'build a castle'\nor\n'build a bridge to a castle'\nYou can 'go' different locations eg: 'go castle' or 'go bridge'\n\nYou can 'edit' objects so when the are 'examine'ed people read what you wrote.\n\nYou can also 'code' objects but you need to know about CowScript for this.\n\nIf you get stuck, try reloading the browser, or 'goto bob' to teleport to the player Bob wherever they are right now.`};
+    const sign = { 
+      id: this.app.id.new(), 
+      loc: '_2', 
+      class: 'sign', 
+      color: 'white',
+      owner: '_wol', 
+      qty: 1,
+      lock: 1, 
+      info: `Type short commands and press Enter \n'look' shows you where you are.\n'say hello', 'think I wonder if..' and 'do sits down' are ways of communicating with others\n\nYou can 'create' simple one word objects like 'create a book' or 'create a table'\nYou can 'paint', 'put', 'pose' and 'push' objects eg \n'paint the table orange'\n'put the book on the table'\n'pose the book as sitting'\n'push the book' (so its not sitting on the table)\n\nYou can 'get' and 'drop' things and use 'inv' to see what you are carrying.\n\nNew locations can be built in two ways:\n'build a castle'\nor\n'build a bridge to a castle'\nYou can 'go' different locations eg: 'go castle' or 'go bridge'\n\nYou can 'edit' objects so when the are 'examine'ed people read what you wrote.\n\nYou can also 'code' objects but you need to know about CowScript for this.\n\nIf you get stuck, try reloading the browser, or 'goto bob' to teleport to the player Bob wherever they are right now.` 
+    };
     this.app.db.setPluralName(sign);
     await this.app.db.save(sign);
 
@@ -97,6 +109,8 @@ export class Tester {
       obj.name = player.name;
       obj.pw = hash;
       obj.qty = 1;
+      obj.owner = player.id;
+      obj.lock = 1;
       obj.class = 'player';
       obj.color = 'goldenrod';
       this.app.db.setPluralName(obj);
@@ -126,7 +140,7 @@ export class Tester {
     }, {
       name: "list",
       code: `list $loc;`
-    }, {      
+    }, {
       name: "put",
       code: `get $target,$rel,$second in $loc,$loc;\nset $target's hosthow to \"$rel\";\nset $target's host to $second;\nset $target's hosthow to \"$rel\";\nset $target's pose to '';\nsay 'put',\"[$actor] put [$target] $rel [$second]\";\nrelook $loc;`
     }, {
@@ -170,16 +184,22 @@ export class Tester {
       code: `list $actor;\n`
     }, {
       name: "read",
-      code: `get $target in $loc;\nsay 'read',"[$actor] reads [$target]";\nexamine $target;`    
-    }, {      
+      code: `get $target in $loc;\nsay 'read',"[$actor] reads [$target]";\nexamine $target;`
+    }, {
       name: "examine",
-      code: `get $target in $loc;\nsay 'examine',"[$actor] examines [$target]";\nexamine $target;`    
+      code: `get $target in $loc;\nsay 'examine',"[$actor] examines [$target]";\nexamine $target;`
     }, {
       name: "edit",
-      code: `get $target in $loc;\nsay 'edit',"[$actor] starts to edit [$target]";\nedit $target;`    
+      code: `get $target in $loc;\nsay 'edit',"[$actor] starts to edit [$target]";\nedit $target;`
     }, {
       name: "code",
-      code: `get $target in $loc;\nsay 'code',"[$actor] starts to code [$target]";\ncode $target;`    
+      code: `get $target in $loc;\nsay 'code',"[$actor] starts to code [$target]";\ncode $target;`
+    }, {
+      name: "lock",
+      code: `get $target in $loc;\nset $target's lock = 1;\nsay 'lock', "[$actor] locks [$target]";\nrelook $loc;`
+    }, {
+      name: "unlock",
+      code: `get $target in $loc;\nset $target's lock = '';\nsay 'unlock', "[$actor] unlocks [$target]";\nrelook $loc;`
     }
     ];
 
@@ -188,6 +208,8 @@ export class Tester {
       obj.loc = '_3';
       obj.class = 'command';
       obj.qty = 1;
+      obj.lock = 1;
+      obj.owner = '_wol',
       obj.color = this.randomColor();
       this.app.db.setPluralName(obj);
       await this.app.db.save(obj);

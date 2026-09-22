@@ -17,6 +17,7 @@ export class App {
   constructor(options = {}) {
     this.window = (typeof window !== "undefined");
     this.local = this.window && window.location.hostname === 'localhost';
+    this.quickLogin = true;
 
     this.settings = options.settings || { generate: false, max: 5 };
     this.name = this.settings.name || 'cowdee';

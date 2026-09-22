@@ -73,7 +73,7 @@ export class Player {
     if (obj) {
       this.app.player.info.playername = obj.name;
       this.app.player.info.id = obj.id;
-      if (this.app.window) { //  && !this.app.local
+      if (this.app.window && !this.app.quickLogin && !this.app.local) {
         // show checkpw dialog
         this.app.ui.showDialog(this.checkPwContent(data));
         document.getElementById('pw').focus();
@@ -109,15 +109,17 @@ export class Player {
 
     const hash = await bcrypt.hash(data.pw, 10);
     const startingLocation = '_2';
+    const newId = this.app.id.new();
     const obj = {
-      id: this.app.id.new(),
+      id: newId,
       class: 'player',
       name: this.info.playername,
       loc: startingLocation,
+      lock: 1,
+      owner: newId,
       color: 'gold',
       pw: hash
     };
-    console.log(`${this.app.name} create new player ${this.app.player.info.playername}`);
     await this.app.db.save(obj);
     await this.logon(obj);
   }
