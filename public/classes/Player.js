@@ -6,7 +6,7 @@ console.log(bcrypt);
 // handles current player info, logging in, updating local storage
 export class Player {
 
-  info = { id: '', loc: '' };
+  info = { id: '', loc: '', history: [] };
   PLAYER_INFO_KEY = 'playerInfo';
 
   constructor(app) {
@@ -149,7 +149,7 @@ export class Player {
     const result = await this.app.io.fetchJson('server', { 'lastContext': 1 });
     console.log(` ${this.app.name} wake `, result);
     this.app.lastContext = result?.lastContext || '0';
-    await this.app.sendCommand({ cmd: 'look', actor: this.info.id, loc: this.info.loc });
+    await this.app.sendCommand({ cmd: 'look', actor: this.info.id, loc: this.info.loc, saveHistory: false });
     this.app.ui.closeDialog();
   }
 
@@ -160,12 +160,14 @@ export class Player {
     const json = this.app.storage?.getItem(this.PLAYER_INFO_KEY);
     if (json) {
       this.info = JSON.parse(json);
+      this.info.history = Array.isArray(this.info.history) ? this.info.history : [];
       if (this.info.id) {
         this.app.storage?.setNamespace(this.info.id);
       }
       await this.wake();
       return;
     }
+    this.info.history = Array.isArray(this.info.history) ? this.info.history : [];
     await this.welcome();
   }
 
@@ -177,8 +179,27 @@ export class Player {
     this.app.storage?.setItem(this.PLAYER_INFO_KEY, JSON.stringify(this.info));
   }
 
+  addHistory(cmd) {
+    if (!cmd || typeof cmd !== 'string') return;
+    cmd = cmd.trim();
+    if (!cmd) return;
+    if (!Array.isArray(this.info.history)) {
+      this.info.history = [];
+    }
+    // If command already exists in history, remove old occurrence so it's not duplicated
+    const existingIndex = this.info.history.indexOf(cmd);
+    if (existingIndex !== -1) {
+      this.info.history.splice(existingIndex, 1);
+    }
+    this.info.history.push(cmd);
+    if (this.info.history.length > 50) {
+      this.info.history.shift();
+    }
+    this.save();
+  }
+
   clear() {
-    this.info = {};
+    this.info = { id: '', loc: '', history: [] };
     this.app.storage?.removeItem(this.PLAYER_INFO_KEY);
     this.app.storage?.setNamespace('0');
   }

@@ -20,6 +20,7 @@ export class UI {
 
     this.setupEvents();
     this.initDialog();
+    this.initHistory();
 
     // When the tab regains focus, clear any unread '*' indicator from the title
     window.addEventListener('focus', () => {
@@ -228,6 +229,120 @@ export class UI {
   closeDialog() {
     if (this.dialogElement) {
       this.dialogElement.close();
+    }
+  }
+
+  /**
+   * Initializes command history select navigation and keyboard bindings
+   */
+  initHistory() {
+    this.historySelect = document.getElementById('history');
+    this.cmdInput = document.getElementById('cmd');
+    if (!this.historySelect || !this.cmdInput) return;
+
+    // Open and focus history select on Cursor Up / Down in cmd input
+    this.cmdInput.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        const fullHistory = this.app.player.info.history;
+        if (!Array.isArray(fullHistory) || fullHistory.length === 0) return;
+
+        this.draftText = this.cmdInput.value;
+        const query = this.draftText.trim().toLowerCase();
+
+        // If user has typed something, filter history by prefix (or contains fallback)
+        let filtered = fullHistory;
+        if (query) {
+          filtered = fullHistory.filter(cmd => cmd.toLowerCase().startsWith(query));
+          if (filtered.length === 0) {
+            filtered = fullHistory.filter(cmd => cmd.toLowerCase().includes(query));
+          }
+        }
+        if (filtered.length === 0) return;
+
+        e.preventDefault();
+        this.historySelect.innerHTML = '';
+        filtered.forEach((cmd) => {
+          const opt = document.createElement('option');
+          opt.value = cmd;
+          opt.textContent = cmd;
+          this.historySelect.appendChild(opt);
+        });
+
+        this.historySelect.size = Math.min(10, Math.max(2, filtered.length));
+        // Up starts at latest matching command, Down starts at first
+        this.historySelect.selectedIndex = e.key === 'ArrowUp' ? filtered.length - 1 : 0;
+        this.cmdInput.value = this.historySelect.value;
+        this.historySelect.hidden = false;
+        this.historySelect.focus();
+      }
+    });
+
+    const updateCmdFromSelect = () => {
+      if (this.historySelect.value) {
+        this.cmdInput.value = this.historySelect.value;
+      }
+    };
+
+    this.historySelect.addEventListener('change', updateCmdFromSelect);
+    this.historySelect.addEventListener('input', updateCmdFromSelect);
+    this.historySelect.addEventListener('click', updateCmdFromSelect);
+    this.historySelect.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        updateCmdFromSelect();
+      }
+    });
+
+    // Keyboard navigation inside history select:
+    // - Left/Right or Backspace closes select and returns focus to cmd input for editing
+    // - Enter executes command and returns focus to cmd input
+    // - Escape closes select and restores original typed draft
+    this.historySelect.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Backspace') {
+        e.preventDefault();
+        this.historySelect.hidden = true;
+        this.cmdInput.focus();
+        const len = this.cmdInput.value.length;
+        this.cmdInput.setSelectionRange(len, len);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        this.historySelect.hidden = true;
+        this.cmdInput.focus();
+        if (this.input) {
+          this.input.requestSubmit();
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        this.historySelect.hidden = true;
+        if (this.draftText !== undefined) {
+          this.cmdInput.value = this.draftText;
+        }
+        this.cmdInput.focus();
+      }
+    });
+
+    // Double-click to execute directly
+    this.historySelect.addEventListener('dblclick', () => {
+      this.historySelect.hidden = true;
+      this.cmdInput.focus();
+      if (this.input) {
+        this.input.requestSubmit();
+      }
+    });
+
+    // Close select on blur if focus left both select and cmd input
+    this.historySelect.addEventListener('blur', () => {
+      setTimeout(() => {
+        if (document.activeElement !== this.historySelect && document.activeElement !== this.cmdInput) {
+          this.historySelect.hidden = true;
+        }
+      }, 100);
+    });
+
+    // Close select on form submit
+    if (this.input) {
+      this.input.addEventListener('submit', () => {
+        this.historySelect.hidden = true;
+      });
     }
   }
 

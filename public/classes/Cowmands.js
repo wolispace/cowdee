@@ -216,7 +216,7 @@ export class Cowmands {
 
       // dont set anything if its locked and the actor is not the owner
       console.log(`${this.app.name} obj.lock:${obj.lock} actor:${this.context.actor} owner:${obj.owner}`);
-      if (obj.lock && obj.lock !== '') {
+      if (obj.lock != null) {
         if (obj.owner !== this.context.actor) {
           this.context.msg = `Opps... ${obj.longname} is locked.`;
           this.app.ui.addMessage(this.context);

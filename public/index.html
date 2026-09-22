@@ -19,10 +19,11 @@
         <section id="bottom">
         </section>
       </div>
-      <form id="input" class="commandform">
+      <select id="history" class="history-select" size="10" hidden></select>
+      <form id="input" class="commandform" autocomplete="off">
         <input type="hidden" name="type" value="cmd" />
-        <label for="cmd" class="commandlabel">Command </label>
-        <input type="text" class="commandterm" name="cmd" id="cmd" placeholder="What do you want to do?" value="" />
+        <label for="cmd" class="commandlabel">Cmd </label>
+        <input type="text" class="commandterm" name="cmd" id="cmd" placeholder="What do you want to do?" value="" autocomplete="off" />
         <input type="submit" class="commandbutton" value="Go" />
       </form> 
     </content>

@@ -61,7 +61,10 @@ export class App {
         data.button = event.submitter?.value;
         await this.handleForm(data);
         const cmdInput = document.getElementById('cmd');
-        if (cmdInput) cmdInput.value = '';
+        if (cmdInput) {
+          cmdInput.value = '';
+          cmdInput.focus();
+        }
       });
 
       /**
@@ -127,6 +130,9 @@ export class App {
     data.it = this.player.info.it;
     data.lastContext = this.lastContext;
     data.counter = this.id.counter;
+    if (data.cmd && data.saveHistory !== false && !data.cmd.startsWith('::run')) {
+      this.player.addHistory(data.cmd);
+    }
     const result = await this.io.fetchJson('server', data);
     if (result?.contexts) {
       const contexts = typeof result.contexts === 'string' ? JSON.parse(result.contexts) : result.contexts;

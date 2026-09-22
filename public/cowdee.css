@@ -79,6 +79,7 @@ content {
   max-width: var(--max-width);
   margin: 0 auto;
   overflow: hidden;
+  position: relative;
 }
 
 /* ── Panels wrapper: holds top/splitter/bottom, fills space above input ── */
@@ -183,6 +184,39 @@ section div {
   height: 1.5rem;
   border: none;
   cursor: pointer;
+}
+
+/* ── Command history select list ── */
+.history-select {
+  position: absolute;
+  bottom: var(--input-height);
+  left: 0;
+  right: 0;
+  background-color: rgba(21, 23, 31, 0.98);
+  color: wheat;
+  font-family: inherit;
+  font-size: 85%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid black;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.7);
+  z-index: 100;
+  outline: none;
+  box-sizing: border-box;
+  border-radius: 1rem;
+  margin-left: 2rem;
+}
+
+.history-select option {
+  padding: 0.35rem 0.6rem;
+  background-color: #15171f;
+  color: wheat;
+  cursor: pointer;
+}
+
+.history-select option:checked,
+.history-select option:hover {
+  background-color: #2a2e3d;
+  color: white;
 }
 
 /* ── Hamburger menu ── */
