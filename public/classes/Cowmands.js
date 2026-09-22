@@ -218,8 +218,9 @@ export class Cowmands {
       console.log(`${this.app.name} obj.lock:${obj.lock} actor:${this.context.actor} owner:${obj.owner}`);
       if (obj.lock && obj.lock !== '') {
         if (obj.owner !== this.context.actor) {
-          this.context.msg = `${obj.longname} is locked.`;
+          this.context.msg = `Opps... ${obj.longname} is locked.`;
           this.app.ui.addMessage(this.context);
+          // end the commands in this context
           this.context.end = true;
           return;
         }

@@ -101,6 +101,7 @@ export class Context {
     for (const statement of statements) {
       const trimmedStatement = statement.trim();
       if (!trimmedStatement) continue;
+      // if end set then we stop executing any more cowmand statements
       if (this.end) return;
       await this.executeStatement(trimmedStatement);
     }
