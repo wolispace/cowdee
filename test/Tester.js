@@ -76,15 +76,15 @@ export class Tester {
     this.app.db.setPluralName(library);
     await this.app.db.save(library, old2);
 
-    const sign = { 
-      id: this.app.id.new(), 
-      loc: '_2', 
-      class: 'sign', 
+    const sign = {
+      id: this.app.id.new(),
+      loc: '_2',
+      class: 'sign',
       color: 'white',
-      owner: '_wol', 
+      owner: '_wol',
       qty: 1,
-      lock: 1, 
-      info: `Type short commands and press Enter \n'look' shows you where you are.\n'say hello', 'think I wonder if..' and 'do sits down' are ways of communicating with others\n\nYou can 'create' simple one word objects like 'create a book' or 'create a table'\nYou can 'paint', 'put', 'pose' and 'push' objects eg \n'paint the table orange'\n'put the book on the table'\n'pose the book as sitting'\n'push the book' (so its not sitting on the table)\n\nYou can 'get' and 'drop' things and use 'inv' to see what you are carrying.\n\nNew locations can be built in two ways:\n'build a castle'\nor\n'build a bridge to a castle'\nYou can 'go' different locations eg: 'go castle' or 'go bridge'\n\nYou can 'edit' objects so when the are 'examine'ed people read what you wrote.\n\nYou can also 'code' objects but you need to know about CowScript for this.\n\nIf you get stuck, try reloading the browser, or 'goto bob' to teleport to the player Bob wherever they are right now.` 
+      lock: 1,
+      info: `Type short commands and press Enter \n'look' shows you where you are.\n'say hello', 'think I wonder if..' and 'do sits down' are ways of communicating with others\n\nYou can 'create' simple one word objects like 'create a book' or 'create a table'\nYou can 'paint', 'put', 'pose' and 'push' objects eg \n'paint the table orange'\n'put the book on the table'\n'pose the book as sitting'\n'push the book' (so its not sitting on the table)\n\nYou can 'get' and 'drop' things and use 'inv' to see what you are carrying.\n\nNew locations can be built in two ways:\n'build a castle'\nor\n'build a bridge to a castle'\nYou can 'go' different locations eg: 'go castle' or 'go bridge'\n\nYou can 'edit' objects so when the are 'examine'ed people read what you wrote.\n\nYou can also 'code' objects but you need to know about CowScript for this.\n\nIf you get stuck, try reloading the browser, or 'goto bob' to teleport to the player Bob wherever they are right now.`
     };
     this.app.db.setPluralName(sign);
     await this.app.db.save(sign);
@@ -210,7 +210,7 @@ export class Tester {
       obj.qty = 1;
       obj.lock = 1;
       obj.owner = '_wol',
-      obj.color = this.randomColor();
+        obj.color = this.randomColor();
       this.app.db.setPluralName(obj);
       await this.app.db.save(obj);
     }

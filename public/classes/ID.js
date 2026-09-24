@@ -77,7 +77,11 @@ export class ID {
   }
 
   // decode the interger out of base 62 (or whatever the aphabet is long)
-  decodeInt(str) {
+  decodeInt(str = '') {
+    if (!str || typeof str !== 'string') {
+      console.log(`${this.app.name} OPps.. trying to decode:`, str);
+      return;
+    }
     str = str.replace(/^_/, ''); // trim off leading '_'
     const base = this.alphabet.length;
     let num = 0;

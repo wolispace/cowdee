@@ -23,22 +23,11 @@ export class DB {
     // only name is lowercased so we can find things like name in mixed case
     // id, code, and info are all keyed by object ID which preserves case
     if (['name'].includes(type)) key = key.toLowerCase();
-    if (!this.memory[type]) {
-      this.memory[type] = {};
-    }
+    if (!this.memory[type]) this.memory[type] = {};
     if (!this.memory[type][prefix]) {
       this.memory[type][prefix] = await this.app.io.loadJson(this.makeFileName(type, prefix));
-    };
-    let match = this.memory[type][prefix][key];
-    if (['name'].includes(type) && !match) {
-      match = [];
-      for (const [word, ids] of Object.entries(this.memory[type][prefix])) {
-        if (word.startsWith(key)) {
-          match.push(...ids);
-        }
-      }
     }
-    return match;
+    return this.memory[type][prefix][key];
   }
 
 
@@ -84,20 +73,24 @@ export class DB {
     return await this.get('name', name);
   };
 
-  async findByPrefix(prefix) {
-  const shardKey = prefix[0].toUpperCase();
-  const shard = this.memory.name[shardKey] ?? this.io.loadJson(`name_${shardKey}`);
-
-  const results = [];
-
-  for (const [word, ids] of Object.entries(shard)) {
-    if (word.startsWith(prefix)) {
-      results.push(...ids);
+  /**
+   * Returns IDs of all objects whose name starts with the given prefix string.
+   * Use this for autocomplete/partial input — NOT for command lookup (to avoid 'go' matching 'goto').
+   * @param {string} prefix
+   * @returns {array} of IDs
+   */
+  async findByNamePrefix(prefix) {
+    const shardKey = '_' + prefix[0].toUpperCase();
+    if (!this.memory.name) this.memory.name = {};
+    if (!this.memory.name[shardKey]) {
+      this.memory.name[shardKey] = await this.app.io.loadJson(this.makeFileName('name', shardKey));
     }
+    const results = [];
+    for (const [word, ids] of Object.entries(this.memory.name[shardKey] ?? {})) {
+      if (word.startsWith(prefix.toLowerCase())) results.push(...ids);
+    }
+    return results;
   }
-
-  return results;
-}
 
 
   /**
