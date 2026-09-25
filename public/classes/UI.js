@@ -21,6 +21,7 @@ export class UI {
     this.setupEvents();
     this.initDialog();
     this.initHistory();
+    this.initMenu();
 
     // When the tab regains focus, clear any unread '*' indicator from the title
     window.addEventListener('focus', () => {
@@ -194,6 +195,9 @@ export class UI {
   }
 
 
+  initMenu() {
+    
+  }
 
   /**
    * initlialises the dialog, linking the element as a dialog

@@ -30,6 +30,7 @@ a {
 
 .click {
   cursor: pointer;
+  text-shadow: 2px 2px 2px black;
 }
 
 .click:hover {
@@ -42,7 +43,7 @@ a {
 }
 
 .click-close {
-  position:fixed;
+  position:absolute;
   top: 1rem;
   right: 3rem;
   background-color: rgb(143, 31, 31);
@@ -98,8 +99,6 @@ section {
   padding: 0.5rem;
   min-height: var(--section-min-height);
   overflow-y: auto;
-  /* smooth momentum scrolling on iOS */
-  -webkit-overflow-scrolling: touch;
 }
 
 section div {

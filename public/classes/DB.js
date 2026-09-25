@@ -67,9 +67,12 @@ export class DB {
    * @param {string} word 
    * @returns {set} of IDs with this name
    */
-  async findByName(word) {
+  async findByName(word, isSingular = false) {
     let name = word.replace(/^(?:the|an|a)\b/i, '').trim().toLocaleLowerCase();
-    name = this.guessSingular(name);
+    // when finding players or things by name, dont try to convert to singular
+    if (!isSingular) {
+      name = this.guessSingular(name);
+    }
     return await this.get('name', name);
   };
 
@@ -100,10 +103,9 @@ export class DB {
   * @returns {object}
   */
   async findPlayer(data) {
-    const candidates = await this.findByName(data.playername);
+    const candidates = await this.findByName(data.playername, true);
     if (!candidates) return undefined;
     // check all candidates to ensure they are class='player'
-    // TODO: worry about password later
     for (const id of candidates) {
       const obj = await this.getById(id);
       if (obj?.class == 'player') {
@@ -191,7 +193,7 @@ export class DB {
    * @returns {string} return the code from the bext match object
    */
   async findCommand(context) {
-    const ids = await this.findByName(context.firstword);
+    const ids = await this.findByName(context.firstword, true);
 
     if (!ids || ids.length < 1) return '';
     if (ids.length === 1) {

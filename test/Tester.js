@@ -37,7 +37,7 @@ export class Tester {
   }
 
   randomColor() {
-    const names = ['wheat', 'seagreen', 'teal', 'tomato', 'dodgerblue', 'slategrey', 'plum', 'brick']
+    const names = this.app.ui.colorNames();
     return names[this.context.random(names.length)];
   }
 
