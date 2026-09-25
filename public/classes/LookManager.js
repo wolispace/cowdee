@@ -261,6 +261,7 @@ export class LookManager {
       const firstId = ids.values().next().value; // read first from a Set
       const obj = this.objs[firstId];
       const host = obj?.host;
+      const showClass = obj.qty == 1 ? 'class' : 'plural';
       let showHost = '</div><div>You also see';
       if (host) {
         if (lastHost == host) {
@@ -275,9 +276,9 @@ export class LookManager {
       for (const id of ids) {
         const sub = this.objs[id];
         delim = (ids.length > 1 && objCounter++ >= ids.length) ? ' and ' : delim;
-        let objName = ['player','command'].includes(sub.class) ? `${sub.class} called [${id}]` : `[${id}.class]`;
+        let objName = ['player','command'].includes(sub.class) ? `${sub.class} called [${id}]` : `[${id}.${showClass}]`;
         let descObj = `[${id}.pose] [${id}]`;
-        descObj = `[${id}.qtyText] [${id}.pose] ${objName}`;
+        // descObj = `[${id}.qtyText] [${id}.pose] ${objName}`;
         sentence += `${delim}${descObj}`;
         delim = ', ';
       }

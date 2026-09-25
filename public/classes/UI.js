@@ -146,7 +146,9 @@ export class UI {
         const obj = loadedObjs[id];
         if (!obj) return ` (can't find id=${id}) `;
         this.app.db.formatObject(obj);
-
+        if (obj.id == '_o') {
+          console.log(obj);
+        }
         const prop = attr || 'longname';
         let val = obj[prop] !== undefined ? obj[prop] : '';
 
@@ -516,6 +518,8 @@ export class UI {
       'a': 1,
       'an': 1,
       'one': 1,
+      'two': 2,
+      'three': 3,
       'some': 20,
       'many': 30,
       'innumerable': 50

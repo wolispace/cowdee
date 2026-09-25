@@ -523,6 +523,9 @@ export class Cowmands {
       const data = await this.app.lookManager.edit({ ...this.context });
       await this.app.ui.addMessage(data);
     },
+    find: async(rest) => {
+      // find $loc, random not me;
+    },
 
     // FLUSH
     flush: ($rest) => {
@@ -683,6 +686,7 @@ export class Cowmands {
     // Step 5: Extract quantity
     // e.g., "53 mice" -> qty = "53", rest = "mice"
     // -------------------------------------------------------------------------
+    // first look for words 'some' 'three' and convert to numbers..
     for (const [str, num] of Object.entries(this.app.ui.qtyNames())) {
       if (thisObj.startsWith(str + ' ')) {
         obj.qty = num;
@@ -691,6 +695,17 @@ export class Cowmands {
         break;
       }
     }
+    
+    // then look for numbers and strip them off thisObj string
+    match = thisObj.match(/(\d+) (.+)/);
+    if (match) {
+      obj.qty = match[1];
+      thisObj = match[2];
+    }
+
+    // finally convert qty into qtyText
+    this.app.db.setQty(obj);
+
     // -------------------------------------------------------------------------
     // Step 8: Extract joining words "called" or "named"
     // e.g., "player called bob" / "cat named fred" -> name = "bob"/"fred"
