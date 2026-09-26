@@ -160,9 +160,12 @@ export class LookManager {
       return this.returnData();
     }
     this.found = await this.app.db.findInLoc(loc.id);
-    // console.log(`found in ${loc.id}`, this.found);
     const inon = 'in';
     this.sentences = [`You are ${inon} [${loc.id}]`];
+    const info = await this.app.db.getInfo(loc.id);
+    if (info) {
+      this.sentences.push(`${info}`);
+    }
     if (!this.found || this.found.length < 1) {
       this.sentences.push('Nothing interesting here');
       if (loc) this.objs[loc.id] = loc;
@@ -294,7 +297,7 @@ export class LookManager {
    */
   returnData() {
     return {
-      msg: '<div>' + this.sentences.join('. ') + '</div>',
+      msg: '<div>' + this.sentences.join(`.<br/><br/>`) + '.</div>',
       loc: this.context.loc,
       for: this.context.for,
       actor: this.context.actor,

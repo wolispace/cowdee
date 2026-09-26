@@ -558,6 +558,10 @@ export class DB {
     for (const prop of clearList) {
       delete obj[prop];
     }
+    if(!obj.created) {
+      obj.creted = this.app.utils.now();
+    }
+    obj.updated = this.app.utils.now();
     await this.set('id', obj.id, obj);
   }
 

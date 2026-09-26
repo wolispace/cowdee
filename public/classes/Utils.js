@@ -143,5 +143,35 @@ export class Utils {
   sentenceCaseString(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
+
+  /**
+   * Returns todays datetime as a formatted string eg "Mon 23 Jan 2023 at 10:23am"
+   * @returns {string}
+   */
+  now() {
+    return this.formatDate(new Date());
+  }
+  /**
+   * Returns a formatted string of a datetime eg "Mon 23 Jan 2023 at 10:23am"
+   * @param {Date} d 
+   * @returns {string}
+   */
+  formatDate(d) {
+  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+  const day = days[d.getDay()];
+  const date = d.getDate();
+  const month = months[d.getMonth()];
+  const year = d.getFullYear();
+
+  let hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  const ampm = hours >= 12 ? "pm" : "am";
+  hours = hours % 12 || 12;
+
+  return `${day} ${date} ${month} ${year} at ${hours}:${minutes}${ampm}`;
+}
+
 }
 

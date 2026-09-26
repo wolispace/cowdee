@@ -1,6 +1,5 @@
 import './bcrypt.js';
 const bcrypt = globalThis.bcrypt;
-console.log(bcrypt);
 
 
 // handles current player info, logging in, updating local storage

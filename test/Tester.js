@@ -65,6 +65,7 @@ export class Tester {
     house.class = 'house';
     house.loc = '__';
     house.lock = 1;
+    house.info = `It's rather ramshackled with dust in every corner`;
     this.app.db.setPluralName(house);
     await this.app.db.save(house, old1);
 
@@ -73,6 +74,7 @@ export class Tester {
     library.class = 'library';
     library.loc = '__';
     library.lock = 1;
+    library.info = 'It is vast an cavenous and build from solid marble';
     this.app.db.setPluralName(library);
     await this.app.db.save(library, old2);
 
