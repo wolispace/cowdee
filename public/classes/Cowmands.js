@@ -109,11 +109,18 @@ export class Cowmands {
         this.context.second = this.context.it;
       }
       // --- Step 7: Resolve objects (like perl's get_resolve) ---
+      if (this.context.target === 'location') {
+        this.context.target = this.context.loc;
+      }
+      if (this.context.second === 'location') {
+        this.context.second = this.context.loc;
+      }
       const ntarget = this.context.target;
       const nsecond = this.context.second;
       // Restore previous target/second before resolving
       this.context.target = ltarget;
       this.context.second = lsecond;
+
       if (ntarget) {
         if (this.app.db.isId(ntarget)) {
           this.context.target = ntarget;
