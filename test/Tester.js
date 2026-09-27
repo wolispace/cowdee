@@ -150,7 +150,7 @@ export class Tester {
       code: `get $target in $loc;\nclear $target,all;\nsay 'push',\"[$actor] pushes [$target]\";\nrelook $loc;`
     }, {
       name: "pose",
-      code: `get $target,\"as\",$text,non-greedy in $loc;\nset $target's pose to $text;\nsay 'pose',\"[$actor] poses [$target] as $text\";\nrelook $loc;`
+      code: `get $target,''as',$text,non-greedy in $loc;\nset $target's pose to $text;\nsay 'pose',\"[$actor] poses [$target] as $text\";\nrelook $loc;`
     }, {
       name: "goto",
       code: `get $target;clear $actor,all;\nset $actor's loc to $target's loc;\nsay 'leaves',\"[$actor] dissapears in a puff of smoke\";\nvar $loc to $target's loc;\nsay 'arrives',\"[$actor] appears out of thin air!\";\nrelook $loc;`
@@ -202,6 +202,9 @@ export class Tester {
     }, {
       name: "unlock",
       code: `get $target in $loc;\nset $target's lock = '';\nsay 'unlock', "[$actor] unlocks [$target]";\nrelook $loc;`
+    }, {
+      name: "link",
+      code: `get $target,'to',$second in $loc;\nset $target's link = $second;\nset $second's link = $target;\nsay 'link', "[$actor] links [$target] to [$second]";\nrelook $loc;`
     }
     ];
 

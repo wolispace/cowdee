@@ -517,6 +517,7 @@ export class UI {
       'a section of': 0.5,
       'a': 1,
       'an': 1,
+      'another': 1,
       'one': 1,
       'two': 2,
       'three': 3,
