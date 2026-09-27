@@ -203,7 +203,7 @@ export class Cowmands {
       const rawVal = match[2].trim();
       if (rawVal.startsWith('(') && rawVal.endsWith(')')) {
         const choices = rawVal.substring(1, rawVal.length - 1).split(',').map(s => s.trim());
-        const selected = choices[Math.floor(Math.random() * choices.length)];
+        const selected = choices[this.context.random(choices.length)];
         this.context[varName] = selected;
       } else {
         this.context[varName] = await this.resolveValue(rawVal);
@@ -476,7 +476,7 @@ export class Cowmands {
       }
       // random chance ro run eg: 'sayit/3' has a 1 in 3 chance of 'sayit' being run.
       const [subName, divisor] = rest.split('/');
-      if (Math.floor(Math.random() * parseInt(divisor)) === 0) {
+      if (this.context.random(parseInt(divisor)) === 0) {
         await this.context.runSub(subName);
       }
     },
@@ -530,8 +530,74 @@ export class Cowmands {
       const data = await this.app.lookManager.edit({ ...this.context });
       await this.app.ui.addMessage(data);
     },
-    find: async(rest) => {
-      // find $loc, random not me;
+    find: async (rest) => {
+      // Syntax: find $loc, <name|random [filters]>
+      // SQL variant (find where ...) is parsed but not yet implemented
+      if (/^where\s+/i.test(rest)) return; // SQL – not yet implemented
+
+      const commaIdx = rest.indexOf(',');
+      if (commaIdx === -1) return;
+
+      const locToken = rest.substring(0, commaIdx).trim();
+      const criteria = rest.substring(commaIdx + 1).trim();
+      const loc = await this.resolveValue(locToken);
+
+      this.context.found_id = 0;
+      this.context.found_count = 0;
+      this.context.get_player = '';
+
+      if (/^random\b/i.test(criteria)) {
+        // --- random [filters] ---
+        const filterStr = criteria.replace(/^random\s*/i, '').toLowerCase();
+        const notMe     = /\bnot me\b/.test(filterStr);
+        const onlyPlayer  = /\bplayer?\b/.test(filterStr) && !/\bnot players?\b/.test(filterStr);
+        const noPlayer    = /\bnot player?\b/.test(filterStr);
+        const onlyDoor    = /\bdoorway\b/.test(filterStr) && !/\bnot doorway\b/.test(filterStr);
+        const noDoor      = /\bnot doorway\b/.test(filterStr);
+        const onlyLocked  = /\blocked\b/.test(filterStr) && !/\bnot locked\b/.test(filterStr);
+        const noLocked    = /\bnot locked\b/.test(filterStr);
+        const onlyEdited  = /\bedited\b/.test(filterStr) && !/\bnot edited\b/.test(filterStr);
+        const noEdited    = /\bnot edited\b/.test(filterStr);
+
+        const ids = await this.app.db.findInLoc(loc);
+        if (!ids || ids.length === 0) return;
+
+        const matches = [];
+        for (const id of ids) {
+          const obj = await this.app.db.getById(id);
+          if (!obj) continue;
+          if (notMe && id === this.context.actor) continue;
+          if (onlyPlayer && obj.class !== 'player') continue;
+          if (noPlayer && obj.class === 'player') continue;
+          if (onlyDoor && !obj.link) continue;
+          if (noDoor && obj.link) continue;
+          if (onlyLocked && obj.locked) continue;
+          if (noLocked && !obj.locked) continue;
+          if (onlyEdited && !obj.info) continue;
+          if (noEdited && obj.info) continue;
+          matches.push(id);
+        }
+
+        this.context.found_count = matches.length;
+        if (matches.length === 0) return;
+
+        const picked = matches[this.context.random(matches.length)];
+        this.context.found_id = picked;
+        const pickedObj = await this.app.db.getById(picked);
+        if (pickedObj?.class === 'player') this.context.get_player = pickedObj.class;
+
+      } else {
+        // --- exact name match eg: find $loc, cat  or  find $loc, player called wolis ---
+        const parsed = this.parseObj(criteria);
+        const searchName = parsed.name || parsed.class;
+        const candidates = await this.app.db.findByNameInLoc(searchName, loc);
+        if (!candidates || candidates.length === 0) return;
+
+        this.context.found_count = candidates.length;
+        this.context.found_id = candidates[0];
+        const foundObj = await this.app.db.getById(candidates[0]);
+        if (foundObj?.class === 'player') this.context.get_player = foundObj.class;
+      }
     },
 
     // FLUSH

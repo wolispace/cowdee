@@ -205,6 +205,9 @@ export class Tester {
     }, {
       name: "link",
       code: `get $target,'to',$second in $loc;\nset $target's link = $second;\nset $second's link = $target;\nsay 'link', "[$actor] links [$target] to [$second]";\nrelook $loc;`
+    }, {
+      name: "point",
+      code: `find $loc, random not me;\nsay 'point', "[$actor] points at [$found_id]";`
     }
     ];
 
