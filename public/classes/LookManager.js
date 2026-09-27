@@ -20,6 +20,7 @@ export class LookManager {
    * @param {Context} context 
    */
   async list(context) {
+    this.app.player.info.editing = true;
     this.context = context;
     const loc = await this.app.db.getById(this.context.loc);
     if (this.context.found) {
@@ -60,6 +61,7 @@ export class LookManager {
    * @param {Context} context 
    */
   async examine(context) {
+    this.app.player.info.editing = true;
     this.context = context;
     this.sentences = [];
     let val = await this.app.db.getInfo(context.target);
@@ -81,6 +83,7 @@ export class LookManager {
    * @param {Context} context 
    */
   async code(context) {
+    this.app.player.info.editing = true;
     this.context = context;
     this.sentences = [];
     let val = await this.app.db.getCode(context.target);
@@ -102,6 +105,7 @@ export class LookManager {
    * @param {Context} context 
    */
   async edit(context) {
+    this.app.player.info.editing = true;
     this.context = context;
     this.sentences = [];
     let val = await this.app.db.getInfo(context.target);
@@ -136,6 +140,10 @@ export class LookManager {
    * @param {Context} context 
    */
   async look(context) {
+    // unless the user send the command, dont generate a look msg for the top panel
+    if (this.app.player.info.editing) {
+      return;
+    }
     this.seen = new Set();
     this.groups = new SetMap();
     this.sentenceCounter = 0;

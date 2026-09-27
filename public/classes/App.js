@@ -120,6 +120,7 @@ export class App {
    * @param {object} data 
    */
   async sendCommand(data) {
+    this.player.info.editing = false;
     this.ui.showLoading();
     if (typeof data === 'string') {
       data = { cmd: data };
