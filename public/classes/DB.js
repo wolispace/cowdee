@@ -3,9 +3,9 @@ export class DB {
   memory = {};
   dirty = {};
   interval = 5_000;
-  wordKeys = ['name','trigger'];
+  wordKeys = ['name', 'trigger'];
   reactions = 0; // reset this after each user entered command??
-  maxReactions = 5; 
+  maxReactions = 5;
 
   // see tests/DB2.php for some sample data
 
@@ -226,8 +226,9 @@ export class DB {
    * @returns 
    */
   async findTrigger(context) {
-    console.log(`${this.app.name} findTrigger() context=`, context);
     if (!context) return;
+    if (!context.trigger) return;
+    // console.log(`${this.app.name} findTrigger() context=`, context);
     const found = await this.get('trigger', context.trigger);
     if (!found || found.size < 1) return;
     // loop through these to see if they are in the context.loc
@@ -246,11 +247,11 @@ export class DB {
     if (context.reactions++ >= this.maxReactions) return;
 
     for (const pair of triggerable) {
-        for (const [id, block] of Object.entries(pair)) {
+      for (const [id, block] of Object.entries(pair)) {
         // prepare the context for this execution
         context.actor = id;
         const code = await this.getCode(id);
-        await context.runCodeFrom(code, block);      
+        await context.runCodeFrom(code, block);
       }
     }
 
@@ -365,7 +366,7 @@ export class DB {
     if (this.pluralNames[plural]) {
       return this.pluralNames[plural];
     } else {
-       return plural.replace(/(es|s)$/, ''); // guess at singular
+      return plural.replace(/(es|s)$/, ''); // guess at singular
     }
   }
 
@@ -604,18 +605,18 @@ export class DB {
     for (const prop of clearList) {
       delete obj[prop];
     }
-    if(!obj.created) {
+    if (!obj.created) {
       obj.creted = this.app.utils.now();
     }
     obj.updated = this.app.utils.now();
     await this.set('id', obj.id, obj);
   }
 
-    /**
-   * Adds a trigger word if this code is triggred in some way
-   * @param {object} obj 
-   * @returns 
-   */
+  /**
+ * Adds a trigger word if this code is triggred in some way
+ * @param {object} obj 
+ * @returns 
+ */
   async addTriggers(obj) {
     const pattern = /\bif\s+(reacting\s+to|target\s+of)\s+(\w+)\s+then\s+(\w+);/gi;
     const triggers = [];

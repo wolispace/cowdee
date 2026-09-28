@@ -130,11 +130,11 @@ export class Player {
     if (obj) {
       this.name = obj.name;
       this.id = obj.id;
-      if (this.app.window && !this.app.quickLogin && !this.app.local) {
+      if (!this.app.window || (this.app.local && this.app.quickLogin)) {
+        await this.logon(obj);
+      } else {
         this.app.ui.showDialog(this.checkPwContent());
         document.getElementById('pw')?.focus();
-      } else {
-        await this.logon(obj);
       }
     } else {
       this.name = data.playername;
