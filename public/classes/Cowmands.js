@@ -135,8 +135,8 @@ export class Cowmands {
           }
         }
         // last interacted with target will be the next commands 'it'
-        if (this.context.actor === this.app.player.info.id) {
-          this.app.player.info.it = this.context.target;
+        if (this.context.actor === this.app.player.id) {
+          this.app.player.it = this.context.target;
         }
       }
       if (nsecond) {
@@ -240,8 +240,8 @@ export class Cowmands {
       obj[prop] = val;
       await this.app.db.save(obj, oldObj);
       // update the players location
-      if (this.app.player.info.id == obj.id && this.app.player.info.loc != obj.loc) {
-        this.app.player.info.loc = obj.loc;
+      if (this.app.player.id == obj.id && this.app.player.loc != obj.loc) {
+        this.app.player.loc = obj.loc;
         this.app.player.save();
       }
     },
@@ -453,8 +453,8 @@ export class Cowmands {
       this.context.it = obj.id;
       this.context.new_id = obj.id;
       // last interacted with target will be the next commands 'it'
-      if (this.context.actor === this.app.player.info.id) {
-        this.app.player.info.it = this.context.target;
+      if (this.context.actor === this.app.player.id) {
+        this.app.player.it = this.context.target;
       }
     },
     // COPY

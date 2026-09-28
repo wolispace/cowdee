@@ -1,33 +1,57 @@
 import './bcrypt.js';
 const bcrypt = globalThis.bcrypt;
 
-
-// handles current player info, logging in, updating local storage
+// Handles current player info, logging in, updating storage, command history
 export class Player {
-
-  info = { id: '', loc: '', history: [] };
-  PLAYER_INFO_KEY = 'playerInfo';
+  id = '';
+  name = '';
+  loc = '';
+  it = '';
+  editing = false;
+  history = [];
+  remember = true;
 
   constructor(app) {
     this.app = app;
-    this.load();
+  }
+
+  // Compatibility getters/setters for legacy code
+  get playername() {
+    return this.name;
+  }
+  set playername(val) {
+    this.name = val;
+  }
+
+  get info() {
+    return this;
+  }
+  set info(val) {
+    if (val && typeof val === 'object') {
+      if (val.id !== undefined) this.id = val.id;
+      if (val.name !== undefined) this.name = val.name;
+      if (val.playername !== undefined) this.name = val.playername;
+      if (val.loc !== undefined) this.loc = val.loc;
+      if (val.it !== undefined) this.it = val.it;
+      if (val.editing !== undefined) this.editing = val.editing;
+      if (val.history !== undefined) this.history = val.history;
+    }
   }
 
   /** 
-   * show the logon form 
+   * Show the logon form 
    */
   async welcome() {
     if (!this.app.window) return;
-    // show dialog, app.handleForm() handles logins
     this.app.ui.showDialog(this.loginFormContent());
-    document.getElementById('playername').focus();
+    document.getElementById('playername')?.focus();
   }
 
   loginFormContent() {
     const defaultName = this.app.local ? 'Wolis' : '';
     return `
       <form method="dialog" id="loginform">
-      <input type="hidden" name="type" value="login">
+        <input type="hidden" name="type" value="login">
         <label for="playername">Who are you?</label>
         <input type="text" id="playername" name="playername" 
           placeholder="Your name in cow" value="${defaultName}" 
@@ -39,6 +63,10 @@ export class Player {
           autocorrect="off"
           autocapitalize="off"
         />
+        <label class="remember-row" style="display: flex; align-items: center; gap: 6px; margin-top: 10px; cursor: pointer; font-size: 0.9em; user-select: none;">
+          <input type="checkbox" id="remember" name="remember" value="1" ${this.remember ? 'checked' : ''} />
+          Remember me
+        </label>
         <menu>
           <button value="submit" class="buttonize">Login</button>
         </menu>
@@ -49,8 +77,9 @@ export class Player {
   checkPwContent() {
     return `
       <form method="dialog" id="loginform">
-      <input type="hidden" name="type" value="checkpw">
-        Welcome back ${this.app.player.info.playername}
+        <input type="hidden" name="type" value="checkpw">
+        <input type="hidden" name="remember" value="${this.remember ? '1' : '0'}">
+        Welcome back ${this.name}
         <label for="pw">What is your password?</label>
         <input type="text" id="pw" name="pw" placeholder="Prove you are you"
           required
@@ -71,8 +100,9 @@ export class Player {
   newPlayerContent() {
     return `
       <form method="dialog" id="loginform">
-      <input type="hidden" name="type" value="newplayer">
-        Welcome new player ${this.app.player.info.playername}.
+        <input type="hidden" name="type" value="newplayer">
+        <input type="hidden" name="remember" value="${this.remember ? '1' : '0'}">
+        Welcome new player ${this.name}.
         <label for="pw">Set your new password:</label>
         <input type="text" id="pw" name="pw" placeholder="So you can prove you are you"
           required
@@ -91,30 +121,34 @@ export class Player {
   }
 
   async handleLogon(data) {
+    if (data?.remember !== undefined) {
+      this.remember = Boolean(data.remember === '1' || data.remember === true);
+    }
     const obj = await this.app.db.findPlayer(data);
 
     console.log(`${this.app.name} logon `, obj);
     if (obj) {
-      this.app.player.info.playername = obj.name;
-      this.app.player.info.id = obj.id;
+      this.name = obj.name;
+      this.id = obj.id;
       if (this.app.window && !this.app.quickLogin && !this.app.local) {
-        // show checkpw dialog
-        this.app.ui.showDialog(this.checkPwContent(data));
-        document.getElementById('pw').focus();
+        this.app.ui.showDialog(this.checkPwContent());
+        document.getElementById('pw')?.focus();
       } else {
         await this.logon(obj);
       }
     } else {
-      // show new player dialog
-      this.app.player.info.playername = data.playername;
-      this.app.ui.showDialog(this.newPlayerContent(data));
-      document.getElementById('pw').focus();
+      this.name = data.playername;
+      this.app.ui.showDialog(this.newPlayerContent());
+      document.getElementById('pw')?.focus();
     }
   }
 
   async handleCheckPw(data) {
-    const objPw = await this.app.db.getPw(this.app.player.info.id);
-    const obj = await this.app.db.getById(this.app.player.info.id);
+    if (data?.remember !== undefined) {
+      this.remember = Boolean(data.remember === '1' || data.remember === true);
+    }
+    const objPw = await this.app.db.getPw(this.id);
+    const obj = await this.app.db.getById(this.id);
 
     if (obj && objPw) {
       const pwOk = await bcrypt.compare(data.pw, objPw);
@@ -125,19 +159,21 @@ export class Player {
         this.app.ui.alert(`Hmm... that didn't match. Try again`);
       }
     } else {
-      this.app.ui.alert(`${this.app.player.info.playername} id=${this.app.player.info.id} can't be found`);
+      this.app.ui.alert(`${this.name} id=${this.id} can't be found`);
     }
   }
 
   async handleNewPlayer(data) {
-
+    if (data?.remember !== undefined) {
+      this.remember = Boolean(data.remember === '1' || data.remember === true);
+    }
     const hash = await bcrypt.hash(data.pw, 10);
     const startingLocation = '_2';
     const newId = this.app.id.new();
     const obj = {
       id: newId,
       class: 'player',
-      name: this.info.playername,
+      name: this.name,
       loc: startingLocation,
       lock: 1,
       owner: newId,
@@ -149,83 +185,116 @@ export class Player {
   }
 
   /**
-   * Finalise login of player, saving into local storage for fast login next time
-   * @params {object} obj
+   * Finalise login of player, saving into storage and waking up
+   * @param {object} obj
    */
   async logon(obj) {
-    this.info.id = obj.id;
-    this.info.loc = obj.loc;
-    this.info.name = obj.name;
-    this.app.storage?.setNamespace(this.info.id);
-    this.save();
+    this.id = obj.id;
+    this.loc = obj.loc;
+    this.name = obj.name;
     this.app.name = obj.id;
+
+    // Restore any previously stored history for this player
+    this.loadHistory();
+
+    if (this.remember) {
+      this.app.storage?.setItem('rememberedPlayer', this.id);
+    } else {
+      this.app.storage?.removeItem('rememberedPlayer');
+    }
+    this.save();
     console.log(`${this.app.name} logs in`);
     await this.wake();
   }
 
-  // clear player and show logoff message
-  logoff() {
+  // Clear player and show welcome login dialog
+  async logoff() {
     this.clear();
+    await this.welcome();
   }
 
   async wake() {
-    // get the last context seen by the server
     const result = await this.app.io.fetchJson('server', { 'lastContext': 1 });
     console.log(` ${this.app.name} wake `, result);
     this.app.lastContext = result?.lastContext || '0';
-    await this.app.sendCommand({ cmd: 'look', actor: this.info.id, loc: this.info.loc, saveHistory: false });
+    await this.app.sendCommand({ cmd: 'look', actor: this.id, loc: this.loc, saveHistory: false });
     this.app.ui.closeDialog();
   }
 
   /**
-   * Load players id and loc from local storage when browser opens
+   * Load remembered player and history from storage when browser opens
    */
   async load() {
-    const json = this.app.storage?.getItem(this.PLAYER_INFO_KEY);
-    if (json) {
-      this.info = JSON.parse(json);
-      this.info.history = Array.isArray(this.info.history) ? this.info.history : [];
-      if (this.info.id) {
-        this.app.storage?.setNamespace(this.info.id);
+    const rememberedId = this.app.storage?.getItem('rememberedPlayer');
+    if (rememberedId) {
+      const obj = await this.app.db.getById(rememberedId);
+      if (obj) {
+        this.remember = true;
+        await this.logon(obj);
+        return;
       }
-      await this.wake();
-      return;
     }
-    this.info.history = Array.isArray(this.info.history) ? this.info.history : [];
+    this.history = [];
     await this.welcome();
   }
 
   /**
-   * Saves the players id and loc after logging in and each time their loc changes
+   * Restore history from player-specific storage entry
+   */
+  loadHistory() {
+    if (!this.id) return;
+    const json = this.app.storage?.getItem(`player_${this.id}`);
+    if (json) {
+      try {
+        const stored = JSON.parse(json);
+        if (Array.isArray(stored.history)) {
+          this.history = stored.history;
+        }
+      } catch (e) {}
+    }
+  }
+
+  /**
+   * Saves player persistent details (id, name, loc, history)
    */
   save() {
-    console.log(`${this.app.name} save player info`, this.info);
-    this.app.storage?.setItem(this.PLAYER_INFO_KEY, JSON.stringify(this.info));
+    if (!this.id) return;
+    const data = {
+      id: this.id,
+      name: this.name,
+      loc: this.loc,
+      history: this.history
+    };
+    console.log(`${this.app.name} save player info`, data);
+    this.app.storage?.setItem(`player_${this.id}`, JSON.stringify(data));
   }
 
   addHistory(cmd) {
     if (!cmd || typeof cmd !== 'string') return;
     cmd = cmd.trim();
     if (!cmd) return;
-    if (!Array.isArray(this.info.history)) {
-      this.info.history = [];
+    if (!Array.isArray(this.history)) {
+      this.history = [];
     }
-    // If command already exists in history, remove old occurrence so it's not duplicated
-    const existingIndex = this.info.history.indexOf(cmd);
+    const existingIndex = this.history.indexOf(cmd);
     if (existingIndex !== -1) {
-      this.info.history.splice(existingIndex, 1);
+      this.history.splice(existingIndex, 1);
     }
-    this.info.history.push(cmd);
-    if (this.info.history.length > 50) {
-      this.info.history.shift();
+    this.history.push(cmd);
+    if (this.history.length > 50) {
+      this.history.shift();
     }
     this.save();
   }
 
   clear() {
-    this.info = { id: '', loc: '', history: [] };
-    this.app.storage?.removeItem(this.PLAYER_INFO_KEY);
-    this.app.storage?.setNamespace('0');
+    this.app.storage?.removeItem('rememberedPlayer');
+    this.id = '';
+    this.name = '';
+    this.loc = '';
+    this.it = '';
+    this.editing = false;
+    this.history = [];
+    this.remember = false;
   }
-
 }

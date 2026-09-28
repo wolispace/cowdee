@@ -23,7 +23,7 @@ export class App {
     this.name = this.settings.name || 'cowdee';
     this.webroot = this.getWebroot();
 
-    this.storage = new Storage(this, options.namespace || '0');
+    this.storage = new Storage(this);
     this.utils = new Utils(this); // random utils
     this.io = new IO(this); // disk IO - read and write to server
     this.ui = new UI(this); // user interface
@@ -120,15 +120,15 @@ export class App {
    * @param {object} data 
    */
   async sendCommand(data) {
-    this.player.info.editing = false;
+    this.player.editing = false;
     this.ui.showLoading();
     if (typeof data === 'string') {
       data = { cmd: data };
     }
     // every command sent needs and actor, loc, it, lastContext, counter
-    data.actor = data.actor ?? this.player.info.id;
-    data.loc = data.loc ?? this.player.info.loc;
-    data.it = this.player.info.it;
+    data.actor = data.actor ?? this.player.id;
+    data.loc = data.loc ?? this.player.loc;
+    data.it = this.player.it;
     data.lastContext = this.lastContext;
     data.counter = this.id.counter;
     if (data.cmd && data.saveHistory !== false && !data.cmd.startsWith('::run')) {

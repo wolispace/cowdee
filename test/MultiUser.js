@@ -32,39 +32,25 @@ async function runMultiUserSimulation() {
   await sleep(300);
 
   try {
-    // 3. Test Storage isolation in unlogged '0' void state
+    // 3. Log in players and verify player info & storage records
     console.log('-----------------------------------------------------');
-    console.log('TEST 1: Storage namespace in unlogged "0" void state');
-    console.log('-----------------------------------------------------');
-    console.log('   Initial Wolis storage namespace:', wolis.storage.getNamespace());
-    console.log('   Initial Bob storage namespace:  ', bob.storage.getNamespace());
-    if (wolis.storage.getNamespace() !== '0' || bob.storage.getNamespace() !== '0') {
-      throw new Error('FAILED: Initial storage namespace must be "0"');
-    }
-
-    // 4. Log in players and verify namespace transition
-    console.log('\n-----------------------------------------------------');
-    console.log('TEST 2: Login and Player namespace transition');
+    console.log('TEST 1: Player login and storage records');
     console.log('-----------------------------------------------------');
     await wolis.player.handleLogon({ playername: 'Wolis' });
     await bob.player.handleLogon({ playername: 'Bob' });
     await jane.player.handleLogon({ playername: 'Jane' });
 
-    console.log(`   Wolis logged in: ID="${wolis.player.info.id}", Loc="${wolis.player.info.loc}", Namespace="${wolis.storage.getNamespace()}"`);
-    console.log(`   Bob logged in:   ID="${bob.player.info.id}", Loc="${bob.player.info.loc}", Namespace="${bob.storage.getNamespace()}"`);
-    console.log(`   Jane logged in:  ID="${jane.player.info.id}", Loc="${jane.player.info.loc}", Namespace="${jane.storage.getNamespace()}"`);
+    console.log(`   Wolis logged in: ID="${wolis.player.id}", Loc="${wolis.player.loc}"`);
+    console.log(`   Bob logged in:   ID="${bob.player.id}", Loc="${bob.player.loc}"`);
+    console.log(`   Jane logged in:  ID="${jane.player.id}", Loc="${jane.player.loc}"`);
 
-    if (wolis.storage.getNamespace() !== '_wol' || bob.storage.getNamespace() !== '_bob' || jane.storage.getNamespace() !== '_jan') {
-      throw new Error('FAILED: Storage namespace did not update to player ID on login!');
-    }
-
-    // Verify storage isolation (each player has their own playerInfo key in storage)
-    const wolisStoredInfo = JSON.parse(wolis.storage.getItem('playerInfo'));
-    const bobStoredInfo = JSON.parse(bob.storage.getItem('playerInfo'));
+    // Verify storage records for each player
+    const wolisStoredInfo = JSON.parse(wolis.storage.getItem('player__wol'));
+    const bobStoredInfo = JSON.parse(bob.storage.getItem('player__bob'));
     console.log('   Wolis stored info in storage:', wolisStoredInfo);
     console.log('   Bob stored info in storage:  ', bobStoredInfo);
     if (wolisStoredInfo.id !== '_wol' || bobStoredInfo.id !== '_bob') {
-      throw new Error('FAILED: Storage keys collided between players!');
+      throw new Error('FAILED: Stored player records invalid!');
     }
 
     // 5. Test Object creation & replication across clients over SSE

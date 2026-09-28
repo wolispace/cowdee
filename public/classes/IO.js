@@ -61,14 +61,14 @@ export class IO {
   }
 
   async tryLock() {
-    const lockId = this.app.player.info.id || this.app.name || 'admin';
+    const lockId = this.app.player.id || this.app.name || 'admin';
     const response = await this.fetchJson('server', { lock: lockId });
     console.log(`${this.app.name} tryLock`, response?.status);
     return !!response?.status;
   }
 
   async unLock() {
-    const lockId = this.app.player.info.id || this.app.name || 'admin';
+    const lockId = this.app.player.id || this.app.name || 'admin';
     const response = await this.fetchJson('server', { lock: lockId, clear: 1 });
     console.log(`${this.app.name} unLock`, response?.status);
     return !!response?.status;

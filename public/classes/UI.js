@@ -40,12 +40,12 @@ export class UI {
       return;
     }
 
-    if (!context.for && context.loc != this.app.player.info.loc) {
+    if (!context.for && context.loc != this.app.player.loc) {
       // console.log(`${this.app.name} --- msg not shown`, context.loc, context.msg.slice(0, 30));
       return;
     }
     // if the for is added then only that entiry can see the msg
-    if (context.for && context.for != this.app.player.info.id) {
+    if (context.for && context.for != this.app.player.id) {
       console.log(`${this.app.name} --- msg not for this player`, context.for, context.msg.slice(0, 30));
       return;
     }
@@ -53,10 +53,13 @@ export class UI {
     // DEBUG: If the user simply includes 'logoff' in the msg then logoff - make a propper command later
     if (context?.msg?.includes('logoff')) {
       this.app.player.clear();
-      this.showDialog('You have logged off<form><menu><button class="buttonize">Ok</button></menu></form>', () => { this.app.ui.closeDialog() });
+      this.showDialog('You have logged off<form><menu><button class="buttonize">Ok</button></menu></form>', () => { 
+        this.app.ui.closeDialog();
+        this.app.player.welcome();
+      });
       return;
     }
-    context.playerId = this.app.player.info.id;
+    context.playerId = this.app.player.id;
 
     if (!this.app.window) {
       context.msg = await this.expand(context, 'text');
@@ -251,7 +254,7 @@ export class UI {
     // Open and focus history select on Cursor Up / Down in cmd input
     this.cmdInput.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-        const fullHistory = this.app.player.info.history;
+        const fullHistory = this.app.player.history;
         if (!Array.isArray(fullHistory) || fullHistory.length === 0) return;
 
         this.draftText = this.cmdInput.value;
