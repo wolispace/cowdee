@@ -3,6 +3,9 @@ export class DB {
   memory = {};
   dirty = {};
   interval = 5_000;
+  wordKeys = ['name','trigger'];
+  reactions = 0; // reset this after each user entered command??
+  maxReactions = 5; 
 
   // see tests/DB2.php for some sample data
 
@@ -22,7 +25,7 @@ export class DB {
     const prefix = this.prefix(type, key);
     // only name is lowercased so we can find things like name in mixed case
     // id, code, and info are all keyed by object ID which preserves case
-    if (['name'].includes(type)) key = key.toLowerCase();
+    if (this.wordKeys.includes(type)) key = key.toLowerCase();
     if (!this.memory[type]) this.memory[type] = {};
     if (!this.memory[type][prefix]) {
       this.memory[type][prefix] = await this.app.io.loadJson(this.makeFileName(type, prefix));
@@ -143,7 +146,7 @@ export class DB {
   /**
  * Returns an array of object IDs in the location
  * @param {string} key 
- * @returns {set}
+ * @returns {array}
  */
   async findInLoc(key) {
     return await this.get('loc', key);
@@ -215,6 +218,43 @@ export class DB {
     }
     return '';
   };
+
+
+  /**
+   * Runs code from a triggered object
+   * @param {object} context 
+   * @returns 
+   */
+  async findTrigger(context) {
+    console.log(`${this.app.name} findTrigger() context=`, context);
+    if (!context) return;
+    const found = await this.get('trigger', context.trigger);
+    if (!found || found.size < 1) return;
+    // loop through these to see if they are in the context.loc
+    const candidates = await this.findInLoc(context.loc);
+    if (!candidates || candidates.size < 1) return;
+    const triggerable = [];
+    for (const id of candidates) {
+      if (found[id]) {
+        triggerable.push(found);
+      }
+    }
+
+    if (triggerable.size < 1) return;
+
+    // dont do infinate reactions
+    if (context.reactions++ >= this.maxReactions) return;
+
+    for (const pair of triggerable) {
+        for (const [id, block] of Object.entries(pair)) {
+        // prepare the context for this execution
+        context.actor = id;
+        const code = await this.getCode(id);
+        await context.runCodeFrom(code, block);      
+      }
+    }
+
+  }
 
 
   /**
@@ -342,7 +382,7 @@ export class DB {
 
     const prefix = this.prefix(type, key);
     // so we can find matching names regardless of case
-    if (['name'].includes(type)) key = key.toLowerCase();
+    if (this.wordKeys.includes(type)) key = key.toLowerCase();
 
     // console.log(`${this.app.name} - set`, {type, prefix, key, value});
     // Ensure memory type and shard is in memory
@@ -376,6 +416,7 @@ export class DB {
    * Save all firty shards to disk
    */
   async saveToDisk() {
+    this.app.player.save();
     // console.log(`${this.app.name} dirty`, this.dirty);
     const batch = {};
     for (const type of Object.keys(this.dirty)) {
@@ -400,7 +441,7 @@ export class DB {
    * @returns {string}
    */
   prefix(type, key = '_') {
-    if (['name'].includes(type)) {
+    if (this.wordKeys.includes(type)) {
       return '_' + key.slice(0, 1).toUpperCase();
     } else {
       return key.slice(0, 2).toUpperCase();
@@ -540,12 +581,17 @@ export class DB {
       if (obj.info !== old.info) {
         await this.removeInfo(old);
       }
+      // if class differ its been renamed - so how to recalc plural - 'rename cats to dogs' or 'rename the cup to a bucket' ??
+    } else {
+      // new objects need plural calculated..
+      this.setPluralName(obj);
     }
 
     await this.addLoc(obj.loc, obj.id);
     await this.addName(this.classNameWords(obj), obj.id);
     if (obj.code) {
       await this.set('code', obj.id, { loc: obj.loc, code: obj.code });
+      await this.addTriggers(obj);
     }
     if (obj.info) {
       await this.set('info', obj.id, obj.info);
@@ -563,6 +609,27 @@ export class DB {
     }
     obj.updated = this.app.utils.now();
     await this.set('id', obj.id, obj);
+  }
+
+    /**
+   * Adds a trigger word if this code is triggred in some way
+   * @param {object} obj 
+   * @returns 
+   */
+  async addTriggers(obj) {
+    const pattern = /\bif\s+(reacting\s+to|target\s+of)\s+(\w+)\s+then\s+(\w+);/gi;
+    const triggers = [];
+    for (const match of obj.code.matchAll(pattern)) {
+      triggers.push({
+        type: match[1].toLowerCase().includes('target') ? 'target' : 'reacts',
+        trigger: match[2],
+        block: match[3],
+      });
+    }
+    for (const { trigger, block } of triggers) {
+      console.log(`${this.app.name} ** add trigger ${trigger} for ${obj.id} -> ${block}`);
+      await this.set('trigger', trigger, { [obj.id]: block });
+    }
   }
 
   /**

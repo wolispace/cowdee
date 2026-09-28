@@ -4,6 +4,7 @@ export class Context {
   counter = 0; // counter for next IDs
   seed = 1; // seed for consistent random numbers based on this.ts
   subs = {};
+  reactions = 0; // how many sequentil reactions have we had on this one context so far
 
   constructor(app, context) {
     // expand the context into this object eg: this.ts = context.ts;

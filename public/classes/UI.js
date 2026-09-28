@@ -67,6 +67,7 @@ export class UI {
         }
       }
       console.log(`${this.app.name} --- addMsg node: `, context.msg);
+      await this.app.db.findTrigger(context);
       return context.msg;
     }
 
@@ -89,6 +90,7 @@ export class UI {
       }
       this.blinkTitle(1000);
     }
+    await this.app.db.findTrigger(context);
   }
 
   /**
