@@ -621,13 +621,11 @@ export class DB {
     const triggers = [];
     for (const match of obj.code.matchAll(pattern)) {
       triggers.push({
-        type: match[1].toLowerCase().includes('target') ? 'target' : 'reacts',
         trigger: match[2],
         block: match[3],
       });
     }
     for (const { trigger, block } of triggers) {
-      console.log(`${this.app.name} ** add trigger ${trigger} for ${obj.id} -> ${block}`);
       await this.set('trigger', trigger, { [obj.id]: block });
     }
   }
