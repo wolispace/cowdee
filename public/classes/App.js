@@ -13,6 +13,10 @@ const LAST_CONTEXT_KEY = 'lastContext'; // how we local store the last seen cont
 
 export class App {
   lastContext = '0'; // last seen context.key
+  tickTimersInitialized = false;
+  serverOffset = 0;
+  tickConfigs = {};
+  tickWatchdog = null;
 
   constructor(options = {}) {
     this.window = (typeof window !== "undefined");
@@ -147,6 +151,9 @@ export class App {
    */
   async processContexts(contexts) {
     for (const rawContext of contexts) {
+      if (rawContext?.ts) {
+        this.syncTime(rawContext.ts);
+      }
       rawContext.app = this; // stuff the app into the context object
       const context = new Context(this, rawContext);
       await context.process();
@@ -181,6 +188,197 @@ export class App {
     cmd += `relook $actor's loc;`;
     cmd += `say 'edit',"[$actor] finishes with [${data.id}]";`;
     return cmd;
+  }
+
+  /**
+   * Synchronizes server time from context timestamp and initializes tick timers if needed.
+   * @param {number} serverTs
+   */
+  syncTime(serverTs) {
+    if (typeof serverTs !== 'number' || isNaN(serverTs)) return;
+    this.serverOffset = serverTs - Date.now();
+    if (!this.tickTimersInitialized) {
+      this.initTickTimers();
+    }
+  }
+
+  /**
+   * Returns current synchronized timestamp based on server truth
+   * @returns {number}
+   */
+  getCurrentTs() {
+    return Date.now() + this.serverOffset;
+  }
+
+  /**
+   * Initializes the 3 timers aligned to server time:
+   * - every 20 seconds at :00, :20, :40 (tick and tickloc)
+   * - every hour at 00:05 (5 mins after the hour, tickhour)
+   * - every day at 00:10 (10 mins after midnight, tickday)
+   */
+  initTickTimers() {
+    if (this.tickTimersInitialized) return;
+    this.tickTimersInitialized = true;
+
+    this.tickConfigs = {
+      tick20: {
+        name: 'tick20',
+        period: 20 * 1000,
+        phase: 0,
+        types: ['tick'],
+        timerId: null,
+        targetTs: 0
+      },
+      tickhour: {
+        name: 'tickhour',
+        period: 60 * 60 * 1000,
+        phase: 5 * 60 * 1000, // 00:05 (5 mins into the hour)
+        types: ['tickhour'],
+        timerId: null,
+        targetTs: 0
+      },
+      tickday: {
+        name: 'tickday',
+        period: 24 * 60 * 60 * 1000,
+        phase: 10 * 60 * 1000, // 00:10 (10 mins after midnight)
+        types: ['tickday'],
+        timerId: null,
+        targetTs: 0
+      }
+    };
+
+    for (const key of Object.keys(this.tickConfigs)) {
+      this.scheduleTick(this.tickConfigs[key]);
+    }
+
+    if (this.window && typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          this.refreshTickTimers();
+        }
+      });
+      window.addEventListener('focus', () => {
+        this.refreshTickTimers();
+      });
+    }
+
+    // Watchdog check every 10s to recover from background throttling / sleep
+    this.tickWatchdog = setInterval(() => {
+      this.checkTickTimers();
+    }, 10000);
+  }
+
+  /**
+   * Schedules next occurrence for a given tick config aligned to synchronized server time
+   */
+  scheduleTick(config) {
+    if (config.timerId) {
+      clearTimeout(config.timerId);
+      config.timerId = null;
+    }
+
+    const now = this.getCurrentTs();
+    const currentMod = ((now % config.period) + config.period) % config.period;
+    let delay = (config.phase - currentMod) % config.period;
+    if (delay <= 0) delay += config.period;
+
+    config.targetTs = now + delay;
+    config.timerId = setTimeout(async () => {
+      config.timerId = null;
+      try {
+        for (const type of config.types) {
+          await this.runTick(type);
+        }
+      } catch (err) {
+        console.error(`[App] Error executing tick ${config.name}:`, err);
+      }
+      this.scheduleTick(config);
+    }, delay);
+  }
+
+  /**
+   * Checks if any tick timer target was missed while backgrounded/sleeping
+   */
+  async checkTickTimers() {
+    if (!this.tickConfigs) return;
+    const now = this.getCurrentTs();
+    for (const key of Object.keys(this.tickConfigs)) {
+      const config = this.tickConfigs[key];
+      if (config.targetTs && now >= config.targetTs + 1000) {
+        if (config.timerId) {
+          clearTimeout(config.timerId);
+          config.timerId = null;
+        }
+        for (const type of config.types) {
+          try {
+            await this.runTick(type);
+          } catch (err) {
+            console.error(`[App] Error in overdue tick ${type}:`, err);
+          }
+        }
+        this.scheduleTick(config);
+      }
+    }
+  }
+
+  /**
+   * Refreshes and realigns all tick timers
+   */
+  async refreshTickTimers() {
+    if (!this.tickTimersInitialized || !this.tickConfigs) return;
+    await this.checkTickTimers();
+    for (const key of Object.keys(this.tickConfigs)) {
+      this.scheduleTick(this.tickConfigs[key]);
+    }
+  }
+
+  /**
+   * Stops all tick timers and watchdog
+   */
+  stopTickTimers() {
+    if (this.tickWatchdog) {
+      clearInterval(this.tickWatchdog);
+      this.tickWatchdog = null;
+    }
+    if (this.tickConfigs) {
+      for (const key of Object.keys(this.tickConfigs)) {
+        if (this.tickConfigs[key].timerId) {
+          clearTimeout(this.tickConfigs[key].timerId);
+          this.tickConfigs[key].timerId = null;
+        }
+      }
+    }
+    this.tickTimersInitialized = false;
+  }
+
+  /**
+   * Executes a tick of given type: tick, tickloc, tickhour, tickday
+   * @param {string} type
+   */
+  async runTick(type) {
+    if (!this.player?.id) return;
+    // Backward compatibility: treat tickloc as tick
+    if (type === 'tickloc') {
+      type = 'tick';
+    }
+    const ids = await this.db.get(type, '__');
+    if (!ids || ids.length === 0) return;
+
+    for (const id of ids) {
+      const obj = await this.db.get('id', id);
+      if (!obj) continue;
+      const code = await this.db.getCode(id);
+      if (!code) continue;
+      const context = new Context(this, {
+        ts: this.getCurrentTs(),
+        actor: id,
+        loc: obj.loc,
+        cmd: `##${type}`
+      });
+
+      console.log({code});
+      await context.runCodeFrom(code, type);
+    }
   }
 }
 

@@ -33,6 +33,7 @@ export class SSE {
       console.log('[SSEweb] received contexts:', this.app.name, rawContexts?.length, 'lastContext:', this.app.lastContext);
       if (Array.isArray(rawContexts)) {
         for (const raw of rawContexts) {
+          if (raw?.ts) this.app.syncTime(raw.ts);
           const context = new Context(this.app, raw);
           await context.process();
         }
@@ -42,6 +43,7 @@ export class SSE {
     this.sse.addEventListener('context', async (event) => {
       const rawContext = JSON.parse(event.data);
       console.log('[SSEweb] received:', this.app.name, event.data, 'lastContext:', this.app.lastContext);
+      if (rawContext?.ts) this.app.syncTime(rawContext.ts);
       const context = new Context(this.app, rawContext);
       await context.process();
     });
@@ -132,12 +134,14 @@ export class SSE {
         console.log(`${this.app.name} [SSE] received contexts:`, data?.length, 'lastContext:', this.app.lastContext);
         if (Array.isArray(data)) {
           for (const raw of data) {
+            if (raw?.ts) this.app.syncTime(raw.ts);
             const context = new Context(this.app, raw);
             await context.process();
           }
         }
       } else if (event === 'context') {
         console.log(`${this.app.name} [SSE] received:`, dataStr, 'lastContext:', this.app.lastContext);
+        if (data?.ts) this.app.syncTime(data.ts);
         const context = new Context(this.app, data);
         await context.process();
       } else if (event === 'shutdown') {
@@ -160,6 +164,9 @@ export class SSE {
     if (this.abortController) {
       this.abortController.abort();
       this.abortController = null;
+    }
+    if (this.app?.stopTickTimers) {
+      this.app.stopTickTimers();
     }
   }
 

@@ -15,7 +15,7 @@ if (app.settings.generate) {
   await app.tester.initCommands();
 
   await app.db.saveToDisk();
-  const ticking = await app.db.get('tickloc', '__');
+  const ticking = await app.db.get('tick', '__');
   console.log(`${app.name} -- ticking =`, ticking);
 }
  

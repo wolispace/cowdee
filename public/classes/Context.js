@@ -52,7 +52,7 @@ export class Context {
         this.app.ui.hideLoading();
         return;
       };
-    } 
+    }
     await this.runCodeFrom(code, '__start');
     this.app.ui.hideLoading();
 
@@ -66,8 +66,12 @@ export class Context {
   async runCodeFrom(code, block) {
     // Partition cowscript code into sub-blocks
     this.partitionCode(code);
-    // Execute from __start
+    // Execute from subName
     await this.runSub(block);
+    // Backward compatibility: treat ##tickloc: as ##tick:
+    if (block === 'tick') {
+      if (this.subs['tickloc']) await this.runSub('tickloc');
+    }
   }
 
   /**

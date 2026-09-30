@@ -646,7 +646,12 @@ export class DB {
     if (!matches) return;
 
     for (const match of matches) {
-      await this.addSub(match[1], '__', obj.id);
+      let type = match[1];
+      // Backward compatibility: treat ##tickloc: as ##tick:
+      if (type === 'tickloc') {
+        type = 'tick';
+      }
+      await this.addSub(type, '__', obj.id);
     }
   }
 
