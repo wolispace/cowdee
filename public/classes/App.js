@@ -196,6 +196,7 @@ export class App {
    */
   syncTime(serverTs) {
     if (typeof serverTs !== 'number' || isNaN(serverTs)) return;
+    this.serverTs = serverTs;
     this.serverOffset = serverTs - Date.now();
     if (!this.tickTimersInitialized) {
       this.initTickTimers();
@@ -370,13 +371,14 @@ export class App {
       const code = await this.db.getCode(id);
       if (!code) continue;
       const context = new Context(this, {
-        ts: this.getCurrentTs(),
+        ts: this.serverTs++,
         actor: id,
         loc: obj.loc,
         cmd: `##${type}`
       });
 
-      console.log({code});
+
+      console.log(context.ts, {code});
       await context.runCodeFrom(code, type);
     }
   }
