@@ -472,14 +472,15 @@ export class DB {
   // manipulate objects within each type/prefix/key
 
   /**
-   * Adds the value to the location list
+   * Adds the value to the group lists like list and tick
    * @param {string} loc
+   * @param {string} key
    * @param {string} value
    */
-  async addLoc(loc, value) {
-    const locList = await this.get('loc', loc) ?? [];
-    if (!locList.includes(value)) locList.push(value);
-    await this.set('loc', loc, locList);
+  async addSub(type, key, value) {
+    const subList = await this.get(type, key) ?? [];
+    if (!subList.includes(value)) subList.push(value);
+    await this.set(type, key, subList);
   }
 
   /**
@@ -563,7 +564,9 @@ export class DB {
 
   /**
    * Adds or updates an object into memory eg {id: 'wol', name: 'Wolis', loc: '2'}
+   * remove old lock from its respective lists, eg if changing loc, remove from old and add to new loc
    * @param {object} obj 
+   * @param {object} old 
    */
   async save(obj, old) {
     // console.log(`${this.app.name} save`, obj, 'old', old);
@@ -588,11 +591,12 @@ export class DB {
       this.setPluralName(obj);
     }
 
-    await this.addLoc(obj.loc, obj.id);
+    await this.addSub('loc', obj.loc, obj.id);
     await this.addName(this.classNameWords(obj), obj.id);
     if (obj.code) {
       await this.set('code', obj.id, { loc: obj.loc, code: obj.code });
       await this.addTriggers(obj);
+      await this.addTicks(obj);
     }
     if (obj.info) {
       await this.set('info', obj.id, obj.info);
@@ -628,6 +632,21 @@ export class DB {
     }
     for (const { trigger, block } of triggers) {
       await this.set('trigger', trigger, { [obj.id]: block });
+    }
+  }
+
+  /**
+   * If the code contains anything starting ##tick.* then add the obj.id into that memory 
+   * eg tick, tick20, tickhour or tickday etc..
+   * TODO: custom ticks are not accomodated as yet
+   * @param {object} obj
+   */
+  async addTicks(obj) {
+    const matches = obj.code.matchAll(/##(tick\w*):/g);
+    if (!matches) return;
+
+    for (const match of matches) {
+      await this.addSub(match[1], '__', obj.id);
     }
   }
 
