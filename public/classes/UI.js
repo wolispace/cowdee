@@ -138,7 +138,7 @@ export class UI {
   async expand(context, format = 'html') {
     if (context.msg) {
       const matches = [...context.msg.matchAll(/\[(\w+)(?:\.(\w+))?\]/g)];
-
+      const defaultProp = context.top ? 'longname' : 'thename';
       // make a list of all referenced object IDs for quick reference
       const loadedObjs = {};
       for (const match of matches) {
@@ -151,21 +151,18 @@ export class UI {
         const obj = loadedObjs[id];
         if (!obj) return ` (can't find id=${id}) `;
         this.app.db.formatObject(obj);
-        if (obj.id == '_o') {
-          console.log(obj);
-        }
-        const prop = attr || 'longname';
+        const prop = attr || defaultProp;
         let val = obj[prop] !== undefined ? obj[prop] : '';
 
         // Special handling if the player/actor matches the object ID (e.g. 'w' -> wolis)
-        if (prop === 'longname' && id === context.playerId) {
+        if (['longname','thename'].includes(prop) && id === context.playerId) {
           val = `${obj.name} (you)`;
         }
 
         if (['put', 'drop', 'pose', 'paint', 'edit', 'code', 'examine', 'read'].includes(context.trigger)) {
           val = obj.thename;
         }
-        if (!['longname', 'name', 'shorname', 'class'].includes(prop)) {
+        if (!['thename', 'longname', 'name', 'shorname', 'class'].includes(prop)) {
           return val;
         }
         if (obj.extra) {
