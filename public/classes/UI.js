@@ -158,10 +158,6 @@ export class UI {
         if (['longname','thename'].includes(prop) && id === context.playerId) {
           val = `${obj.name} (you)`;
         }
-
-        if (['put', 'drop', 'pose', 'paint', 'edit', 'code', 'examine', 'read'].includes(context.trigger)) {
-          val = obj.thename;
-        }
         if (!['thename', 'longname', 'name', 'shorname', 'class'].includes(prop)) {
           return val;
         }
