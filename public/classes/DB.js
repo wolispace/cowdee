@@ -70,13 +70,17 @@ export class DB {
    * @param {string} word 
    * @returns {set} of IDs with this name
    */
-  async findByName(word, isSingular = false) {
+  async findByName(word) {
     let name = word.replace(/^(?:the|an|a)\b/i, '').trim().toLocaleLowerCase();
-    // when finding players or things by name, dont try to convert to singular
-    if (!isSingular) {
+
+    // assume singular 'cat' or 'bus' but may get plural 'cats'
+    let candidates = await this.get('name', name);
+    if (!candidates) {
+      // non found so try converted to singular then try  again 'cat' or 'bu'
       name = this.guessSingular(name);
+      candidates = await this.get('name', name);
     }
-    return await this.get('name', name);
+    return candidates;
   };
 
   /**
@@ -341,6 +345,8 @@ export class DB {
    * @returns {object} 
    */
   setPluralName(obj) {
+    if (obj.plural) return;
+
     if (obj.qty > 1) {
       obj.plural = obj.class; // what they typed was the plural name
       obj.class = this.guessSingular(obj.plural);
@@ -769,6 +775,7 @@ export class DB {
    * Flush memory and dirty and reset counter
    */
   flush() {
+    console.log(`${this.app.name} flush memory and reset counter...`);
     this.memory = {};
     this.dirty = {};
     this.counter = 1;

@@ -54,7 +54,6 @@ export class Tester {
         color: this.randomColor()
       };
       obj.info = `It's a pretty ordinary ${obj.class}`;
-      this.app.db.setPluralName(obj);
       await this.app.db.save(obj);
       if (counter % 10 === 0) {
         process.stdout.write(":");
@@ -125,7 +124,6 @@ export class Tester {
       obj.lock = 1;
       obj.class = 'player';
       obj.color = 'goldenrod';
-      this.app.db.setPluralName(obj);
       await this.app.db.save(obj);
     }
   }
@@ -229,7 +227,6 @@ export class Tester {
       obj.lock = 1;
       obj.owner = '_wol',
         obj.color = this.randomColor();
-      this.app.db.setPluralName(obj);
       await this.app.db.save(obj);
     }
   }
