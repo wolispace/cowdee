@@ -125,7 +125,7 @@ export class Cowmands {
         if (this.app.db.isId(ntarget)) {
           this.context.target = ntarget;
         } else {
-          this.context.found = await this.app.db.findByNameInLoc(ntarget, getLocValue);
+          this.context.found = await this.app.db.findByNameInLoc(ntarget, getLocValue, true);
           if (this.context.found && this.context.found.length == 1) {
             this.context.target = this.context.found[0];
             delete this.context.found;
@@ -143,7 +143,7 @@ export class Cowmands {
         if (this.app.db.isId(nsecond)) {
           this.context.second = nsecond;
         } else {
-          this.context.found = await this.app.db.findByNameInLoc(nsecond, getSecondLocValue);
+          this.context.found = await this.app.db.findByNameInLoc(nsecond, getSecondLocValue, true);
           if (this.context.found && this.context.found.length == 1) {
             this.context.second = this.context.found[0];
             delete this.context.found;
@@ -447,7 +447,6 @@ export class Cowmands {
       obj.id = this.app.id.new();
       obj.creator = this.context.actor;
       obj.owner = this.context.actor;
-      this.app.db.setPluralName(obj);
       await this.app.db.save(obj);
       this.context.target = obj.id;
       this.context.it = obj.id;
@@ -590,7 +589,7 @@ export class Cowmands {
         // --- exact name match eg: find $loc, cat  or  find $loc, player called wolis ---
         const parsed = this.parseObj(criteria);
         const searchName = parsed.name || parsed.class;
-        const candidates = await this.app.db.findByNameInLoc(searchName, loc);
+        const candidates = await this.app.db.findByNameInLoc(searchName, loc, true);
         if (!candidates || candidates.length === 0) return;
 
         this.context.found_count = candidates.length;

@@ -326,11 +326,14 @@ export class App {
    * Refreshes and realigns all tick timers
    */
   async refreshTickTimers() {
+    console.log(`${this.name} refreshing tick timers...`);
+    this.db.flush();
     if (!this.tickTimersInitialized || !this.tickConfigs) return;
     await this.checkTickTimers();
     for (const key of Object.keys(this.tickConfigs)) {
       this.scheduleTick(this.tickConfigs[key]);
     }
+    this.player.relook();
   }
 
   /**
@@ -377,8 +380,6 @@ export class App {
         cmd: `##${type}`
       });
 
-
-      console.log(context.ts, {code});
       await context.runCodeFrom(code, type);
     }
   }

@@ -16,7 +16,7 @@ async function runMultiUserSimulation() {
   await initApp.tester.initPlayers();
   await initApp.tester.initCommands();
   await initApp.db.saveToDisk();
-  await sleep(300);
+  await initApp.utils.sleep(300);
   console.log(`✔ Initialized test database fixtures. DB Counter: ${initApp.id.counter}\n`);
 
   // 2. Create 3 independent real App instances and connect to SSE / Server
@@ -29,7 +29,7 @@ async function runMultiUserSimulation() {
   await jane.start();
 
   // Allow initial SSE handshake
-  await sleep(300);
+  await initApp.utils.sleep(300);
 
   try {
     // 3. Log in players and verify player info & storage records
@@ -61,7 +61,7 @@ async function runMultiUserSimulation() {
     await bob.sendCommand({ cmd: `create a pink ${newObjName}` });
 
     // Wait for SSE broadcast across network/server
-    await sleep(2000);
+    await initApp.utils.sleep(2000);
     console.log('bob name _P', bob.db.memory.name._P);
     console.log('wolis name _P', wolis.db.memory.name._P);
     console.log('jane name _P', jane.db.memory.name._P);
@@ -94,21 +94,24 @@ async function runMultiUserSimulation() {
     await bob.sendCommand({ cmd: `put the frog on the bus` });
     await bob.sendCommand({ cmd: `pose it as sitting` });
     // Wait for SSE broadcast
-    await sleep(600);
+    await initApp.utils.sleep(600);
     await wolis.sendCommand({ cmd: `look` });
     console.log('   Wolis heard:', wolis.ui.messages[wolis.ui.messages.length - 1]);
+    await wolis.sendCommand({ cmd: `get the frog` });
 
-    await wolis.sendCommand({ cmd: `build a door to a pantry` });
-    await wolis.sendCommand({ cmd: `create a handle` });
-    await bob.sendCommand({ cmd: `put the handle on the door` });
+    await wolis.sendCommand({ cmd: `build a shed` });
+    await wolis.sendCommand({ cmd: `create 3 white cups` });
+    await bob.sendCommand({ cmd: `get the cups` });
     // Wait for SSE broadcast
-    await sleep(600);
+    await initApp.utils.sleep(600);
     await wolis.sendCommand({ cmd: `look` });
     console.log('   Wolis heard:', wolis.ui.messages[wolis.ui.messages.length - 1]);
 
     await wolis.sendCommand({ cmd: `go door` });
-    await sleep(600);
+    await initApp.utils.sleep(600);
     console.log(`wolis is now in `, wolis.player.info.loc);
+    await wolis.sendCommand({ cmd: `drop the frog` });
+
     if (wolis.player.info.loc === '_2') {
       throw new Error(`FAILED: Expected wolis to be in new location not in _2 starting location`);
     }
@@ -124,7 +127,7 @@ async function runMultiUserSimulation() {
     await bob.sendCommand({ cmd: 'say hello Wolis in the house' });
 
     // Wait for SSE broadcast
-    await sleep(600);
+    await initApp.utils.sleep(600);
 
     console.log('   Wolis heard:', wolis.ui.messages[wolis.ui.messages.length - 1]);
     const janeMsgCountAfter = jane.ui.messages.length;

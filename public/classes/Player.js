@@ -220,6 +220,14 @@ export class Player {
     await this.app.sendCommand({ cmd: 'look', actor: this.id, loc: this.loc, saveHistory: false });
     this.app.ui.closeDialog();
   }
+  /**
+   * Silently refresh what the player is seeing without anoucing they look around (do this after editing and returning to a tab etc..)
+   */
+  async relook() {
+        console.log(`${this.name} silent relook just this player ${this.id} in ${this.loc}...`);
+    const data = await this.app.lookManager.look({ actor: this.id, loc: this.loc, trigger: 'relook' });
+    await this.app.ui.addMessage(data);
+  }
 
   /**
    * Load remembered player and history from storage when browser opens
@@ -265,7 +273,6 @@ export class Player {
       loc: this.loc,
       history: this.history
     };
-    console.log(`${this.app.name} save player info`, data);
     this.app.storage?.setItem(`player_${this.id}`, JSON.stringify(data));
   }
 

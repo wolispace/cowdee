@@ -145,6 +145,16 @@ export class Utils {
   }
 
   /**
+   * Waits for x milliseconds
+   * @param {int} ms 
+   * @returns 
+   */
+  sleep = (ms) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  };
+
+
+  /**
    * Returns todays datetime as a formatted string eg "Mon 23 Jan 2023 at 10:23am"
    * @returns {string}
    */
