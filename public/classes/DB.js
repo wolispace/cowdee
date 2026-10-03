@@ -777,11 +777,17 @@ export class DB {
   }
 
   /**
-   * Flush memory and dirty and reset counter
+   * Save any pending dirty writes, then wipe memory so it re-reads fresh from the server.
    */
-  flush() {
+  async flush() {
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+      this.saveTimeout = null;
+      await this.saveToDisk();
+    }
     console.log(`${this.app.name} flush memory and reset counter...`);
     this.memory = {};
+    this._inflight = {};
     this.dirty = {};
     this.counter = 1;
   }

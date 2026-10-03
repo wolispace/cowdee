@@ -254,7 +254,9 @@ export class App {
 
     if (this.window && typeof document !== 'undefined') {
       document.addEventListener('visibilitychange', async () => {
-        if (document.visibilityState === 'visible') {
+        if (document.visibilityState === 'hidden') {
+          this._lastHidden = Date.now();
+        } else if (document.visibilityState === 'visible') {
           await this.refreshTickTimers();
         }
       });
@@ -327,7 +329,12 @@ export class App {
    */
   async refreshTickTimers() {
     console.log(`${this.name} refreshing tick timers...`);
-    await this.db.flush();
+    const elapsed = Date.now() - (this._lastHidden ?? Date.now());
+    if (elapsed > 60_000) {
+      // Away long enough that memory may be stale — save pending writes then re-read fresh
+      console.log(`${this.name} tab was hidden for ${Math.round(elapsed / 1000)}s, flushing memory...`);
+      await this.db.flush();
+    }
     if (!this.tickTimersInitialized || !this.tickConfigs) return;
     await this.checkTickTimers();
     for (const key of Object.keys(this.tickConfigs)) {
