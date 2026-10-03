@@ -107,7 +107,7 @@ async function runMultiUserSimulation() {
     await wolis.sendCommand({ cmd: `look` });
     console.log('   Wolis heard:', wolis.ui.messages[wolis.ui.messages.length - 1]);
 
-    await wolis.sendCommand({ cmd: `go door` });
+    await wolis.sendCommand({ cmd: `go shed` });
     await initApp.utils.sleep(600);
     console.log(`wolis is now in `, wolis.player.info.loc);
     await wolis.sendCommand({ cmd: `drop the frog` });

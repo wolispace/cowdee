@@ -253,19 +253,19 @@ export class App {
     }
 
     if (this.window && typeof document !== 'undefined') {
-      document.addEventListener('visibilitychange', () => {
+      document.addEventListener('visibilitychange', async () => {
         if (document.visibilityState === 'visible') {
-          this.refreshTickTimers();
+          await this.refreshTickTimers();
         }
       });
-      window.addEventListener('focus', () => {
-        this.refreshTickTimers();
+      window.addEventListener('focus', async () => {
+        await this.refreshTickTimers();
       });
     }
 
     // Watchdog check every 10s to recover from background throttling / sleep
-    this.tickWatchdog = setInterval(() => {
-      this.checkTickTimers();
+    this.tickWatchdog = setInterval(async () => {
+      await this.checkTickTimers();
     }, 10000);
   }
 
@@ -327,13 +327,13 @@ export class App {
    */
   async refreshTickTimers() {
     console.log(`${this.name} refreshing tick timers...`);
-    this.db.flush();
+    await this.db.flush();
     if (!this.tickTimersInitialized || !this.tickConfigs) return;
     await this.checkTickTimers();
     for (const key of Object.keys(this.tickConfigs)) {
       this.scheduleTick(this.tickConfigs[key]);
     }
-    this.player.relook();
+    await this.player.relook();
   }
 
   /**
