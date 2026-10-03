@@ -25,15 +25,10 @@ export class DB {
     const prefix = this.prefix(type, key);
     // only name is lowercased so we can find things like name in mixed case
     // id, code, and info are all keyed by object ID which preserves case
+    if (this.wordKeys.includes(type)) key = key.toLowerCase();
     if (!this.memory[type]) this.memory[type] = {};
     if (!this.memory[type][prefix]) {
-      if (!this._inflight) this._inflight = {};
-      const slot = `${type}/${prefix}`;
-      if (!this._inflight[slot]) {
-        this._inflight[slot] = this.app.io.loadJson(this.makeFileName(type, prefix))
-          .finally(() => delete this._inflight[slot]);
-      }
-      this.memory[type][prefix] = await this._inflight[slot];
+      this.memory[type][prefix] = await this.app.io.loadJson(this.makeFileName(type, prefix));
     }
     return this.memory[type][prefix][key];
   }

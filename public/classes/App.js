@@ -125,10 +125,12 @@ export class App {
    */
   async sendCommand(data) {
     this.player.editing = false;
-    this.ui.showLoading();
-    if (typeof data === 'string') {
-      data = { cmd: data };
+    if (!data.ts) {
+        this.ui.showLoading();
     }
+    // if (typeof data === 'string') {
+    //   data = { cmd: data };
+    // }
     // every command sent needs and actor, loc, it, lastContext, counter
     data.actor = data.actor ?? this.player.id;
     data.loc = data.loc ?? this.player.loc;
@@ -272,6 +274,17 @@ export class App {
   }
 
   /**
+   * Returns the last elapsed boundary timestamp for a tick config — deterministic and identical across all browsers.
+   * e.g. for period=20s, phase=0: always a multiple of 20s since epoch
+   */
+  tickBoundary(config) {
+    const now = this.getCurrentTs();
+    const currentMod = ((now % config.period) + config.period) % config.period;
+    const distancePastPhase = ((currentMod - config.phase) + config.period) % config.period;
+    return now - distancePastPhase;
+  }
+
+  /**
    * Schedules next occurrence for a given tick config aligned to synchronized server time
    */
   scheduleTick(config) {
@@ -312,6 +325,7 @@ export class App {
           clearTimeout(config.timerId);
           config.timerId = null;
         }
+        const boundary = this.tickBoundary(config);
         for (const type of config.types) {
           try {
             await this.runTick(type);
@@ -364,14 +378,15 @@ export class App {
 
   /**
    * Executes a tick of given type: tick, tickloc, tickhour, tickday
+   * Each reacting object sends a command with the deterministic boundary ts as its own id
+   * makes the server filename {boundary}{id}.json identical across all browsers.
    * @param {string} type
    */
   async runTick(type) {
+    const newTs = this.lastTs + 1;
+    console.log(`${this.name} running tick of type ${type} at ts ${newTs} from ${this.lastTs}`);
     if (!this.player?.id) return;
-    // Backward compatibility: treat tickloc as tick
-    if (type === 'tickloc') {
-      type = 'tick';
-    }
+    if (type === 'tickloc') type = 'tick';
     const ids = await this.db.get(type, '__');
     if (!ids || ids.length === 0) return;
 
@@ -380,14 +395,13 @@ export class App {
       if (!obj) continue;
       const code = await this.db.getCode(id);
       if (!code) continue;
-      const context = new Context(this, {
-        ts: this.serverTs++,
+      await this.sendCommand({
+        ts: newTs,
         actor: id,
         loc: obj.loc,
-        cmd: `##${type}`
+        cmd: `::tick ${type}`,
+        saveHistory: false
       });
-
-      await context.runCodeFrom(code, type);
     }
   }
 }

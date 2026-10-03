@@ -36,6 +36,11 @@ function handleInput($request)
       }
     }
 
+    // If the client supplies a fixed ts (tick boundary), use it for the filename
+    if (!empty($request['ts'])) {
+      $mstimestamp = $request['ts'];
+    }
+
     $contextData = [
       'ts' => $mstimestamp,
       'counter' => $request['counter'],

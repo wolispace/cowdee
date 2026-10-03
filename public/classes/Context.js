@@ -31,6 +31,7 @@ export class Context {
     // sync up so our counter never falls behind any peer's.
     this.app.id.sync(this.counter);
     if (this.app.seen(this.key())) return;
+    this.app.lastTs = this.ts;
     if (!this.cmd) return;
     // same player then remember the last 'it'
     if (this.actor === this.app.player.id && this.app.player.id) {
@@ -38,12 +39,16 @@ export class Context {
     }
     console.log(`\n${this.app.name} ### processing:`, this.ts, this.actor, 'loc:', this.loc, 'counter:', this.app.id.counter, 'it:', this.it, 'cmd:', this.cmd);
     const { firstword, rest } = this.app.utils.splitFirstWord(this.cmd);
+    let runFrom = '__start';
     this.firstword = firstword;
     this.rest = rest;
     this.cmd_text = rest;
     let code = '';
     if (this.firstword === '::run') {
       code = this.rest;
+    } else if (this.firstword === '::tick') {
+      code = await this.app.db.getCode(this.actor);
+      runFrom = this.rest;
     } else {
       code = await this.app.db.findCommand(this);
       if (!code) {
@@ -53,7 +58,7 @@ export class Context {
         return;
       };
     }
-    await this.runCodeFrom(code, '__start');
+    await this.runCodeFrom(code, runFrom);
     this.app.ui.hideLoading();
 
   }
