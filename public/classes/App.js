@@ -303,7 +303,7 @@ export class App {
       config.timerId = null;
       try {
         for (const type of config.types) {
-          await this.runTick(type);
+          await this.runTick(type, this.tickBoundary(config));
         }
       } catch (err) {
         console.error(`[App] Error executing tick ${config.name}:`, err);
@@ -328,7 +328,7 @@ export class App {
         const boundary = this.tickBoundary(config);
         for (const type of config.types) {
           try {
-            await this.runTick(type);
+            await this.runTick(type, boundary);
           } catch (err) {
             console.error(`[App] Error in overdue tick ${type}:`, err);
           }
@@ -381,10 +381,9 @@ export class App {
    * Each reacting object sends a command with the deterministic boundary ts as its own id
    * makes the server filename {boundary}{id}.json identical across all browsers.
    * @param {string} type
+   * @param {number} boundaryTs  - the tick boundary timestamp (same in every browser)
    */
-  async runTick(type) {
-    const newTs = this.lastTs + 1;
-    console.log(`${this.name} running tick of type ${type} at ts ${newTs} from ${this.lastTs}`);
+  async runTick(type, boundaryTs) {
     if (!this.player?.id) return;
     if (type === 'tickloc') type = 'tick';
     const ids = await this.db.get(type, '__');
@@ -396,7 +395,7 @@ export class App {
       const code = await this.db.getCode(id);
       if (!code) continue;
       await this.sendCommand({
-        ts: newTs,
+        ts: boundaryTs,
         actor: id,
         loc: obj.loc,
         cmd: `::tick ${type}`,
