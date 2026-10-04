@@ -174,10 +174,10 @@ export class Tester {
       code: `get $target;clear $actor,all;\nset $actor's loc to $target's loc;\nsay 'leaves',\"[$actor] dissapears in a puff of smoke\";\nvar $loc to $target's loc;\nsay 'arrives',\"[$actor] appears out of thin air!\";\nrelook $loc;`
     }, {
       name: "go",
-      code: `get $target in $loc;\nvar $tlink to $target's link;\nsay 'leaves',\"[$actor] leaves via [$target]\";\nvar $nloc to $tlink's loc;\nset $actor's loc to $nloc;\nrelook $loc;\nsay 'arrives',\"[$actor] appears via [$tlink]\";\nrelook $nloc;`
+      code: `get $target in $loc;\nvar $tlink to $target's link;\nsay 'leaves',"[$actor] leaves via [$target]";\nvar $nloc to $tlink's loc;\nset $actor's loc to $nloc;\nrelook $loc;\nset $loc = $nloc;\nsay 'arrives',"[$actor] appears via [$tlink]";\nrelook $nloc;`
     }, {
       name: "exit",
-      code: `find $loc, exit;\nvar $tlink to $found_id's link;\nsay 'leaves',\"[$actor] leaves via [$found_id]\";\nrelook $loc;\nvar $loc to $tlink's loc;\nset $actor's loc to $loc;\nsay 'arrives',\"[$actor] appears via [$tlink]\";\nrelook $loc;`
+      code: `find $loc, exit;\nvar $tlink to $found_id's link;\nsay 'leaves',"[$actor] leaves via [$found_id]";\nrelook $loc;\nvar $loc to $tlink's loc;\nset $actor's loc to $loc;\nsay 'arrives',"[$actor] appears via [$tlink]";\nrelook $loc;`
     }, {      
       name: "into",
       code: `set $oldloc to $loc;\nget $target in $loc;\nsay 'leaves',"[$actor] disapears inside [$target]!";\nset $loc = $target;\nset $actor's loc to $loc;\nrelook $loc;\nrelook $oldloc;`
