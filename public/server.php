@@ -25,7 +25,45 @@ function handleInput($request)
   if (!$request)
     return;
 
-  if (!empty($request['cmd'])) {
+  if (!empty($request['commands']) && is_array($request['commands'])) {
+    // Batched commands — array of individual cmd payloads sent by the client queue
+    $processed = 0;
+    $mstimestamp = round(microtime(true) * 1000);
+
+    foreach ($request['commands'] as $cmd) {
+      if (empty($cmd['cmd'])) {
+        logIt('commands batch: skipping entry with empty cmd: ' . json_encode($cmd));
+        continue;
+      }
+
+      // Mirror single-cmd logic: use server microtime as base, auto-increment to avoid
+      // collisions, but honour a client-supplied ts (e.g. tick boundary) when present.
+      $ts = $mstimestamp++;
+      if (!empty($cmd['ts'])) {
+        // Keep as numeric string to avoid int-cast precision loss on large floats
+        $ts = sprintf('%.0f', $cmd['ts']);
+      }
+
+      $actor = $cmd['actor'] ?? '';
+      $contextData = [
+        'ts'      => $ts,
+        'counter' => $cmd['counter'] ?? ($request['counter'] ?? ''),
+        'actor'   => $actor,
+        'loc'     => $cmd['loc']     ?? '',
+        'it'      => $cmd['it']      ?? '',
+        'cmd'     => $cmd['cmd'],
+      ];
+
+      $filename = CONTEXT_DIR . "/{$ts}{$actor}" . CONTEXT_EXT;
+      $written  = file_put_contents($filename, json_encode($contextData));
+      logIt('commands batch: ' . ($written !== false ? "saved $filename" : "FAILED to write $filename"));
+      if ($written !== false) $processed++;
+    }
+
+    logIt("commands batch done: {$processed}/" . count($request['commands']) . " written");
+    outputJson(['status' => 'ok', 'count' => $processed]);
+
+  } else if (!empty($request['cmd'])) {
     $mstimestamp = round(microtime(true) * 1000);
     $lastContext = $request['lastContext'] ?? '0';
 
