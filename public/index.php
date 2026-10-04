@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <?php
-$version = '0.6.0';
+$version = '0.7.0';
 $rnd = rand(0, 999999); ?>
 <html>
 
@@ -16,7 +16,7 @@ $rnd = rand(0, 999999); ?>
   <content>
     <div id="panels">
       <section id="top">
-        <h2>Welcome to cow</h2>
+        <h2>Welcome to distributed cow v<?= $version ?></h2>
         <p>Log in to enter the world.</p>
 
       </section>
