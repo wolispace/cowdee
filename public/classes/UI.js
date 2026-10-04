@@ -23,6 +23,8 @@ export class UI {
     this.initHistory();
     this.initMenu();
 
+    this.bottom.innerHTML = `<br/><br/>`;
+
     // When the tab regains focus, clear any unread '*' indicator from the title
     window.addEventListener('focus', () => {
       document.title = document.title.replace(/\*$/, '');
