@@ -147,7 +147,8 @@ async function runMultiUserSimulation() {
     bob.sse.close();
     jane.sse.close();
   }
-
+  await app.tester.deleteTestContexts();
+  await app.tester.deleteTestLogs();
   process.exit(0);
 }
 

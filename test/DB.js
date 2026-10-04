@@ -25,6 +25,9 @@ if (app.settings.generate) {
   await app.utils.sleep(300);
 
   await app.db.saveToDisk();
+  await app.tester.deleteTestContexts();
+  await app.tester.deleteTestLogs();
+  
   const ticking = await app.db.get('tick', '__');
   console.log(`${app.name} -- ticking =`, ticking);
 }
