@@ -215,7 +215,7 @@ export class App {
 
   /**
    * Initializes the 3 timers aligned to server time:
-   * - every 20 seconds at :00, :20, :40 (tick and tickloc)
+   * - every 20 seconds at :00, :20, :40 (tick — also runs ##tickloc: sub-block)
    * - every hour at 00:05 (5 mins after the hour, tickhour)
    * - every day at 00:10 (10 mins after midnight, tickday)
    */
@@ -223,35 +223,20 @@ export class App {
     if (this.tickTimersInitialized) return;
     this.tickTimersInitialized = true;
 
+    // Static schedule — the key is the tick type passed to runTick.
+    // Runtime state (type, timerId, targetTs, lastRunBoundary) is injected below.
     this.tickConfigs = {
-      tick20: {
-        name: 'tick20',
-        period: 20 * 1000,
-        phase: 0,
-        types: ['tick'],
-        timerId: null,
-        targetTs: 0
-      },
-      tickhour: {
-        name: 'tickhour',
-        period: 60 * 60 * 1000,
-        phase: 5 * 60 * 1000, // 00:05 (5 mins into the hour)
-        types: ['tickhour'],
-        timerId: null,
-        targetTs: 0
-      },
-      tickday: {
-        name: 'tickday',
-        period: 24 * 60 * 60 * 1000,
-        phase: 10 * 60 * 1000, // 00:10 (10 mins after midnight)
-        types: ['tickday'],
-        timerId: null,
-        targetTs: 0
-      }
+      tick:     { period: 20 * 1000,           phase: 0 },
+      tickhour: { period: 60 * 60 * 1000,      phase: 5 * 60 * 1000  }, // 5 mins into the hour
+      tickday:  { period: 24 * 60 * 60 * 1000, phase: 10 * 60 * 1000 }, // 10 mins after midnight
     };
 
-    for (const key of Object.keys(this.tickConfigs)) {
-      this.scheduleTick(this.tickConfigs[key]);
+    for (const [type, config] of Object.entries(this.tickConfigs)) {
+      config.type = type;
+      config.timerId = null;
+      config.targetTs = 0;
+      config.lastRunBoundary = 0;
+      this.scheduleTick(config);
     }
 
     if (this.window && typeof document !== 'undefined') {
@@ -262,15 +247,11 @@ export class App {
           await this.refreshTickTimers();
         }
       });
-      window.addEventListener('focus', async () => {
-        await this.refreshTickTimers();
-      });
+      // Note: 'focus' intentionally omitted — visibilitychange covers tab-return.
     }
 
-    // Watchdog check every 10s to recover from background throttling / sleep
-    this.tickWatchdog = setInterval(async () => {
-      await this.checkTickTimers();
-    }, 10000);
+    // Watchdog: check every 10s to recover from background throttling / sleep
+    this.tickWatchdog = setInterval(() => this.checkTickTimers(), 10000);
   }
 
   /**
@@ -301,45 +282,52 @@ export class App {
     config.targetTs = now + delay;
     config.timerId = setTimeout(async () => {
       config.timerId = null;
+      const boundary = this.tickBoundary(config);
+      config.lastRunBoundary = boundary;
       try {
-        for (const type of config.types) {
-          await this.runTick(type, this.tickBoundary(config));
-        }
+        await this.runTick(config.type, boundary);
       } catch (err) {
-        console.error(`[App] Error executing tick ${config.name}:`, err);
+        console.error(`[App] Error executing tick ${config.type}:`, err);
       }
       this.scheduleTick(config);
     }, delay);
   }
 
   /**
-   * Checks if any tick timer target was missed while backgrounded/sleeping
+   * Checks if any tick timer target was missed while backgrounded/sleeping.
+   * Re-entrant safe: if already running (slow sendCommand in-flight) it exits immediately.
    */
   async checkTickTimers() {
-    if (!this.tickConfigs) return;
-    const now = this.getCurrentTs();
-    for (const key of Object.keys(this.tickConfigs)) {
-      const config = this.tickConfigs[key];
-      if (config.targetTs && now >= config.targetTs + 1000) {
-        if (config.timerId) {
-          clearTimeout(config.timerId);
-          config.timerId = null;
-        }
-        const boundary = this.tickBoundary(config);
-        for (const type of config.types) {
-          try {
-            await this.runTick(type, boundary);
-          } catch (err) {
-            console.error(`[App] Error in overdue tick ${type}:`, err);
+    if (!this.tickConfigs || this._checkingTicks) return;
+    this._checkingTicks = true;
+    try {
+      const now = this.getCurrentTs();
+      for (const config of Object.values(this.tickConfigs)) {
+        if (config.targetTs && now >= config.targetTs + 1000) {
+          const boundary = this.tickBoundary(config);
+          if (boundary === config.lastRunBoundary) continue; // already ran this boundary
+          if (config.timerId) {
+            clearTimeout(config.timerId);
+            config.timerId = null;
           }
+          config.lastRunBoundary = boundary;
+          try {
+            await this.runTick(config.type, boundary);
+          } catch (err) {
+            console.error(`[App] Error in overdue tick ${config.type}:`, err);
+          }
+          this.scheduleTick(config);
         }
-        this.scheduleTick(config);
       }
+    } finally {
+      this._checkingTicks = false;
     }
   }
 
   /**
-   * Refreshes and realigns all tick timers
+   * Refreshes and realigns all tick timers (called on tab-visible).
+   * checkTickTimers handles overdue ticks and reschedules them;
+   * we then schedule any that are still waiting to keep them aligned.
    */
   async refreshTickTimers() {
     console.log(`${this.name} refreshing tick timers...`);
@@ -351,8 +339,9 @@ export class App {
     }
     if (!this.tickTimersInitialized || !this.tickConfigs) return;
     await this.checkTickTimers();
-    for (const key of Object.keys(this.tickConfigs)) {
-      this.scheduleTick(this.tickConfigs[key]);
+    // Reschedule any that weren't overdue (their timerId was left in place by checkTickTimers)
+    for (const config of Object.values(this.tickConfigs)) {
+      if (!config.timerId) this.scheduleTick(config);
     }
     await this.player.relook();
   }
@@ -377,15 +366,16 @@ export class App {
   }
 
   /**
-   * Executes a tick of given type: tick, tickloc, tickhour, tickday
-   * Each reacting object sends a command with the deterministic boundary ts as its own id
-   * makes the server filename {boundary}{id}.json identical across all browsers.
+   * Executes a tick of given type: tick, tickhour, tickday
+   * Each reacting object sends a command with the deterministic boundary ts as its own id,
+   * making the server filename {boundary}{id}.json identical across all browsers.
    * @param {string} type
    * @param {number} boundaryTs  - the tick boundary timestamp (same in every browser)
    */
   async runTick(type, boundaryTs) {
     if (!this.player?.id) return;
-    if (type === 'tickloc') type = 'tick';
+    // Don't fire ticks while the tab is hidden — refreshTickTimers catches up on return
+    if (this.window && document.visibilityState === 'hidden') return;
     const ids = await this.db.get(type, '__');
     if (!ids || ids.length === 0) return;
 

@@ -31,7 +31,6 @@ export class Context {
     // sync up so our counter never falls behind any peer's.
     this.app.id.sync(this.counter);
     if (this.app.seen(this.key())) return;
-    this.app.lastTs = this.ts;
     if (!this.cmd) return;
     // same player then remember the last 'it'
     if (this.actor === this.app.player.id && this.app.player.id) {
