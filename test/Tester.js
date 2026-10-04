@@ -95,7 +95,7 @@ export class Tester {
       owner: '_wol',
       qty: 1,
       lock: 1,
-      code: `if target of push then pushme;##pushme: say 'say', "[$actor] says 'Oi! quit pushing!'";##tXick:runsub doit/10;##doit:say 'think',"[$actor] .oO( I keep thinking its Tuesday )";`,
+      code: `if target of push then pushme;##pushme: say 'say', "[$actor] says 'Oi! quit pushing!'";##tick:runsub doit/10;##doit:say 'think',"[$actor] .oO( I keep thinking its Tuesday )";`,
       info: `Type short commands and press Enter \n'look' shows you where you are.\n'say hello', 'think I wonder if..' and 'do sits down' are ways of communicating with others\n\nYou can 'create' simple one word objects like 'create a book' or 'create a table'\nYou can 'paint', 'put', 'pose' and 'push' objects eg \n'paint the table orange'\n'put the book on the table'\n'pose the book as sitting'\n'push the book' (so its not sitting on the table)\n\nYou can 'get' and 'drop' things and use 'inv' to see what you are carrying.\n\nNew locations can be built in two ways:\n'build a castle'\nor\n'build a bridge to a castle'\nYou can 'go' different locations eg: 'go castle' or 'go bridge'\n\nYou can 'edit' objects so when the are 'examine'ed people read what you wrote.\n\nYou can also 'code' objects but you need to know about CowScript for this.\n\nIf you get stuck, try reloading the browser, or 'goto bob' to teleport to the player Bob wherever they are right now.`
     };
     await this.app.db.save(sign);
@@ -107,7 +107,7 @@ export class Tester {
       color: 'white',
       owner: '_wol',
       qty: 1,
-      code: `if reacting to say then pushit;##pushit:\nfind $loc, sign;\nsay 'push', "[$actor] pushes [$found_id]";##tick:runsub noiseit;##noiseit:$how = (quietly,loudly,abruptly);$noise = (gurgles,pops,dings,groans,wheezes);say 'do',"[$actor] $how $noise";##tiXckhour:say 'think',"[$actor] .oO( Brrr );`,
+      code: `if reacting to say then pushit;##pushit:\nfind $loc, sign;\nsay 'push', "[$actor] pushes [$found_id]";##tick:runsub noiseit/5;##noiseit:$how = (quietly,loudly,abruptly);$noise = (gurgles,pops,dings,groans,wheezes);say 'do',"[$actor] $how $noise";##tiXckhour:say 'think',"[$actor] .oO( Brrr );`,
       info: `Type short commands and press Enter \n'look' shows you where you are.\n'say hello', 'think I wonder if..' and 'do sits down' are ways of communicating with others\n\nYou can 'create' simple one word objects like 'create a book' or 'create a table'\nYou can 'paint', 'put', 'pose' and 'push' objects eg \n'paint the table orange'\n'put the book on the table'\n'pose the book as sitting'\n'push the book' (so its not sitting on the table)\n\nYou can 'get' and 'drop' things and use 'inv' to see what you are carrying.\n\nNew locations can be built in two ways:\n'build a castle'\nor\n'build a bridge to a castle'\nYou can 'go' different locations eg: 'go castle' or 'go bridge'\n\nYou can 'edit' objects so when the are 'examine'ed people read what you wrote.\n\nYou can also 'code' objects but you need to know about CowScript for this.\n\nIf you get stuck, try reloading the browser, or 'goto bob' to teleport to the player Bob wherever they are right now.`
     };
     await this.app.db.save(fridge);
