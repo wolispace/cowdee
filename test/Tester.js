@@ -69,21 +69,21 @@ export class Tester {
         process.stdout.write(":");
       }
     }
-    const house = await this.app.db.get('id', '_2');
-    const old1 = { ...house };
-    house.class = 'house';
-    house.loc = '__';
-    house.lock = 1;
-    house.info = `It's rather ramshackled with dust in every corner`;
-    this.app.db.setPluralName(house);
-    await this.app.db.save(house, old1);
+    const kitchen = await this.app.db.get('id', '_2');
+    const old1 = { ...kitchen };
+    kitchen.class = 'kitchen';
+    kitchen.loc = '__';
+    kitchen.lock = 1;
+    kitchen.info = `It's a cozy kitchen with yellow paint on the walls`;
+    this.app.db.setPluralName(kitchen);
+    await this.app.db.save(kitchen, old1);
 
     const library = await this.app.db.get('id', '_3');
     const old2 = { ...library };
     library.class = 'library';
     library.loc = '__';
     library.lock = 1;
-    library.info = 'It is vast an cavenous and build from solid marble';
+    library.info = 'It is vast, cavenous and built from solid marble';
     this.app.db.setPluralName(library);
     await this.app.db.save(library, old2);
 

@@ -20,14 +20,15 @@ if (app.settings.generate) {
   await app.start();  
   await app.player.handleLogon({ playername: 'Wolis' });
   await app.utils.sleep(300);
-  await app.sendCommand({ cmd: `build a shed` });
-  await app.sendCommand({ cmd: `create a red bus` });
+  await app.sendCommand({ cmd: `build a pantry` });
+  await app.sendCommand({ cmd: `create a table` });
+  await app.sendCommand({ cmd: `put the mouse behind the fridge` });
   await app.utils.sleep(300);
 
   await app.db.saveToDisk();
   await app.tester.deleteTestContexts();
   await app.tester.deleteTestLogs();
-  
+
   const ticking = await app.db.get('tick', '__');
   console.log(`${app.name} -- ticking =`, ticking);
 }
