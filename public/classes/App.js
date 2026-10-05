@@ -128,9 +128,9 @@ export class App {
     if (!data.ts) {
         this.ui.showLoading();
     }
-    // if (typeof data === 'string') {
-    //   data = { cmd: data };
-    // }
+    if (typeof data === 'string') {
+      data = { cmd: data };
+    }
     // every command sent needs and actor, loc, it, lastContext, counter
     data.actor = data.actor ?? this.player.id;
     data.loc = data.loc ?? this.player.loc;
