@@ -202,8 +202,7 @@ export class LookManager {
     const objs = {};
     if (!this.found || this.found.length === 0) return objs;
 
-    // this.db.preload() should take a list of IDs and load all id objs
-   // await this.db.pools.id.preload(this.found);
+   await this.app.db.preLoad('id', this.found);
 
     for (const id of this.found) {
       const obj = await this.app.db.getById(id);

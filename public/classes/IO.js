@@ -3,9 +3,9 @@ export class IO {
   token = '';
 
   // --- command queue ---
-  _cmdQueue   = [];   // pending cmd payloads
+  _cmdQueue = [];   // pending cmd payloads
   _flushTimer = null; // debounce handle
-  _FLUSH_MS   = 1000; // wait this long after last enqueue before sending
+  _FLUSH_MS = 10; // wait this long after last enqueue before sending
 
   constructor(app) {
     this.app = app;
@@ -43,7 +43,7 @@ export class IO {
   }
 
   async fetchJson(type, payload) {
-    payload.token   = this.token;
+    payload.token = this.token;
     payload.counter = this.app.id.counter;
 
     // cmd payloads go through the queue; everything else fires immediately
@@ -82,7 +82,7 @@ export class IO {
     console.log(`${this.app.name} flushing ${commands.length} queued command(s)`);
     const result = await this._doFetch('server', {
       commands,
-      token:   this.token,
+      token: this.token,
       counter: this.app.id.counter
     });
 

@@ -35,7 +35,7 @@ function logIt($str) {
       continue; 
     }
     $data = json_decode(file_get_contents($file), true);
-    $lastCounter = file_get_contents(DB_DIR . '/' . ID_COUNTER_FILE);
+    $lastCounter = @file_get_contents(DB_DIR . '/' . ID_COUNTER_FILE);
     if (empty($data['counter']) || $data['counter'] < $lastCounter) {
       $data['counter'] = $lastCounter;
     }

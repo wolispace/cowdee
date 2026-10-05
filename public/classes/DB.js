@@ -28,32 +28,39 @@ export class DB {
     if (this.wordKeys.includes(type)) key = key.toLowerCase();
     if (!this.memory[type]) this.memory[type] = {};
     if (!this.memory[type][prefix]) {
+      console.log(`${this.app.name} - had to load ${type}${prefix} from disk for key ${key}`);
       this.memory[type][prefix] = await this.app.io.loadJson(this.makeFileName(type, prefix));
     }
     return this.memory[type][prefix][key];
   }
 
-
-  /** TODO: do we need this still?
- * Preloads all shard files needed for an array/Set of keys in a single batch request
- * @param {Iterable<string>} keys 
- */
-  async preload(keys) {
-    if (!keys) return;
-    const filenames = new Set();
-    for (const key of keys) {
-      if (!this.pool.has(key)) {
-        filenames.add(this.app.io.makeShardFilename(this.type, key));
+  /**
+   * Loads from disk any missing data from the array of keys for this type eg 'id', ['_wol', '_bob', '_jan']
+   * @param {string} type 
+   * @param {array} keys
+   * @returns null 
+   */
+  async preLoad(type, keys) {
+    const files = [];
+    for(const key of keys) {
+      const prefix = this.prefix(type, key);
+      // only name is lowercased so we can find things like name in mixed case
+      // id, code, and info are all keyed by object ID which preserves case
+      if (this.wordKeys.includes(type)) key = key.toLowerCase();
+      if (!this.memory[type][prefix]) {
+        files.push(this.makeFileName(type, prefix));
       }
     }
-    if (filenames.size === 0) return;
-
-    const fileMap = await this.app.io.loadFiles([...filenames]);
-    for (const items of Object.values(fileMap)) {
-      this.populateFromShard(items);
+    if (files.length > 0) {
+      // bundle the files and make one request, handling all results in one go
+      const fileMap = await this.app.io.loadFiles(files);
+      for (const [filename, items] of Object.entries(fileMap)) {
+        const prefix = filename.slice(-2); // filename.slice(0, filename.length - 2); // remove the last two chars to get the prefix
+        console.log(`${this.app.name} - preLoad ${type}${prefix} from disk`);
+        this.memory[type][prefix] = items;
+      }
     }
   }
-
 
   /**
  * Returns the whole object from a chunked file

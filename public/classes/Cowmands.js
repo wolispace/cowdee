@@ -625,6 +625,7 @@ export class Cowmands {
     const varName = parts[0].substring(1);
     let value = this.context[varName] ?? '';
 
+    // TODO loop through the parts and build a list of ids we can this.app.db.preLoad([ids])
     for (let i = 1; i < parts.length; i++) {
       const obj = await this.app.db.getById(value);
       if (!obj) return '';
@@ -637,15 +638,14 @@ export class Cowmands {
   /**
    * Resolve a $var or chained expression (e.g. $target's link's host) to an object.
    * Returns the object, or null if the ID can't be resolved.
-   * @param {string} token  - e.g. '$target' or "$target's link's host"
+   * @param {string} token  - e.g. '$target' or "$target's link's host" or an id eg '_wol' or '_2'
    * @returns {object|null}
    */
   async resolveObj(token) {
-    const obj = await this.app.db.getById(token);
-    if (obj) return obj;
-    const id = await this.resolveValue(token);
-    if (!id) return null;
-    return (await this.app.db.getById(id)) || null;
+    if (!token.startsWith('_')) {
+      token = await this.resolveValue(token);
+    }
+    return await this.app.db.getById(token);
   }
 
   /**

@@ -1,0 +1,1134 @@
+
+W:\My Drive\wmDrive\workspaces\cow\cowdee>call prep 
+
+W:\My Drive\wmDrive\workspaces\cow\cowdee>xcopy .\public C:\Temp\cowdee\public /E /I /Y 
+.\public\sse.php
+.\public\cowdee.js
+.\public\cowdee.css
+.\public\index_050.html
+.\public\server.php
+.\public\sse2.php
+.\public\utils.php
+.\public\_log.txt
+.\public\favicon.ico
+.\public\testsse.html
+.\public\_emptyDB.php
+.\public\index.php
+.\public\_emptyContexts.php
+.\public\_emptyLog.php
+.\public\classes\ID.js
+.\public\classes\Utils.js
+.\public\classes\LookManager.js
+.\public\classes\Player.js
+.\public\classes\SSE.js
+.\public\classes\IO.js
+.\public\classes\UI.js
+.\public\classes\Context.js
+.\public\classes\Cowmands.js
+.\public\classes\Storage.js
+.\public\classes\App.js
+.\public\classes\DB.js
+.\public\classes\SetMap.js
+.\public\classes\bcrypt.js
+28 File(s) copied
+
+W:\My Drive\wmDrive\workspaces\cow\cowdee>where node 
+C:\Program Files\nodejs\node.exe
+
+W:\My Drive\wmDrive\workspaces\cow\cowdee>node --version 
+v26.7.0
+
+W:\My Drive\wmDrive\workspaces\cow\cowdee>node --inspect --localstorage-file=_storage/local.sqlite test/MultiUser.js 
+=====================================================
+       COWDEE MULTI-USER REAL-APP TEST               
+=====================================================
+
+CWD: W:\My Drive\wmDrive\workspaces\cow\cowdee
+flushed memory
+initApp flush memory and reset counter...
+removing files
+initApp - had to load loc_0 from disk for key _0
+initApp - had to load name_B from disk for key basket
+initApp - had to load loc_1 from disk for key _1
+initApp - had to load name_C from disk for key chair
+initApp - had to load loc_2 from disk for key _2
+initApp - had to load name_M from disk for key mouse
+initApp - had to load loc__ from disk for key __
+initApp - had to load name_K from disk for key kitchen
+initApp - had to load name_L from disk for key library
+initApp - had to load name_S from disk for key sign
+initApp - had to load tick__ from disk for key __
+initApp - had to load name_F from disk for key fridge
+initApp - had to load name_P from disk for key player
+initApp - had to load name_W from disk for key wolis
+initApp - had to load loc_3 from disk for key _3
+initApp - had to load name_J from disk for key jane
+initApp - had to load name_T from disk for key think
+initApp - had to load name_D from disk for key do
+initApp - had to load name_G from disk for key goto
+initApp - had to load name_E from disk for key exit
+initApp - had to load name_I from disk for key into
+initApp - had to load name_O from disk for key outof
+initApp - had to load name_R from disk for key read
+initApp - had to load name_U from disk for key unlock
+✔ Initialized test database fixtures. DB Counter: 36
+
+starting SSE
+_wol [SSEnode] connecting http://localhost/sse.php
+starting SSE
+_bob [SSEnode] connecting http://localhost/sse.php
+starting SSE
+_jan [SSEnode] connecting http://localhost/sse.php
+-----------------------------------------------------
+TEST 1: Player login and storage records
+-----------------------------------------------------
+_wol - had to load name_W from disk for key wolis
+_wol - had to load id_W from disk for key _wol
+_wol logon  {
+  id: '_wol',
+  loc: '_2',
+  name: 'Wolis',
+  qty: 1,
+  owner: '_wol',
+  lock: 1,
+  class: 'player',
+  color: 'goldenrod',
+  plural: 'players',
+  creted: 'Mon 5 Oct 2026 at 3:19pm',
+  updated: 'Mon 5 Oct 2026 at 3:19pm'
+}
+_wol logs in
+ _wol wake  { lastContext: null, counter: 36 }
+_wol flushing 1 queued command(s)
+_bob - had to load name_B from disk for key bob
+_bob - had to load id_B from disk for key _bob
+_wol [SSE] received contexts: 1 lastContext: 0
+
+_wol ### processing: 1791175745567 _wol loc: _2 counter: 36 it:  cmd: look
+_wol - had to load name_L from disk for key look
+_bob logon  {
+  id: '_bob',
+  loc: '_2',
+  name: 'Bob',
+  qty: 1,
+  owner: '_bob',
+  lock: 1,
+  class: 'player',
+  color: 'goldenrod',
+  plural: 'players',
+  creted: 'Mon 5 Oct 2026 at 3:19pm',
+  updated: 'Mon 5 Oct 2026 at 3:19pm'
+}
+_bob logs in
+_bob [SSE] received contexts: 1 lastContext: 0
+
+_bob ### processing: 1791175745567 _wol loc: _2 counter: 36 it:  cmd: look
+_bob - had to load name_L from disk for key look
+_wol - had to load code_C from disk for key _C
+_jan [SSE] received contexts: 1 lastContext: 0
+_bob - had to load code_C from disk for key _C
+ _bob wake  { lastContext: '1791175745567_wol', counter: 36 }
+_wol -- executeCowmand [say 'look',"[$actor] looks around"]
+_wol --- addMsg node:  Wolis (you) looks around
+_wol - had to load trigger_L from disk for key look
+_bob -- executeCowmand [say 'look',"[$actor] looks around"]
+_bob - had to load id_W from disk for key _wol
+_wol -- executeCowmand [relook $loc]
+_wol - had to load id_2 from disk for key _2
+_bob --- addMsg node:  Wolis looks around
+_bob - had to load trigger_L from disk for key look
+_wol - had to load loc_2 from disk for key _2
+_bob -- executeCowmand [relook $loc]
+_bob - had to load id_2 from disk for key _2
+_wol - had to load info_2 from disk for key _2
+_bob - had to load loc_2 from disk for key _2
+_bob - had to load info_2 from disk for key _2
+_wol - preLoad id_4 from disk
+_wol - preLoad id_5 from disk
+_wol - preLoad id_6 from disk
+_wol - preLoad id_B from disk
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob.</div>
+_bob - preLoad id_4 from disk
+_bob - preLoad id_5 from disk
+_bob - preLoad id_6 from disk
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you).</div>
+_bob flushing 1 queued command(s)
+_jan - had to load name_J from disk for key jane
+_jan - had to load id_J from disk for key _jan
+_wol [SSE] received contexts: 1 lastContext: 1791175745567_wol
+
+_wol ### processing: 1791175747084 _bob loc: _2 counter: 36 it:  cmd: look
+_wol -- executeCowmand [say 'look',"[$actor] looks around"]
+_wol --- addMsg node:  Bob looks around
+_wol -- executeCowmand [relook $loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob.</div>
+_jan logon  {
+  id: '_jan',
+  loc: '_3',
+  name: 'Jane',
+  qty: 1,
+  owner: '_jan',
+  lock: 1,
+  class: 'player',
+  color: 'goldenrod',
+  plural: 'players',
+  creted: 'Mon 5 Oct 2026 at 3:19pm',
+  updated: 'Mon 5 Oct 2026 at 3:19pm'
+}
+_jan logs in
+_jan [SSE] received contexts: 1 lastContext: 0
+
+_jan ### processing: 1791175747084 _bob loc: _2 counter: 36 it:  cmd: look
+_jan - had to load name_L from disk for key look
+_bob [SSE] received contexts: 1 lastContext: 1791175745567_wol
+
+_bob ### processing: 1791175747084 _bob loc: _2 counter: 36 it:  cmd: look
+_bob -- executeCowmand [say 'look',"[$actor] looks around"]
+_bob --- addMsg node:  Bob (you) looks around
+_bob -- executeCowmand [relook $loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you).</div>
+ _jan wake  { lastContext: '1791175747084_bob', counter: 36 }
+_jan - had to load code_C from disk for key _C
+_jan -- executeCowmand [say 'look',"[$actor] looks around"]
+_jan -- executeCowmand [relook $loc]
+_jan - had to load id_2 from disk for key _2
+_jan - had to load loc_2 from disk for key _2
+_jan - had to load info_2 from disk for key _2
+_jan - preLoad id_4 from disk
+_jan - preLoad id_5 from disk
+_jan - preLoad id_6 from disk
+_jan - preLoad id_W from disk
+_jan - preLoad id_B from disk
+initApp @@ timeout debounce save to disk
+_jan flushing 1 queued command(s)
+   Wolis logged in: ID="_wol", Loc="_2"
+   Bob logged in:   ID="_bob", Loc="_2"
+   Jane logged in:  ID="_jan", Loc="_3"
+   Wolis stored info in storage: { id: '_wol', name: 'Wolis', loc: '_2', history: [] }
+   Bob stored info in storage:   { id: '_bob', name: 'Bob', loc: '_2', history: [] }
+
+-----------------------------------------------------
+TEST 3: Bob creates a pink pig in Room _2
+-----------------------------------------------------
+_wol [SSE] received contexts: 1 lastContext: 1791175747084_bob
+
+_wol ### processing: 1791175748624 _jan loc: _3 counter: 36 it:  cmd: look
+_wol -- executeCowmand [say 'look',"[$actor] looks around"]
+_wol -- executeCowmand [relook $loc]
+_wol - had to load id_3 from disk for key _3
+_bob [SSE] received contexts: 1 lastContext: 1791175747084_bob
+
+_bob ### processing: 1791175748624 _jan loc: _3 counter: 36 it:  cmd: look
+_bob -- executeCowmand [say 'look',"[$actor] looks around"]
+_bob -- executeCowmand [relook $loc]
+_bob - had to load id_3 from disk for key _3
+_jan [SSE] received contexts: 1 lastContext: 1791175747084_bob
+
+_jan ### processing: 1791175748624 _jan loc: _3 counter: 36 it:  cmd: look
+_jan -- executeCowmand [say 'look',"[$actor] looks around"]
+_jan --- addMsg node:  Jane (you) looks around
+_jan - had to load trigger_L from disk for key look
+_wol - had to load loc_3 from disk for key _3
+_bob - had to load loc_3 from disk for key _3
+_jan -- executeCowmand [relook $loc]
+_jan - had to load id_3 from disk for key _3
+_bob - had to load info_3 from disk for key _3
+_wol - had to load info_3 from disk for key _3
+_jan - had to load loc_3 from disk for key _3
+_jan - had to load info_3 from disk for key _3
+_bob - preLoad id_J from disk
+_bob - preLoad id_7 from disk
+_bob - preLoad id_8 from disk
+_bob - preLoad id_9 from disk
+_bob - preLoad id_A from disk
+_bob - preLoad id_C from disk
+_bob - preLoad id_D from disk
+_bob - preLoad id_E from disk
+_bob - preLoad id_F from disk
+_bob - preLoad id_G from disk
+_bob - preLoad id_H from disk
+_bob - preLoad id_I from disk
+_bob - preLoad id_K from disk
+_bob - preLoad id_L from disk
+_bob - preLoad id_M from disk
+_bob - preLoad id_N from disk
+_bob - preLoad id_O from disk
+_bob - preLoad id_P from disk
+_bob - preLoad id_Q from disk
+_bob - preLoad id_R from disk
+_bob - preLoad id_S from disk
+_bob - preLoad id_T from disk
+_bob - preLoad id_U from disk
+_bob - preLoad id_V from disk
+_bob - preLoad id_X from disk
+_bob - preLoad id_Y from disk
+_bob - preLoad id_Z from disk
+_wol - preLoad id_J from disk
+_wol - preLoad id_7 from disk
+_wol - preLoad id_8 from disk
+_wol - preLoad id_9 from disk
+_wol - preLoad id_A from disk
+_wol - preLoad id_C from disk
+_wol - preLoad id_D from disk
+_wol - preLoad id_E from disk
+_wol - preLoad id_F from disk
+_wol - preLoad id_G from disk
+_wol - preLoad id_H from disk
+_wol - preLoad id_I from disk
+_wol - preLoad id_K from disk
+_wol - preLoad id_L from disk
+_wol - preLoad id_M from disk
+_wol - preLoad id_N from disk
+_wol - preLoad id_O from disk
+_wol - preLoad id_P from disk
+_wol - preLoad id_Q from disk
+_wol - preLoad id_R from disk
+_wol - preLoad id_S from disk
+_wol - preLoad id_T from disk
+_wol - preLoad id_U from disk
+_wol - preLoad id_V from disk
+_wol - preLoad id_X from disk
+_wol - preLoad id_Y from disk
+_wol - preLoad id_Z from disk
+_jan - preLoad id_7 from disk
+_jan - preLoad id_8 from disk
+_jan - preLoad id_9 from disk
+_jan - preLoad id_A from disk
+_jan - preLoad id_C from disk
+_jan - preLoad id_D from disk
+_jan - preLoad id_E from disk
+_jan - preLoad id_F from disk
+_jan - preLoad id_G from disk
+_jan - preLoad id_H from disk
+_jan - preLoad id_I from disk
+_jan - preLoad id_K from disk
+_jan - preLoad id_L from disk
+_jan - preLoad id_M from disk
+_jan - preLoad id_N from disk
+_jan - preLoad id_O from disk
+_jan - preLoad id_P from disk
+_jan - preLoad id_Q from disk
+_jan - preLoad id_R from disk
+_jan - preLoad id_S from disk
+_jan - preLoad id_T from disk
+_jan - preLoad id_U from disk
+_jan - preLoad id_V from disk
+_jan - preLoad id_X from disk
+_jan - preLoad id_Y from disk
+_jan - preLoad id_Z from disk
+_jan --- addMsg node:  <div>You are in a library.<br/><br/>It is vast, cavenous and built from solid marble.<br/><br/>You see Jane (you), say, think, do, create, find, look, list, put, push, pose, goto, go, exit, into, outof, flush, build, copy, paint, get, drop, inv, read, examine, edit, code, lock, unlock, link, point.</div>
+_bob flushing 1 queued command(s)
+_wol [SSE] received contexts: 1 lastContext: 1791175748624_jan
+
+_wol ### processing: 1791175750067 _bob loc: _2 counter: 36 it:  cmd: create a pink pig
+_wol - had to load name_C from disk for key create
+_wol - had to load code_A from disk for key _A
+_wol -- executeCowmand [get $text]
+_wol -- executeCowmand [new $text]
+_wol - had to load name_P from disk for key pig
+_jan [SSE] received contexts: 1 lastContext: 1791175748624_jan
+
+_jan ### processing: 1791175750067 _bob loc: _2 counter: 36 it:  cmd: create a pink pig
+_jan - had to load name_C from disk for key create
+_bob [SSE] received contexts: 1 lastContext: 1791175748624_jan
+
+_bob ### processing: 1791175750067 _bob loc: _2 counter: 36 it:  cmd: create a pink pig
+_bob - had to load name_C from disk for key create
+_wol -- executeCowmand [say 'create',"[$actor] creates [$target]"]
+_wol --- addMsg node:  Bob creates the pig
+_wol - had to load trigger_C from disk for key create
+_jan - had to load code_A from disk for key _A
+_bob - had to load code_A from disk for key _A
+_wol -- executeCowmand [relook $loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig.</div>
+_jan -- executeCowmand [get $text]
+_jan -- executeCowmand [new $text]
+_jan - had to load name_P from disk for key pig
+_bob -- executeCowmand [get $text]
+_bob -- executeCowmand [new $text]
+_bob - had to load name_P from disk for key pig
+_jan -- executeCowmand [say 'create',"[$actor] creates [$target]"]
+_jan -- executeCowmand [relook $loc]
+_bob -- executeCowmand [say 'create',"[$actor] creates [$target]"]
+_bob --- addMsg node:  Bob (you) creates the pig
+_bob - had to load trigger_C from disk for key create
+_bob -- executeCowmand [relook $loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig.</div>
+bob name _P {
+  player: [ '_wol', '_bob', '_jan' ],
+  put: [ '_E' ],
+  push: [ '_F' ],
+  pose: [ '_G' ],
+  paint: [ '_P' ],
+  point: [ '_a' ],
+  pig: [ '_b' ]
+}
+wolis name _P {
+  player: [ '_wol', '_bob', '_jan' ],
+  put: [ '_E' ],
+  push: [ '_F' ],
+  pose: [ '_G' ],
+  paint: [ '_P' ],
+  point: [ '_a' ],
+  pig: [ '_b' ]
+}
+jane name _P {
+  player: [ '_wol', '_bob', '_jan' ],
+  put: [ '_E' ],
+  push: [ '_F' ],
+  pose: [ '_G' ],
+  paint: [ '_P' ],
+  point: [ '_a' ],
+  pig: [ '_b' ]
+}
+_bob OPps.. trying to decode: [ '_b' ]
+_wol OPps.. trying to decode: [ '_b' ]
+   newObj in Bob's local DB:   YES (ID: _b, Decoded: undefined)
+   newObj in Wolis's local DB: YES (ID: _b, Decoded: undefined)
+_wol flushing 1 queued command(s)
+_bob [SSE] received contexts: 1 lastContext: 1791175750067_bob
+
+_bob ### processing: 1791175753129 _wol loc: _2 counter: 37 it:  cmd: create a red bus
+_bob -- executeCowmand [get $text]
+_bob -- executeCowmand [new $text]
+_bob -- executeCowmand [say 'create',"[$actor] creates [$target]"]
+_bob --- addMsg node:  Wolis creates the bus
+_bob -- executeCowmand [relook $loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig, a bus.</div>
+_jan [SSE] received contexts: 1 lastContext: 1791175750067_bob
+
+_jan ### processing: 1791175753129 _wol loc: _2 counter: 37 it:  cmd: create a red bus
+_jan -- executeCowmand [get $text]
+_jan -- executeCowmand [new $text]
+_jan - had to load name_B from disk for key bus
+_jan -- executeCowmand [say 'create',"[$actor] creates [$target]"]
+_jan -- executeCowmand [relook $loc]
+_wol [SSE] received contexts: 1 lastContext: 1791175750067_bob
+
+_wol ### processing: 1791175753129 _wol loc: _2 counter: 37 it:  cmd: create a red bus
+_wol -- executeCowmand [get $text]
+_wol -- executeCowmand [new $text]
+_wol - had to load name_B from disk for key bus
+_wol -- executeCowmand [say 'create',"[$actor] creates [$target]"]
+_wol --- addMsg node:  Wolis (you) creates the bus
+_wol -- executeCowmand [relook $loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig, a bus.</div>
+_wol flushing 1 queued command(s)
+_wol [SSE] received contexts: 1 lastContext: 1791175753129_wol
+
+_wol ### processing: 1791175754271 _wol loc: _2 counter: 38 it:  cmd: get it
+_wol - had to load name_G from disk for key get
+_jan [SSE] received contexts: 1 lastContext: 1791175753129_wol
+
+_jan ### processing: 1791175754271 _wol loc: _2 counter: 38 it:  cmd: get it
+_jan - had to load name_G from disk for key get
+_bob [SSE] received contexts: 1 lastContext: 1791175753129_wol
+
+_bob ### processing: 1791175754271 _wol loc: _2 counter: 38 it:  cmd: get it
+_bob - had to load name_G from disk for key get
+_wol - had to load code_Q from disk for key _Q
+_bob - had to load code_Q from disk for key _Q
+_jan - had to load code_Q from disk for key _Q
+_wol -- executeCowmand [get $target in $loc]
+_wol -- executeCowmand [unhost $target]
+_wol - had to load id from disk for key 
+_bob -- executeCowmand [get $target in $loc]
+_bob -- executeCowmand [unhost $target]
+_bob - had to load id from disk for key 
+_jan -- executeCowmand [get $target in $loc]
+_jan -- executeCowmand [unhost $target]
+_jan - had to load id from disk for key 
+_bob -- executeCowmand [clear $target,all]
+_bob -- executeCowmand [set $target's pose to ""]
+_bob -- executeCowmand [set $target's loc to $actor]
+_bob -- executeCowmand [say 'gets',"[$actor] gets [$target]"]
+_bob --- addMsg node:  Wolis gets []
+_bob - had to load trigger_G from disk for key gets
+_wol -- executeCowmand [clear $target,all]
+_wol -- executeCowmand [set $target's pose to ""]
+_wol -- executeCowmand [set $target's loc to $actor]
+_wol -- executeCowmand [say 'gets',"[$actor] gets [$target]"]
+_wol --- addMsg node:  Wolis (you) gets []
+_wol - had to load trigger_G from disk for key gets
+_jan -- executeCowmand [clear $target,all]
+_jan -- executeCowmand [set $target's pose to ""]
+_jan -- executeCowmand [set $target's loc to $actor]
+_jan -- executeCowmand [say 'gets',"[$actor] gets [$target]"]
+_jan -- executeCowmand [relook $loc]
+_jan -- executeCowmand [var $loc to $actor]
+_jan -- executeCowmand [msg $loc,$actor,$target,0,'arrives',"[$target] appears from nowhere"]
+_jan -- executeCowmand [relook $actor's loc]
+_bob -- executeCowmand [relook $loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig, a bus.</div>
+_bob -- executeCowmand [var $loc to $actor]
+_bob -- executeCowmand [msg $loc,$actor,$target,0,'arrives',"[$target] appears from nowhere"]
+_bob -- executeCowmand [relook $actor's loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig, a bus.</div>
+_wol -- executeCowmand [relook $loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig, a bus.</div>
+_wol -- executeCowmand [var $loc to $actor]
+_wol -- executeCowmand [msg $loc,$actor,$target,0,'arrives',"[$target] appears from nowhere"]
+_wol -- executeCowmand [relook $actor's loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig, a bus.</div>
+_wol flushing 1 queued command(s)
+_wol [SSE] received contexts: 1 lastContext: 1791175754271_wol
+
+_wol ### processing: 1791175755380 _wol loc: _2 counter: 38 it: _c cmd: drop it
+_wol - had to load name_D from disk for key drop
+_wol - had to load code_R from disk for key _R
+_bob [SSE] received contexts: 1 lastContext: 1791175754271_wol
+
+_bob ### processing: 1791175755380 _wol loc: _2 counter: 38 it: _c cmd: drop it
+_bob - had to load name_D from disk for key drop
+_jan [SSE] received contexts: 1 lastContext: 1791175754271_wol
+
+_jan ### processing: 1791175755380 _wol loc: _2 counter: 38 it: _c cmd: drop it
+_jan - had to load name_D from disk for key drop
+_wol -- executeCowmand [get $target in $actor]
+_wol -- executeCowmand [var $dest to $actor's loc]
+_wol -- executeCowmand [set $target's loc to $dest]
+_wol -- executeCowmand [say 'drops',"[$actor] drops [$target]"]
+_wol --- addMsg node:  Wolis (you) drops the bus
+_wol - had to load trigger_D from disk for key drops
+_bob - had to load code_R from disk for key _R
+_jan - had to load code_R from disk for key _R
+_wol -- executeCowmand [var $loc to $dest]
+_wol -- executeCowmand [relook $loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig, a bus.</div>
+_wol -- executeCowmand [var $loc to $actor]
+_wol -- executeCowmand [say 'gone',"[$target] has gone"]
+_wol -- executeCowmand [relook $actor's loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig, a bus.</div>
+_bob -- executeCowmand [get $target in $actor]
+_bob -- executeCowmand [var $dest to $actor's loc]
+_bob -- executeCowmand [set $target's loc to $dest]
+_bob -- executeCowmand [say 'drops',"[$actor] drops [$target]"]
+_bob --- addMsg node:  Wolis drops the bus
+_bob - had to load trigger_D from disk for key drops
+_jan -- executeCowmand [get $target in $actor]
+_jan -- executeCowmand [var $dest to $actor's loc]
+_jan -- executeCowmand [set $target's loc to $dest]
+_jan -- executeCowmand [say 'drops',"[$actor] drops [$target]"]
+_jan -- executeCowmand [var $loc to $dest]
+_jan -- executeCowmand [relook $loc]
+_jan -- executeCowmand [var $loc to $actor]
+_jan -- executeCowmand [say 'gone',"[$target] has gone"]
+_jan -- executeCowmand [relook $actor's loc]
+_bob -- executeCowmand [var $loc to $dest]
+_bob -- executeCowmand [relook $loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig, a bus.</div>
+_bob -- executeCowmand [var $loc to $actor]
+_bob -- executeCowmand [say 'gone',"[$target] has gone"]
+_bob -- executeCowmand [relook $actor's loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig, a bus.</div>
+_bob flushing 1 queued command(s)
+_wol [SSE] received contexts: 1 lastContext: 1791175755380_wol
+
+_wol ### processing: 1791175756447 _bob loc: _2 counter: 38 it: _b cmd: get the bus
+_wol -- executeCowmand [get $target in $loc]
+_wol -- executeCowmand [unhost $target]
+_wol - had to load loc_C from disk for key _c
+_wol -- executeCowmand [clear $target,all]
+_wol -- executeCowmand [set $target's pose to ""]
+_wol -- executeCowmand [set $target's loc to $actor]
+_wol - had to load loc_B from disk for key _bob
+_bob [SSE] received contexts: 1 lastContext: 1791175755380_wol
+
+_bob ### processing: 1791175756447 _bob loc: _2 counter: 38 it: _b cmd: get the bus
+_bob -- executeCowmand [get $target in $loc]
+_bob -- executeCowmand [unhost $target]
+_bob - had to load loc_C from disk for key _c
+_jan [SSE] received contexts: 1 lastContext: 1791175755380_wol
+
+_jan ### processing: 1791175756447 _bob loc: _2 counter: 38 it: _b cmd: get the bus
+_jan -- executeCowmand [get $target in $loc]
+_jan -- executeCowmand [unhost $target]
+_jan - had to load loc_C from disk for key _c
+_wol -- executeCowmand [say 'gets',"[$actor] gets [$target]"]
+_wol --- addMsg node:  Bob gets the bus
+_wol -- executeCowmand [relook $loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig.</div>
+_wol -- executeCowmand [var $loc to $actor]
+_wol -- executeCowmand [msg $loc,$actor,$target,0,'arrives',"[$target] appears from nowhere"]
+_wol -- executeCowmand [relook $actor's loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig.</div>
+_bob -- executeCowmand [clear $target,all]
+_bob -- executeCowmand [set $target's pose to ""]
+_bob -- executeCowmand [set $target's loc to $actor]
+_bob - had to load loc_B from disk for key _bob
+_jan -- executeCowmand [clear $target,all]
+_jan -- executeCowmand [set $target's pose to ""]
+_jan -- executeCowmand [set $target's loc to $actor]
+_jan - had to load loc_B from disk for key _bob
+_bob -- executeCowmand [say 'gets',"[$actor] gets [$target]"]
+_bob --- addMsg node:  Bob (you) gets the bus
+_bob -- executeCowmand [relook $loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig.</div>
+_bob -- executeCowmand [var $loc to $actor]
+_bob -- executeCowmand [msg $loc,$actor,$target,0,'arrives',"[$target] appears from nowhere"]
+_bob -- executeCowmand [relook $actor's loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig.</div>
+_jan -- executeCowmand [say 'gets',"[$actor] gets [$target]"]
+_jan -- executeCowmand [relook $loc]
+_jan -- executeCowmand [var $loc to $actor]
+_jan -- executeCowmand [msg $loc,$actor,$target,0,'arrives',"[$target] appears from nowhere"]
+_jan -- executeCowmand [relook $actor's loc]
+_bob flushing 1 queued command(s)
+_wol [SSE] received contexts: 1 lastContext: 1791175756447_bob
+
+_wol ### processing: 1791175757799 _bob loc: _2 counter: 38 it: _b cmd: drop the bus
+_wol -- executeCowmand [get $target in $actor]
+_wol -- executeCowmand [var $dest to $actor's loc]
+_wol -- executeCowmand [set $target's loc to $dest]
+_wol -- executeCowmand [say 'drops',"[$actor] drops [$target]"]
+_wol --- addMsg node:  Bob drops the bus
+_wol -- executeCowmand [var $loc to $dest]
+_wol -- executeCowmand [relook $loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig.<br/><br/></div><div>You also see a bus.</div>
+_wol -- executeCowmand [var $loc to $actor]
+_wol -- executeCowmand [say 'gone',"[$target] has gone"]
+_wol -- executeCowmand [relook $actor's loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig.<br/><br/></div><div>You also see a bus.</div>
+_jan [SSE] received contexts: 1 lastContext: 1791175756447_bob
+
+_jan ### processing: 1791175757799 _bob loc: _2 counter: 38 it: _b cmd: drop the bus
+_jan -- executeCowmand [get $target in $actor]
+_jan -- executeCowmand [var $dest to $actor's loc]
+_jan -- executeCowmand [set $target's loc to $dest]
+_jan -- executeCowmand [say 'drops',"[$actor] drops [$target]"]
+_jan -- executeCowmand [var $loc to $dest]
+_jan -- executeCowmand [relook $loc]
+_jan -- executeCowmand [var $loc to $actor]
+_jan -- executeCowmand [say 'gone',"[$target] has gone"]
+_jan -- executeCowmand [relook $actor's loc]
+_bob [SSE] received contexts: 1 lastContext: 1791175756447_bob
+
+_bob ### processing: 1791175757799 _bob loc: _2 counter: 38 it: _b cmd: drop the bus
+_bob -- executeCowmand [get $target in $actor]
+_bob -- executeCowmand [var $dest to $actor's loc]
+_bob -- executeCowmand [set $target's loc to $dest]
+_bob -- executeCowmand [say 'drops',"[$actor] drops [$target]"]
+_bob --- addMsg node:  Bob (you) drops the bus
+_bob -- executeCowmand [var $loc to $dest]
+_bob -- executeCowmand [relook $loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig.<br/><br/></div><div>You also see a bus.</div>
+_bob -- executeCowmand [var $loc to $actor]
+_bob -- executeCowmand [say 'gone',"[$target] has gone"]
+_bob -- executeCowmand [relook $actor's loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig.<br/><br/></div><div>You also see a bus.</div>
+_wol flushing 1 queued command(s)
+_wol [SSE] received contexts: 1 lastContext: 1791175757799_bob
+
+_wol ### processing: 1791175758930 _wol loc: _2 counter: 38 it: _c cmd: paint it dodgerblue
+_wol - had to load code_P from disk for key _P
+_jan [SSE] received contexts: 1 lastContext: 1791175757799_bob
+
+_jan ### processing: 1791175758930 _wol loc: _2 counter: 38 it: _c cmd: paint it dodgerblue
+_jan - had to load code_P from disk for key _P
+_bob [SSE] received contexts: 1 lastContext: 1791175757799_bob
+
+_bob ### processing: 1791175758930 _wol loc: _2 counter: 38 it: _c cmd: paint it dodgerblue
+_bob - had to load code_P from disk for key _P
+_wol -- executeCowmand [get $target,$lastword in $loc]
+_wol -- executeCowmand [set $target's color to $lastword]
+_wol -- executeCowmand [say 'paint',"[$actor] paints [$target] $lastword"]
+_wol --- addMsg node:  Wolis (you) paints the bus dodgerblue
+_wol - had to load trigger_P from disk for key paint
+_jan -- executeCowmand [get $target,$lastword in $loc]
+_jan -- executeCowmand [set $target's color to $lastword]
+_jan -- executeCowmand [say 'paint',"[$actor] paints [$target] $lastword"]
+_jan -- executeCowmand [relook $loc]
+_bob -- executeCowmand [get $target,$lastword in $loc]
+_bob -- executeCowmand [set $target's color to $lastword]
+_bob -- executeCowmand [say 'paint',"[$actor] paints [$target] $lastword"]
+_bob --- addMsg node:  Wolis paints the bus dodgerblue
+_bob - had to load trigger_P from disk for key paint
+_wol -- executeCowmand [relook $loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig.<br/><br/></div><div>You also see a bus.</div>
+_bob -- executeCowmand [relook $loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig.<br/><br/></div><div>You also see a bus.</div>
+_wol flushing 1 queued command(s)
+_wol - had to load tick__ from disk for key __
+_bob - had to load tick__ from disk for key __
+_jan [SSE] received contexts: 1 lastContext: 1791175758930_wol
+
+_jan ### processing: 1791175760081 _wol loc: _2 counter: 38 it: _c cmd: create a green frog
+_jan -- executeCowmand [get $text]
+_jan -- executeCowmand [new $text]
+_jan - had to load name_F from disk for key frog
+_bob [SSE] received contexts: 1 lastContext: 1791175758930_wol
+
+_bob ### processing: 1791175760081 _wol loc: _2 counter: 38 it: _c cmd: create a green frog
+_bob -- executeCowmand [get $text]
+_bob -- executeCowmand [new $text]
+_bob - had to load name_F from disk for key frog
+_jan - had to load tick__ from disk for key __
+_wol - had to load code_5 from disk for key _5
+_jan - had to load code_5 from disk for key _5
+_bob -- executeCowmand [say 'create',"[$actor] creates [$target]"]
+_bob --- addMsg node:  Wolis creates the frog
+_bob -- executeCowmand [relook $loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig, a frog.<br/><br/></div><div>You also see a bus.</div>
+_bob - had to load code_5 from disk for key _5
+_jan -- executeCowmand [say 'create',"[$actor] creates [$target]"]
+_jan -- executeCowmand [relook $loc]
+_wol [SSE] received contexts: 1 lastContext: 1791175758930_wol
+
+_wol ### processing: 1791175760081 _wol loc: _2 counter: 38 it: _c cmd: create a green frog
+_wol -- executeCowmand [get $text]
+_wol -- executeCowmand [new $text]
+_wol - had to load name_F from disk for key frog
+_wol -- executeCowmand [say 'create',"[$actor] creates [$target]"]
+_wol --- addMsg node:  Wolis (you) creates the frog
+_wol -- executeCowmand [relook $loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig, a frog.<br/><br/></div><div>You also see a bus.</div>
+_wol flushing 1 queued command(s)
+_jan flushing 1 queued command(s)
+_wol - had to load code_6 from disk for key _6
+_bob flushing 2 queued command(s)
+_jan - had to load code_6 from disk for key _6
+_bob - had to load code_6 from disk for key _6
+_wol [SSE] received contexts: 1 lastContext: 1791175760081_wol
+
+_wol ### processing: 1791175761380 _bob loc: _2 counter: 39 it: _c cmd: put the frog on the bus
+_wol - had to load code_E from disk for key _E
+_wol -- executeCowmand [get $target,$rel,$second in $loc,$loc]
+_wol -- executeCowmand [set $target's hosthow to "$rel"]
+_wol -- executeCowmand [set $target's host to $second]
+_wol -- executeCowmand [set $target's hosthow to "$rel"]
+_wol -- executeCowmand [set $target's pose to '']
+_wol -- executeCowmand [say 'put',"[$actor] put [$target] $rel [$second]"]
+_wol --- addMsg node:  Bob put the frog on the bus
+_wol -- executeCowmand [relook $loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig.<br/><br/></div><div>You also see a bus.<br/><br/>on the bus there is a frog.</div>
+_jan [SSE] received contexts: 1 lastContext: 1791175760081_wol
+
+_jan ### processing: 1791175761380 _bob loc: _2 counter: 39 it: _c cmd: put the frog on the bus
+_jan - had to load code_E from disk for key _E
+_bob [SSE] received contexts: 1 lastContext: 1791175760081_wol
+
+_bob ### processing: 1791175761380 _bob loc: _2 counter: 39 it: _c cmd: put the frog on the bus
+_bob - had to load code_E from disk for key _E
+_jan -- executeCowmand [get $target,$rel,$second in $loc,$loc]
+_jan -- executeCowmand [set $target's hosthow to "$rel"]
+_jan -- executeCowmand [set $target's host to $second]
+_jan -- executeCowmand [set $target's hosthow to "$rel"]
+_jan -- executeCowmand [set $target's pose to '']
+_jan -- executeCowmand [say 'put',"[$actor] put [$target] $rel [$second]"]
+_jan -- executeCowmand [relook $loc]
+_bob -- executeCowmand [get $target,$rel,$second in $loc,$loc]
+_bob -- executeCowmand [set $target's hosthow to "$rel"]
+_bob -- executeCowmand [set $target's host to $second]
+_bob -- executeCowmand [set $target's hosthow to "$rel"]
+_bob -- executeCowmand [set $target's pose to '']
+_bob -- executeCowmand [say 'put',"[$actor] put [$target] $rel [$second]"]
+_bob --- addMsg node:  Bob (you) put the frog on the bus
+_bob -- executeCowmand [relook $loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig.<br/><br/></div><div>You also see a bus.<br/><br/>on the bus there is a frog.</div>
+_wol flushing 1 queued command(s)
+_jan flushing 1 queued command(s)
+_bob flushing 2 queued command(s)
+_wol [SSE] received contexts: 1 lastContext: 1791175761380_bob
+
+_wol ### processing: 1791175762466 _bob loc: _2 counter: 39 it: _c cmd: pose it as sitting
+_wol - had to load code_G from disk for key _G
+_wol -- executeCowmand [get $target,''as',$text,non-greedy in $loc]
+_wol -- executeCowmand [set $target's pose to $text]
+_wol -- executeCowmand [say 'pose',"[$actor] poses [$target] as $text"]
+_wol --- addMsg node:  Bob poses the bus as sitting
+_wol -- executeCowmand [relook $loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig.<br/><br/></div><div>You also see sitting a bus.<br/><br/>on the bus there is a frog.</div>
+_bob [SSE] received contexts: 1 lastContext: 1791175761380_bob
+
+_bob ### processing: 1791175762466 _bob loc: _2 counter: 39 it: _c cmd: pose it as sitting
+_bob - had to load code_G from disk for key _G
+_jan [SSE] received contexts: 1 lastContext: 1791175761380_bob
+
+_jan ### processing: 1791175762466 _bob loc: _2 counter: 39 it: _c cmd: pose it as sitting
+_jan - had to load code_G from disk for key _G
+_jan -- executeCowmand [get $target,''as',$text,non-greedy in $loc]
+_jan -- executeCowmand [set $target's pose to $text]
+_jan -- executeCowmand [say 'pose',"[$actor] poses [$target] as $text"]
+_jan -- executeCowmand [relook $loc]
+_bob -- executeCowmand [get $target,''as',$text,non-greedy in $loc]
+_bob -- executeCowmand [set $target's pose to $text]
+_bob -- executeCowmand [say 'pose',"[$actor] poses [$target] as $text"]
+_bob --- addMsg node:  Bob (you) poses the bus as sitting
+_bob -- executeCowmand [relook $loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig.<br/><br/></div><div>You also see sitting a bus.<br/><br/>on the bus there is a frog.</div>
+_wol flushing 1 queued command(s)
+   Wolis heard: <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig.<br/><br/></div><div>You also see sitting a bus.<br/><br/>on the bus there is a frog.</div>
+_wol [SSE] received contexts: 1 lastContext: 1791175762466_bob
+
+_wol ### processing: 1791175764396 _wol loc: _2 counter: 39 it: _d cmd: look
+_wol -- executeCowmand [say 'look',"[$actor] looks around"]
+_wol --- addMsg node:  Wolis (you) looks around
+_wol -- executeCowmand [relook $loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig.<br/><br/></div><div>You also see sitting a bus.<br/><br/>on the bus there is a frog.</div>
+_bob [SSE] received contexts: 1 lastContext: 1791175762466_bob
+
+_bob ### processing: 1791175764396 _wol loc: _2 counter: 39 it: _d cmd: look
+_bob -- executeCowmand [say 'look',"[$actor] looks around"]
+_bob --- addMsg node:  Wolis looks around
+_bob -- executeCowmand [relook $loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig.<br/><br/></div><div>You also see sitting a bus.<br/><br/>on the bus there is a frog.</div>
+_jan [SSE] received contexts: 1 lastContext: 1791175762466_bob
+
+_jan ### processing: 1791175764396 _wol loc: _2 counter: 39 it: _d cmd: look
+_jan -- executeCowmand [say 'look',"[$actor] looks around"]
+_jan -- executeCowmand [relook $loc]
+_wol flushing 1 queued command(s)
+_wol [SSE] received contexts: 1 lastContext: 1791175764396_wol
+
+_wol ### processing: 1791175765628 _wol loc: _2 counter: 39 it: _d cmd: get the frog
+_wol -- executeCowmand [get $target in $loc]
+_wol -- executeCowmand [unhost $target]
+_wol - had to load loc_D from disk for key _d
+_bob [SSE] received contexts: 1 lastContext: 1791175764396_wol
+
+_bob ### processing: 1791175765628 _wol loc: _2 counter: 39 it: _d cmd: get the frog
+_bob -- executeCowmand [get $target in $loc]
+_bob -- executeCowmand [unhost $target]
+_bob - had to load loc_D from disk for key _d
+_jan [SSE] received contexts: 1 lastContext: 1791175764396_wol
+
+_jan ### processing: 1791175765628 _wol loc: _2 counter: 39 it: _d cmd: get the frog
+_jan -- executeCowmand [get $target in $loc]
+_jan -- executeCowmand [unhost $target]
+_jan - had to load loc_D from disk for key _d
+_wol -- executeCowmand [clear $target,all]
+_wol -- executeCowmand [set $target's pose to ""]
+_wol -- executeCowmand [set $target's loc to $actor]
+_wol - had to load loc_W from disk for key _wol
+_bob -- executeCowmand [clear $target,all]
+_bob -- executeCowmand [set $target's pose to ""]
+_bob -- executeCowmand [set $target's loc to $actor]
+_bob - had to load loc_W from disk for key _wol
+_jan -- executeCowmand [clear $target,all]
+_jan -- executeCowmand [set $target's pose to ""]
+_jan -- executeCowmand [set $target's loc to $actor]
+_jan - had to load loc_W from disk for key _wol
+_wol -- executeCowmand [say 'gets',"[$actor] gets [$target]"]
+_wol --- addMsg node:  Wolis (you) gets the frog
+_wol -- executeCowmand [relook $loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig.<br/><br/></div><div>You also see sitting a bus.</div>
+_wol -- executeCowmand [var $loc to $actor]
+_wol -- executeCowmand [msg $loc,$actor,$target,0,'arrives',"[$target] appears from nowhere"]
+_wol -- executeCowmand [relook $actor's loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig.<br/><br/></div><div>You also see sitting a bus.</div>
+_bob -- executeCowmand [say 'gets',"[$actor] gets [$target]"]
+_bob --- addMsg node:  Wolis gets the frog
+_bob -- executeCowmand [relook $loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig.<br/><br/></div><div>You also see sitting a bus.</div>
+_bob -- executeCowmand [var $loc to $actor]
+_bob -- executeCowmand [msg $loc,$actor,$target,0,'arrives',"[$target] appears from nowhere"]
+_bob -- executeCowmand [relook $actor's loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig.<br/><br/></div><div>You also see sitting a bus.</div>
+_jan -- executeCowmand [say 'gets',"[$actor] gets [$target]"]
+_jan -- executeCowmand [relook $loc]
+_jan -- executeCowmand [var $loc to $actor]
+_jan -- executeCowmand [msg $loc,$actor,$target,0,'arrives',"[$target] appears from nowhere"]
+_jan -- executeCowmand [relook $actor's loc]
+_wol flushing 1 queued command(s)
+_wol [SSE] received contexts: 1 lastContext: 1791175765628_wol
+
+_wol ### processing: 1791175766787 _wol loc: _2 counter: 39 it: _d cmd: build a shed
+_wol - had to load code_N from disk for key _N
+_bob [SSE] received contexts: 1 lastContext: 1791175765628_wol
+
+_bob ### processing: 1791175766787 _wol loc: _2 counter: 39 it: _d cmd: build a shed
+_bob - had to load code_N from disk for key _N
+_jan [SSE] received contexts: 1 lastContext: 1791175765628_wol
+
+_jan ### processing: 1791175766787 _wol loc: _2 counter: 39 it: _d cmd: build a shed
+_jan - had to load code_N from disk for key _N
+_wol -- executeCowmand [get $text,'to',$text2]
+_wol -- executeCowmand [if $text2 ne '' then complex else simple]
+_wol -- executeCowmand [new exit]
+_wol - had to load name_E from disk for key exit
+_bob -- executeCowmand [get $text,'to',$text2]
+_bob -- executeCowmand [if $text2 ne '' then complex else simple]
+_bob -- executeCowmand [new exit]
+_bob - had to load name_E from disk for key exit
+_jan -- executeCowmand [get $text,'to',$text2]
+_jan -- executeCowmand [if $text2 ne '' then complex else simple]
+_jan -- executeCowmand [new exit]
+_jan - had to load name_E from disk for key exit
+_wol -- executeCowmand [var $exit to $new_id]
+_wol -- executeCowmand [new $text]
+_wol - had to load name_S from disk for key shed
+_jan -- executeCowmand [var $exit to $new_id]
+_jan -- executeCowmand [new $text]
+_jan - had to load name_S from disk for key shed
+_bob -- executeCowmand [var $exit to $new_id]
+_bob -- executeCowmand [new $text]
+_bob - had to load name_S from disk for key shed
+_wol -- executeCowmand [update $new_id to "link=$exit, color='lightgreen'"]
+_wol -- executeCowmand [update $exit to "link=$new_id, loc=$new_id, extra='from here', qty=1, class='exit', color='lightgreen'"]
+_wol - had to load loc_F from disk for key _f
+_jan -- executeCowmand [update $new_id to "link=$exit, color='lightgreen'"]
+_jan -- executeCowmand [update $exit to "link=$new_id, loc=$new_id, extra='from here', qty=1, class='exit', color='lightgreen'"]
+_jan - had to load loc_F from disk for key _f
+_bob -- executeCowmand [update $new_id to "link=$exit, color='lightgreen'"]
+_bob -- executeCowmand [update $exit to "link=$new_id, loc=$new_id, extra='from here', qty=1, class='exit', color='lightgreen'"]
+_bob - had to load loc_F from disk for key _f
+_wol -- executeCowmand [say 'create',"[$actor] built [$new_id]"]
+_wol --- addMsg node:  Wolis (you) built the shed
+_wol -- executeCowmand [relook $loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig, a shed.<br/><br/></div><div>You also see sitting a bus.</div>
+_jan -- executeCowmand [say 'create',"[$actor] built [$new_id]"]
+_jan -- executeCowmand [relook $loc]
+_bob -- executeCowmand [say 'create',"[$actor] built [$new_id]"]
+_bob --- addMsg node:  Wolis built the shed
+_bob -- executeCowmand [relook $loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig, a shed.<br/><br/></div><div>You also see sitting a bus.</div>
+_wol flushing 1 queued command(s)
+_wol [SSE] received contexts: 1 lastContext: 1791175766787_wol
+
+_wol ### processing: 1791175768328 _wol loc: _2 counter: 41 it: _d cmd: create 3 white cups
+_wol -- executeCowmand [get $text]
+_wol -- executeCowmand [new $text]
+_wol -- executeCowmand [say 'create',"[$actor] creates [$target]"]
+_wol --- addMsg node:  Wolis (you) creates the cups
+_wol -- executeCowmand [relook $loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig, a shed, three cups.<br/><br/></div><div>You also see sitting a bus.</div>
+_jan [SSE] received contexts: 1 lastContext: 1791175766787_wol
+
+_jan ### processing: 1791175768328 _wol loc: _2 counter: 41 it: _d cmd: create 3 white cups
+_jan -- executeCowmand [get $text]
+_jan -- executeCowmand [new $text]
+_jan -- executeCowmand [say 'create',"[$actor] creates [$target]"]
+_jan -- executeCowmand [relook $loc]
+_bob [SSE] received contexts: 1 lastContext: 1791175766787_wol
+
+_bob ### processing: 1791175768328 _wol loc: _2 counter: 41 it: _d cmd: create 3 white cups
+_bob -- executeCowmand [get $text]
+_bob -- executeCowmand [new $text]
+_bob -- executeCowmand [say 'create',"[$actor] creates [$target]"]
+_bob --- addMsg node:  Wolis creates the cups
+_bob -- executeCowmand [relook $loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig, a shed, three cups.<br/><br/></div><div>You also see sitting a bus.</div>
+_bob flushing 1 queued command(s)
+_wol [SSE] received contexts: 1 lastContext: 1791175768328_wol
+
+_wol ### processing: 1791175769853 _bob loc: _2 counter: 42 it: _c cmd: get the cups
+_wol -- executeCowmand [get $target in $loc]
+_wol -- executeCowmand [unhost $target]
+_wol - had to load loc_G from disk for key _g
+_bob [SSE] received contexts: 1 lastContext: 1791175768328_wol
+
+_bob ### processing: 1791175769853 _bob loc: _2 counter: 42 it: _c cmd: get the cups
+_bob -- executeCowmand [get $target in $loc]
+_bob -- executeCowmand [unhost $target]
+_bob - had to load loc_G from disk for key _g
+_jan [SSE] received contexts: 1 lastContext: 1791175768328_wol
+
+_jan ### processing: 1791175769853 _bob loc: _2 counter: 42 it: _c cmd: get the cups
+_jan -- executeCowmand [get $target in $loc]
+_jan -- executeCowmand [unhost $target]
+_jan - had to load loc_G from disk for key _g
+_wol -- executeCowmand [clear $target,all]
+_wol -- executeCowmand [set $target's pose to ""]
+_wol -- executeCowmand [set $target's loc to $actor]
+_wol -- executeCowmand [say 'gets',"[$actor] gets [$target]"]
+_wol --- addMsg node:  Bob gets the cups
+_wol -- executeCowmand [relook $loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig, a shed.<br/><br/></div><div>You also see sitting a bus.</div>
+_wol -- executeCowmand [var $loc to $actor]
+_wol -- executeCowmand [msg $loc,$actor,$target,0,'arrives',"[$target] appears from nowhere"]
+_wol -- executeCowmand [relook $actor's loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig, a shed.<br/><br/></div><div>You also see sitting a bus.</div>
+_bob -- executeCowmand [clear $target,all]
+_bob -- executeCowmand [set $target's pose to ""]
+_bob -- executeCowmand [set $target's loc to $actor]
+_bob -- executeCowmand [say 'gets',"[$actor] gets [$target]"]
+_bob --- addMsg node:  Bob (you) gets the cups
+_bob -- executeCowmand [relook $loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig, a shed.<br/><br/></div><div>You also see sitting a bus.</div>
+_bob -- executeCowmand [var $loc to $actor]
+_bob -- executeCowmand [msg $loc,$actor,$target,0,'arrives',"[$target] appears from nowhere"]
+_bob -- executeCowmand [relook $actor's loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig, a shed.<br/><br/></div><div>You also see sitting a bus.</div>
+_jan -- executeCowmand [clear $target,all]
+_jan -- executeCowmand [set $target's pose to ""]
+_jan -- executeCowmand [set $target's loc to $actor]
+_jan -- executeCowmand [say 'gets',"[$actor] gets [$target]"]
+_jan -- executeCowmand [relook $loc]
+_jan -- executeCowmand [var $loc to $actor]
+_jan -- executeCowmand [msg $loc,$actor,$target,0,'arrives',"[$target] appears from nowhere"]
+_jan -- executeCowmand [relook $actor's loc]
+_wol flushing 1 queued command(s)
+   Wolis heard: <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig, a shed.<br/><br/></div><div>You also see sitting a bus.</div>
+_wol [SSE] received contexts: 1 lastContext: 1791175769853_bob
+
+_wol ### processing: 1791175771933 _wol loc: _2 counter: 42 it: _g cmd: look
+_wol -- executeCowmand [say 'look',"[$actor] looks around"]
+_wol --- addMsg node:  Wolis (you) looks around
+_wol -- executeCowmand [relook $loc]
+_wol --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis (you), Bob, a pig, a shed.<br/><br/></div><div>You also see sitting a bus.</div>
+_jan [SSE] received contexts: 1 lastContext: 1791175769853_bob
+
+_jan ### processing: 1791175771933 _wol loc: _2 counter: 42 it: _g cmd: look
+_jan -- executeCowmand [say 'look',"[$actor] looks around"]
+_jan -- executeCowmand [relook $loc]
+_bob [SSE] received contexts: 1 lastContext: 1791175769853_bob
+
+_bob ### processing: 1791175771933 _wol loc: _2 counter: 42 it: _g cmd: look
+_bob -- executeCowmand [say 'look',"[$actor] looks around"]
+_bob --- addMsg node:  Wolis looks around
+_bob -- executeCowmand [relook $loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Wolis, Bob (you), a pig, a shed.<br/><br/></div><div>You also see sitting a bus.</div>
+_wol flushing 1 queued command(s)
+_wol [SSE] received contexts: 1 lastContext: 1791175771933_wol
+
+_wol ### processing: 1791175773229 _wol loc: _2 counter: 42 it: _g cmd: go shed
+_wol - had to load code_I from disk for key _I
+_jan [SSE] received contexts: 1 lastContext: 1791175771933_wol
+
+_jan ### processing: 1791175773229 _wol loc: _2 counter: 42 it: _g cmd: go shed
+_jan - had to load code_I from disk for key _I
+_bob [SSE] received contexts: 1 lastContext: 1791175771933_wol
+
+_bob ### processing: 1791175773229 _wol loc: _2 counter: 42 it: _g cmd: go shed
+_bob - had to load code_I from disk for key _I
+_wol -- executeCowmand [get $target in $loc]
+_wol -- executeCowmand [var $tlink to $target's link]
+_wol -- executeCowmand [say 'leaves',"[$actor] leaves via [$target]"]
+_wol --- addMsg node:  Wolis (you) leaves via the shed
+_wol -- executeCowmand [var $nloc to $tlink's loc]
+_wol -- executeCowmand [set $actor's loc to $nloc]
+_wol -- executeCowmand [relook $loc]
+_wol -- executeCowmand [set $loc = $nloc]
+_wol -- executeCowmand [say 'arrives',"[$actor] appears via [$tlink]"]
+_wol --- addMsg node:  Wolis (you) appears via the exit from here
+_wol - had to load trigger_A from disk for key arrives
+_jan -- executeCowmand [get $target in $loc]
+_jan -- executeCowmand [var $tlink to $target's link]
+_jan -- executeCowmand [say 'leaves',"[$actor] leaves via [$target]"]
+_jan -- executeCowmand [var $nloc to $tlink's loc]
+_jan -- executeCowmand [set $actor's loc to $nloc]
+_jan - had to load name_W from disk for key wolis
+_bob -- executeCowmand [get $target in $loc]
+_bob -- executeCowmand [var $tlink to $target's link]
+_bob -- executeCowmand [say 'leaves',"[$actor] leaves via [$target]"]
+_bob --- addMsg node:  Wolis leaves via the shed
+_bob -- executeCowmand [var $nloc to $tlink's loc]
+_bob -- executeCowmand [set $actor's loc to $nloc]
+_bob - had to load name_W from disk for key wolis
+_wol -- executeCowmand [relook $nloc]
+_wol - had to load info_F from disk for key _f
+_jan -- executeCowmand [relook $loc]
+_jan -- executeCowmand [set $loc = $nloc]
+_jan -- executeCowmand [say 'arrives',"[$actor] appears via [$tlink]"]
+_jan -- executeCowmand [relook $nloc]
+_jan - had to load info_F from disk for key _f
+_bob -- executeCowmand [relook $loc]
+_bob --- addMsg node:  <div>You are in a kitchen.<br/><br/>It's a cozy kitchen with yellow paint on the walls.<br/><br/>You see a mouse, a sign, a fridge, Bob (you), a pig, a shed.<br/><br/></div><div>You also see sitting a bus.</div>
+_bob -- executeCowmand [set $loc = $nloc]
+_bob -- executeCowmand [say 'arrives',"[$actor] appears via [$tlink]"]
+_bob -- executeCowmand [relook $nloc]
+_bob - had to load info_F from disk for key _f
+_wol --- addMsg node:  <div>You are in a shed.<br/><br/>You see an exit from here, Wolis (you).</div>
+wolis is now in  _f
+_wol flushing 1 queued command(s)
+
+-----------------------------------------------------
+TEST 4: Spatial Chat & Message Filtering
+-----------------------------------------------------
+_bob [SSE] received contexts: 1 lastContext: 1791175773229_wol
+
+_bob ### processing: 1791175774999 _wol loc: _f counter: 42 it: _f cmd: drop the frog
+_bob -- executeCowmand [get $target in $actor]
+_bob -- executeCowmand [var $dest to $actor's loc]
+_bob -- executeCowmand [set $target's loc to $dest]
+_bob -- executeCowmand [say 'drops',"[$actor] drops [$target]"]
+_bob -- executeCowmand [var $loc to $dest]
+_bob -- executeCowmand [relook $loc]
+_bob -- executeCowmand [var $loc to $actor]
+_bob -- executeCowmand [say 'gone',"[$target] has gone"]
+_bob -- executeCowmand [relook $actor's loc]
+_wol [SSE] received contexts: 1 lastContext: 1791175773229_wol
+
+_wol ### processing: 1791175774999 _wol loc: _f counter: 42 it: _f cmd: drop the frog
+_wol -- executeCowmand [get $target in $actor]
+_wol -- executeCowmand [var $dest to $actor's loc]
+_wol -- executeCowmand [set $target's loc to $dest]
+_wol -- executeCowmand [say 'drops',"[$actor] drops [$target]"]
+_wol --- addMsg node:  Wolis (you) drops the frog
+_wol -- executeCowmand [var $loc to $dest]
+_wol -- executeCowmand [relook $loc]
+_wol --- addMsg node:  <div>You are in a shed.<br/><br/>You see an exit from here, Wolis (you).<br/><br/></div><div>You also see a frog.</div>
+_wol -- executeCowmand [var $loc to $actor]
+_wol -- executeCowmand [say 'gone',"[$target] has gone"]
+_wol -- executeCowmand [relook $actor's loc]
+_wol --- addMsg node:  <div>You are in a shed.<br/><br/>You see an exit from here, Wolis (you).<br/><br/></div><div>You also see a frog.</div>
+_jan [SSE] received contexts: 1 lastContext: 1791175773229_wol
+
+_jan ### processing: 1791175774999 _wol loc: _f counter: 42 it: _f cmd: drop the frog
+_jan -- executeCowmand [get $target in $actor]
+_jan -- executeCowmand [var $dest to $actor's loc]
+_jan -- executeCowmand [set $target's loc to $dest]
+_jan -- executeCowmand [say 'drops',"[$actor] drops [$target]"]
+_jan -- executeCowmand [var $loc to $dest]
+_jan -- executeCowmand [relook $loc]
+_jan -- executeCowmand [var $loc to $actor]
+_jan -- executeCowmand [say 'gone',"[$target] has gone"]
+_jan -- executeCowmand [relook $actor's loc]
+_bob flushing 1 queued command(s)
+_wol [SSE] received contexts: 1 lastContext: 1791175774999_wol
+
+_wol ### processing: 1791175776322 _bob loc: _2 counter: 42 it: _g cmd: say hello Wolis in the house
+_wol - had to load code_7 from disk for key _7
+_jan [SSE] received contexts: 1 lastContext: 1791175774999_wol
+
+_jan ### processing: 1791175776322 _bob loc: _2 counter: 42 it: _g cmd: say hello Wolis in the house
+_jan - had to load code_7 from disk for key _7
+_bob [SSE] received contexts: 1 lastContext: 1791175774999_wol
+
+_bob ### processing: 1791175776322 _bob loc: _2 counter: 42 it: _g cmd: say hello Wolis in the house
+_bob - had to load code_7 from disk for key _7
+_wol -- executeCowmand [get $text,$rel,$target in $loc]
+_wol - had to load name_H from disk for key house
+_jan -- executeCowmand [get $text,$rel,$target in $loc]
+_jan - had to load name_H from disk for key house
+_bob -- executeCowmand [get $text,$rel,$target in $loc]
+_bob - had to load name_H from disk for key house
+_jan -- executeCowmand [if $target > 0 then sayto else saytext]
+_jan -- executeCowmand [get $text]
+_jan -- executeCowmand [if $niceness > 0 then saynice else saynormal]
+_jan -- executeCowmand [if $text like "?" then askit else sayit]
+_jan -- executeCowmand [say 'say',"[$actor] $prefix says '$text'"]
+_wol -- executeCowmand [if $target > 0 then sayto else saytext]
+_wol -- executeCowmand [get $text]
+_wol -- executeCowmand [if $niceness > 0 then saynice else saynormal]
+_wol -- executeCowmand [if $text like "?" then askit else sayit]
+_wol -- executeCowmand [say 'say',"[$actor] $prefix says '$text'"]
+_bob -- executeCowmand [if $target > 0 then sayto else saytext]
+_bob -- executeCowmand [get $text]
+_bob -- executeCowmand [if $niceness > 0 then saynice else saynormal]
+_bob -- executeCowmand [if $text like "?" then askit else sayit]
+_bob -- executeCowmand [say 'say',"[$actor] $prefix says '$text'"]
+_bob --- addMsg node:  Bob (you) says 'hello Wolis in the house'
+_bob - had to load trigger_S from disk for key say
+_bob -- executeCowmand [find $loc, sign]
+_bob -- executeCowmand [say 'push', "[$actor] pushes [$found_id]"]
+_bob --- addMsg node:  the fridge pushes the sign
+_bob -- executeCowmand [say 'say', "[$actor] says 'Oi! quit pushing!'"]
+_bob --- addMsg node:  the sign says 'Oi! quit pushing!'
+_bob -- executeCowmand [find $loc, sign]
+_bob -- executeCowmand [say 'push', "[$actor] pushes [$found_id]"]
+_bob --- addMsg node:  the fridge pushes the sign
+_bob -- executeCowmand [say 'say', "[$actor] says 'Oi! quit pushing!'"]
+_bob --- addMsg node:  the sign says 'Oi! quit pushing!'
+_bob -- executeCowmand [find $loc, sign]
+_bob -- executeCowmand [say 'push', "[$actor] pushes [$found_id]"]
+_bob --- addMsg node:  the fridge pushes the sign
+   Wolis heard: <div>You are in a shed.<br/><br/>You see an exit from here, Wolis (you).<br/><br/></div><div>You also see a frog.</div>
+   Jane (in Library loc 3) received new messages: 0 (Expected: 0)
+
+=====================================================
+           ALL MULTI-USER TESTS PASSED!              
+=====================================================
+
+removing contexts
+removing logs
