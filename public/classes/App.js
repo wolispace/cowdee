@@ -119,6 +119,15 @@ export class App {
   }
 
   /**
+   * send multiple commands eg: 'create a cup. paint it red. put it on the table';
+   * @param {string} commands 
+   */
+  async sendCommands(commands) {
+    for (const cmd of commands.split('.')) {
+      await this.sendCommand(cmd.trim());
+    }
+  }
+  /**
    * Sends one context to the server then processes all of the contexts it gets back (this being one of them)
    * {actor:'wol', loc:'2', cmd: 'look', lastContext: '2928192827392wol', counter: 5}
    * @param {object} data 

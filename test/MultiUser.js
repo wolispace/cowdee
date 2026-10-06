@@ -58,7 +58,7 @@ async function runMultiUserSimulation() {
     console.log('\n-----------------------------------------------------');
     console.log(`TEST 3: Bob creates a pink ${newObjName} in Room _2`);
     console.log('-----------------------------------------------------');
-    await bob.sendCommand({ cmd: `create a pink ${newObjName}` });
+    await bob.sendCommand(`create a pink ${newObjName}`);
 
     // Wait for SSE broadcast across network/server
     await initApp.utils.sleep(2000);
@@ -83,40 +83,30 @@ async function runMultiUserSimulation() {
       throw new Error(`FAILED: Expected new object ID to be over 23, but got ID "${newObjInBobDB}" (Decoded: ${decodedBobId})`);
     }
 
-    await wolis.sendCommand({ cmd: `create a red bus` });
-    await wolis.sendCommand({ cmd: `get it` });
-    await wolis.sendCommand({ cmd: `drop it` });
-    await bob.sendCommand({ cmd: `get the bus` });
-    await bob.sendCommand({ cmd: `drop the bus` });
-    await wolis.sendCommand({ cmd: `paint it dodgerblue` });
+    await wolis.sendCommands(`create a red bus. get it. drop it`);
+    await bob.sendCommands(`get the bus. drop the bus`);
+    await wolis.sendCommands(`paint it dodgerblue. create a green frog`);
+    await bob.sendCommands(`put the frog on the bus. pose it as sitting`);
 
-    await wolis.sendCommand({ cmd: `create a green frog` });
-    await bob.sendCommand({ cmd: `put the frog on the bus` });
-    await bob.sendCommand({ cmd: `pose it as sitting` });
     // Wait for SSE broadcast
     await initApp.utils.sleep(600);
-    await wolis.sendCommand({ cmd: `look` });
+    await wolis.sendCommand(`look`);
     console.log('   Wolis heard:', wolis.ui.messages[wolis.ui.messages.length - 1]);
-    await wolis.sendCommand({ cmd: `get the frog` });
-
-    await wolis.sendCommand({ cmd: `build a shed` });
-    await wolis.sendCommand({ cmd: `create 3 white cups` });
-    await bob.sendCommand({ cmd: `get the cups` });
+    await wolis.sendCommands(`get the frog. build a shed. create 3 white cups`);
+    await bob.sendCommands(`get the cups`);
     // Wait for SSE broadcast
     await initApp.utils.sleep(600);
-    await wolis.sendCommand({ cmd: `look` });
+    await wolis.sendCommand(`look`);
     console.log('   Wolis heard:', wolis.ui.messages[wolis.ui.messages.length - 1]);
 
-    await wolis.sendCommand({ cmd: `go shed` });
+    await wolis.sendCommand(`go shed`);
     await initApp.utils.sleep(600);
     console.log(`wolis is now in `, wolis.player.info.loc);
-    await wolis.sendCommand({ cmd: `drop the frog` });
+    await wolis.sendCommand(`drop the frog`);
 
     if (wolis.player.info.loc === '_2') {
       throw new Error(`FAILED: Expected wolis to be in new location not in _2 starting location`);
     }
-
-
 
     // 6. Test Chat & Spatial Filtering over SSE
     console.log('\n-----------------------------------------------------');
@@ -124,7 +114,7 @@ async function runMultiUserSimulation() {
     console.log('-----------------------------------------------------');
     const janeMsgCountBefore = jane.ui.messages.length;
 
-    await bob.sendCommand({ cmd: 'say hello Wolis in the house' });
+    await bob.sendCommand(`say hello Wolis in the house`);
 
     // Wait for SSE broadcast
     await initApp.utils.sleep(600);

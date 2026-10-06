@@ -269,7 +269,7 @@ export class LookManager {
       const obj = this.objs[firstId];
       const host = obj?.host;
       const showClass = obj.qty == 1 ? 'class' : 'plural';
-      let showHost = '</p><p>You also see';
+      let showHost = 'You also see';
       if (host) {
         if (lastHost == host) {
           showHost = `[${obj.id}.pose] [${obj.id}.hosthow] the [${host}.class] there [${obj.id}.is]`;
@@ -295,6 +295,7 @@ export class LookManager {
    * @returns {object}
    */
   returnData() {
+    // console.log(`${this.app.name}  ## sentences:`, this.sentences);
     return {
       msg: '<div><p>' + this.sentences.join(`.</p><p>`) + '.</p></div>',
       loc: this.context.loc,
