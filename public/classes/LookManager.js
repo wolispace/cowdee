@@ -276,16 +276,9 @@ export class LookManager {
           showHost = `[${obj.id}.pose] [${obj.id}.hosthow] the [${host}.class] there [${obj.id}.is]`;
         }
       }
-      let sentence = sentenceCount++ < 1 ? 'You see' : showHost;
-      let delim = ' ';
-      let objCounter = 1;
-      for (const id of ids) {
-        const sub = this.objs[id];
-        delim = (ids.length > 1 && objCounter++ >= ids.length) ? ' and ' : delim;
-        let descObj = `[${id}]`;
-        sentence += `${delim}${descObj}`;
-        delim = ', ';
-      }
+      const parts = [...ids].map(id => `[${id}]`);
+      const list = parts.join(', ').replace(/, ([^,]+)$/, ' and $1');
+      let sentence = (sentenceCount++ < 1 ? 'You see' : showHost) + ' ' + list;
       // console.log(sentence);
       this.sentences.push(sentence);
       lastHost = obj.id;
