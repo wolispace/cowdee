@@ -179,6 +179,8 @@ function handleInput($request)
     $serverCounter = file_exists($counterFile) ? (int) file_get_contents($counterFile) : 1;
     outputJson(['lastContext' => get_last_context(), 'counter' => $serverCounter]);
   } else {
+    $counterFile = DB_DIR . '/' . ID_COUNTER_FILE;
+    $serverCounter = file_exists($counterFile) ? (int) file_get_contents($counterFile) : 1;
     outputJson(['counter' => $serverCounter, 'src' => $counterFile]);
   }
 }

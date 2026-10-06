@@ -22,6 +22,25 @@ if (app.settings.generate) {
   await app.utils.sleep(300);
   const playerCommands = `
     build a pantry 
+    go pantry
+    create a shelf
+    paint it tan
+    create a can of tomatoes
+    paint it tomato
+    put it on the shelf
+    create a can of beans
+    paint it green
+    put it on the shelf
+    create a hole
+    paint it slategrey
+    create a passage
+    paint it slategrey
+    link hole to passage
+    get passage
+    goto jane
+    drop passage
+    go passage
+    exit
     create a table
     put the mouse behind the fridge
     pose the mouse as dancing
