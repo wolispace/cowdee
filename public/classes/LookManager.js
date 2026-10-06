@@ -263,12 +263,13 @@ export class LookManager {
   buildSentences() {
     let sentenceCount = 0;
     let lastHost = '';
+
     for (const [key, ids] of this.groups.map) {
       const firstId = ids.values().next().value; // read first from a Set
       const obj = this.objs[firstId];
       const host = obj?.host;
       const showClass = obj.qty == 1 ? 'class' : 'plural';
-      let showHost = '</div><div>You also see';
+      let showHost = '</p><p>You also see';
       if (host) {
         if (lastHost == host) {
           showHost = `[${obj.id}.pose] [${obj.id}.hosthow] the [${host}.class] there [${obj.id}.is]`;
@@ -276,11 +277,15 @@ export class LookManager {
           showHost = `[${obj.id}.pose] [${obj.id}.hosthow] the [${host}.class] there [${obj.id}.is]`;
         }
       }
-      const parts = [...ids].map(id => `[${id}]`);
-      const list = parts.join(', ').replace(/, ([^,]+)$/, ' and $1');
-      let sentence = (sentenceCount++ < 1 ? 'You see' : showHost) + ' ' + list;
-      // console.log(sentence);
-      this.sentences.push(sentence);
+      const allIds = [...ids];
+      const chunks = [];
+      const wordsPerSentence = 6;
+      for (let i = 0; i < allIds.length; i += wordsPerSentence) chunks.push(allIds.slice(i, i + wordsPerSentence));
+      for (const chunk of chunks) {
+        const list = chunk.map(id => `[${id}]`).join(', ').replace(/, ([^,]+)$/, ' and $1');
+        const sentence = (sentenceCount++ < 1 ? 'You see' : showHost) + ' ' + list;
+        this.sentences.push(sentence);
+      }
       lastHost = obj.id;
     }
   }
