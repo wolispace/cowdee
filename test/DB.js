@@ -20,11 +20,20 @@ if (app.settings.generate) {
   await app.start();  
   await app.player.handleLogon({ playername: 'Wolis' });
   await app.utils.sleep(300);
-  await app.sendCommand({ cmd: `build a pantry` });
-  await app.sendCommand({ cmd: `create a table` });
-  await app.sendCommand({ cmd: `put the mouse behind the fridge` });
+  const playerCommands = `
+    build a pantry 
+    create a table
+    put the mouse behind the fridge
+    pose the mouse as dancing
+  `;
+  for(const cmd of playerCommands.split('\n')) {
+    if (cmd.trim()) {
+      await app.sendCommand(cmd);
+      await app.utils.sleep(300);
+    }
+  }
+  
   await app.utils.sleep(300);
-
   await app.db.saveToDisk();
   await app.tester.deleteTestContexts();
   await app.tester.deleteTestLogs();

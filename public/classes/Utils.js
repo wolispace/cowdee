@@ -139,7 +139,11 @@ export class Utils {
     return text.replace(/\.\s*([a-z])/g, (_, letter) => `. ${letter.toUpperCase()}`);
   }
 
-  // not used yet, maybe a smarter thing to use than capitalEachSentence()
+  /**
+   * Converts a string to sentence case (first letter capitalized)
+   * @param {string} str 
+   * @returns {string}
+   */
   sentenceCaseString(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }

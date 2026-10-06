@@ -149,47 +149,33 @@ export class UI {
           loadedObjs[id] = await this.app.db.getById(id);
         }
       }
-      context.msg = context.msg.replace(/\[(\w+)(?:\.(\w+))?\]/g, (match, id, attr) => {
+      for (const match of matches) {
+        const [token, id, attr] = match;
         const obj = loadedObjs[id];
-        if (!obj) return ` (can't find id=${id}) `;
-        this.app.db.formatObject(obj);
-        const prop = attr || defaultProp;
-        let val = obj[prop] !== undefined ? obj[prop] : '';
-
-        // Special handling if the player/actor matches the object ID (e.g. 'w' -> wolis)
-        if (['longname','thename'].includes(prop) && id === context.playerId) {
-          val = `${obj.name} (you)`;
-        }
-        if (!['thename', 'longname', 'name', 'shorname', 'class'].includes(prop)) {
-          return val;
-        }
-        if (obj.extra) {
-          val = `${val} ${obj.extra.trim() }`;
-        }
-
-        if (format == 'html') {
-          // Format value with styling if color is defined
-          const style = obj.color ? `style="color: ${obj.color}"` : '';
-          let cmd = 'examine';
-          let hint = 'Examine';
-          if (obj.link) {
-            cmd = 'doorway';
-            hint = 'Go';
-          }
-          if (context.cmd && context.cmd != '') {
-            cmd = context.cmd;
-            hint = `Choose this to ${context.cmd}`;
-          }
-          const locked = (obj.lock && obj.lock != '') ? 'locked' : '';
-          return `<span class="click ${locked}" data-cmd="${cmd}" ${style} data-id="${id}" title="${hint} ${val} [${id}]">${val}</span>`;
-        } else {
-          return val;
-        }
-      });
+        const replacement = this.expandToken(obj, id, attr, defaultProp, context, format);
+        context.msg = context.msg.replace(token, replacement);
+      }
       context.msg = context.msg.replace(/\s+/g, ' ').trim();
     }
     context.msg = this.capitalEachSentence(context.msg);
     return context.msg;
+  }
+
+  expandToken(obj, id, attr, defaultProp, context, format) {
+    if (!obj) return ` (can't find id=${id}) `;
+    this.app.db.formatObject(obj);
+    const prop = attr || defaultProp;
+    let val = obj[prop] !== undefined ? obj[prop] : '';
+    if (['longname', 'thename'].includes(prop) && id === context.playerId) val = `${obj.name} (you)`;
+    if (!['thename', 'longname', 'name', 'shorname', 'class'].includes(prop)) return val;
+    if (obj.extra) val = `${val} ${obj.extra.trim()}`;
+    if (format !== 'html') return val;
+    const style = obj.color ? `style="color: ${obj.color}"` : '';
+    let cmd = 'examine', hint = 'Examine';
+    if (obj.link) { cmd = 'doorway'; hint = 'Go'; }
+    if (context.cmd && context.cmd != '') { cmd = context.cmd; hint = `Choose this to ${context.cmd}`; }
+    const locked = (obj.lock && obj.lock != '') ? 'locked' : '';
+    return `<span class="click ${locked}" data-cmd="${cmd}" ${style} data-id="${id}" title="${hint} ${val} [${id}]">${val}</span>`;
   }
 
   capitalEachSentence(text) {

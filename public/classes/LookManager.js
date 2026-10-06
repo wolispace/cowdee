@@ -271,9 +271,9 @@ export class LookManager {
       let showHost = '</div><div>You also see';
       if (host) {
         if (lastHost == host) {
-          showHost = `[${obj.id}.hosthow] the [${host}.class] there [${obj.id}.is]`;
+          showHost = `[${obj.id}.pose] [${obj.id}.hosthow] the [${host}.class] there [${obj.id}.is]`;
         } else {
-          showHost = `[${obj.id}.hosthow] the [${host}.class] there [${obj.id}.is]`;
+          showHost = `[${obj.id}.pose] [${obj.id}.hosthow] the [${host}.class] there [${obj.id}.is]`;
         }
       }
       let sentence = sentenceCount++ < 1 ? 'You see' : showHost;
@@ -282,9 +282,7 @@ export class LookManager {
       for (const id of ids) {
         const sub = this.objs[id];
         delim = (ids.length > 1 && objCounter++ >= ids.length) ? ' and ' : delim;
-        let objName = ['player','command'].includes(sub.class) ? `${sub.class} called [${id}]` : `[${id}.${showClass}]`;
         let descObj = `[${id}]`;
-        // descObj = `[${id}.qtyText] [${id}.pose] ${objName}`;
         sentence += `${delim}${descObj}`;
         delim = ', ';
       }
@@ -300,7 +298,7 @@ export class LookManager {
    */
   returnData() {
     return {
-      msg: '<div>' + this.sentences.join(`.<br/><br/>`) + '.</div>',
+      msg: '<div><p>' + this.sentences.join(`.</p><p>`) + '.</p></div>',
       loc: this.context.loc,
       for: this.context.for,
       actor: this.context.actor,
