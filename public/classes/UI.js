@@ -157,7 +157,7 @@ export class UI {
       }
       context.msg = context.msg.replace(/\s+/g, ' ').trim();
     }
-    context.msg = this.capitalEachSentence(context.msg);
+    context.msg = context.msg.replace(/<p>\s*([a-z])/g, (_, letter) => `<p>${letter.toUpperCase()}`);
     return context.msg;
   }
 
@@ -177,11 +177,6 @@ export class UI {
     const locked = (obj.lock && obj.lock != '') ? 'locked' : '';
     return `<span class="click ${locked}" data-cmd="${cmd}" ${style} data-id="${id}" title="${hint} ${val} [${id}]">${val}</span>`;
   }
-
-  capitalEachSentence(text) {
-    return text.replace(/\.\s+([a-z])/g, (_, letter) => `. ${letter.toUpperCase()}`);
-  }
-
 
   initMenu() {
     
