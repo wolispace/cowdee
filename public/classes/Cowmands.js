@@ -625,7 +625,8 @@ export class Cowmands {
     const varName = parts[0].substring(1);
     let value = this.context[varName] ?? '';
 
-    // TODO loop through the parts and build a list of ids we can this.app.db.preLoad([ids])
+    // a voyage of discover, get the object, read its value.. get that object etc..
+    // I dont think there is a sensible way of pre-loading these.
     for (let i = 1; i < parts.length; i++) {
       const obj = await this.app.db.getById(value);
       if (!obj) return '';

@@ -158,15 +158,11 @@ export class LookManager {
     }
     let loc = await this.app.db.getById(this.context.loc);
     if (!loc) {
-      loc = await this.app.db.getById(0);
-    }
-    if (loc) {
-      this.app.db.formatObject(loc);
-    }
-    if (!loc) {
       this.sentences.push('You are nowhere');
       return this.returnData();
     }
+    this.app.db.formatObject(loc);
+    this.objs[loc.id] = loc;
     this.found = await this.app.db.findInLoc(loc.id);
     const inon = 'in';
     this.sentences = [`You are ${inon} [${loc.id}]`];
@@ -176,9 +172,9 @@ export class LookManager {
     }
     if (!this.found || this.found.length < 1) {
       this.sentences.push('Nothing interesting here');
-      if (loc) this.objs[loc.id] = loc;
       return this.returnData();
     }
+
     this.objs = await this.populateObjs();
     this.hosted = this.buildHosted();
     // console.log(this.hosted.entries);
@@ -287,7 +283,7 @@ export class LookManager {
         const sub = this.objs[id];
         delim = (ids.length > 1 && objCounter++ >= ids.length) ? ' and ' : delim;
         let objName = ['player','command'].includes(sub.class) ? `${sub.class} called [${id}]` : `[${id}.${showClass}]`;
-        let descObj = `[${id}.pose] [${id}]`;
+        let descObj = `[${id}]`;
         // descObj = `[${id}.qtyText] [${id}.pose] ${objName}`;
         sentence += `${delim}${descObj}`;
         delim = ', ';
