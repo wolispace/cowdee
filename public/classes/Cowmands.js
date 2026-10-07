@@ -55,10 +55,12 @@ export class Cowmands {
       // Helper: strip quotes from a literal
       const unquote = (bit) => bit.replace(/^["']|["']$/g, '');
       // --- Step 6: Map user input (cmd_text) into the variable slots ---
-      const cmdText = this.context.cmd_text || '';
+      let cmdText = this.context.cmd_text || '';
       if (gCount === 1) {
         this.context[varName(getBits[0])] = cmdText;
       } else if (gCount === 2) {
+        // TODO remove all redundant starting workds including numbers eg 'three mice' or '5 mice'
+        cmdText = cmdText.replace(/^(a|an|the|some)\s+/gi, '');
         if (firstword.toLowerCase().includes('lastword')) {
           const lastSpaceIdx = cmdText.lastIndexOf(' ');
           if (lastSpaceIdx !== -1) {
@@ -492,6 +494,12 @@ export class Cowmands {
       this.context.loc = loc;
       this.context.for = this.context.actor;
       const data = await this.app.lookManager.list({ ...this.context });
+      await this.app.ui.addMessage(data);
+    },
+    // COLORPICKER
+    colorpicker: async (rest) => {
+      // this.context.clickcmd = this.context.cmd.replace(ntarget, '{id}');
+      const data = await this.app.lookManager.colorpicker({ ...this.context });
       await this.app.ui.addMessage(data);
     },
     // EXAMINE

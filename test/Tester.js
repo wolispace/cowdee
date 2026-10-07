@@ -195,7 +195,7 @@ export class Tester {
       code: `get $target in $loc;\ncopy $target;\nsay 'copy', "[$actor] copies [$target]";\nrelook $loc;`
     }, {
       name: "paint",
-      code: `get $target,$lastword in $loc;\nset $target's color to $lastword;\nsay 'paint',\"[$actor] paints [$target] $lastword\";\nrelook $loc;`
+      code: `get $target,$lastword in $loc;\nif $lastword ne '' then paintit else picker;\n##picker:\ncolorpicker;\n##paintit:\nset $target's color to $lastword;\nsay 'paint',\"[$actor] paints [$target] $lastword\";\nrelook $loc;`
     }, {
       name: "get",
       code: `get $target in $loc;\nunhost $target;\nclear $target,all;\nset $target's pose to \"\";\nset $target's loc to $actor;\nsay 'gets',\"[$actor] gets [$target]\";\nrelook $loc;\nvar $loc to $actor;\n msg $loc,$actor,$target,0,'arrives',\"[$target] appears from nowhere\";\nrelook $actor's loc;`

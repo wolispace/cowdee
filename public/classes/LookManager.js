@@ -56,6 +56,24 @@ export class LookManager {
     return this.returnData();
   }
 
+  /**
+   * Builds a list of all colors with the clickcmd to paoint the context.target each color
+   * @param {Context} context 
+   */
+  async colorpicker(context) {
+    this.app.player.editing = true;
+    this.context = context;
+    this.sentences = [];
+    let list = '';
+    for (const color of this.app.ui.colorNames()) {
+      list += `<span class='click' data-cmd='paint' data-id='${context.target}' data-color='${color}' style='color:${color};'>${color} </span>`;
+    }
+    console.log({list});
+    this.sentences.push(list);
+    this.context.clickcmd = `paint [${context.target}] {color}`;
+    return this.returnData();
+  }
+
     /**
    * Returns the html info of the object
    * @param {Context} context 

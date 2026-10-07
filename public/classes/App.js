@@ -41,6 +41,7 @@ export class App {
       examine: el => `examine ${el.dataset.id}`,
       close: () => `look`,
       doorway: el => `go ${el.dataset.id}`,
+      paint: el => `paint ${el.dataset.id} ${el.dataset.color}`
     };
   }
 

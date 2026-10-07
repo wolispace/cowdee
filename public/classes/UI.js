@@ -16,6 +16,7 @@ export class UI {
     this.top = document.getElementById('top');
     this.bottom = document.getElementById('bottom');
     this.input = document.getElementById('input');
+    this.cmdInput = document.getElementById('cmd');
     this.minHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--section-min-height')) * parseFloat(getComputedStyle(document.documentElement).fontSize);
 
     this.setupEvents();
@@ -24,6 +25,9 @@ export class UI {
     this.initMenu();
 
     this.bottom.innerHTML = `<br/><br/>`;
+    this.bottom.addEventListener('click', () => { 
+      this.cmdInput.focus(); 
+    });
 
     // When the tab regains focus, clear any unread '*' indicator from the title
     window.addEventListener('focus', () => {
