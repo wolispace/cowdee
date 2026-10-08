@@ -51,7 +51,7 @@ export class UI {
       return;
     }
     // if the for is added then only that entiry can see the msg
-    if (context.for && context.for != this.app.player.id) {
+    if (context.for && context.for !== 'all' && context.for != this.app.player.id) {
       console.log(`${this.app.name} --- msg not for this player`, context.for, context.msg.slice(0, 30));
       return;
     }

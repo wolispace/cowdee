@@ -146,6 +146,9 @@ export class Tester {
       name: "think",
       code: `get $text;\nif $text ne '' then thinkit else ponder;\n##thinkit:\nsay 'think',\"[$actor] .oO( $text )\";\n##ponder:\nsay 'think',\"[$actor] .o0( I keep thinking its Tuesday )\"`
     }, {
+      name: "shout",
+      code: `get $text;\nif $text ne 'shout' then shoutit else fail;\n##shoutit:\nmsg 0,$actor,0,0,'shout',\"You hear [$actor] shout '$text!'\",$actor;\n##fail:\nvar $mm to (Hello,Hay,Bingo,Ahoy there mates,Its life Jim,Horse,Four,My my,AAARGH);\nmsg 0,$actor,0,0,'shout',"[$actor] shouts '$mm!'",$actor;`
+    }, {
       name: "do",
       code: `get $text;\nif $text ne '' then doit else fail;\n##doit:\nsay 'action',\"[$actor] $text\";\n##fail:\nvar $text to (claps,dances around the room,sits down);\nrunsub doit;`
     }, {

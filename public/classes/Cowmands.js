@@ -312,6 +312,8 @@ export class Cowmands {
       if (!match) return;
       this.context.trigger = match[1];
       const template = this.app.utils.decodeString(this.app.utils.trimQuotes(match[2].trim()));
+      // what the click command will be
+      this.context.cmd = 'examine';
       this.context.msg = this.expandTemplate(template);
       delete this.context.for;
       await this.app.ui.addMessage(this.context);
@@ -444,6 +446,7 @@ export class Cowmands {
       if (rawInitCmd) {
         this.context.init_cmd = await this.resolveValue(rawInitCmd);
       }
+      this.context.for = 'all';
 
       await this.app.ui.addMessage(this.context);
     },
