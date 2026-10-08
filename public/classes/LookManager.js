@@ -92,6 +92,7 @@ export class LookManager {
         val = `It's a pretty ordinary ${obj.class}`;
       }
     };
+    val = this.app.ui.makeClickLinks(val);
     this.sentences.push(`<div class='info'>${val}</div><div class="click buttonize click-close" data-cmd="close">X</div>`);
     return this.returnData();
   }

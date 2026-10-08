@@ -182,6 +182,16 @@ export class UI {
     return `<span class="click ${locked}" data-cmd="${cmd}" ${style} data-id="${id}" title="${hint} ${val} [${id}]">${val}</span>`;
   }
 
+  makeClickLinks(msg) {
+    const matches = [...msg.matchAll(/type: \[(.+?)\]/g)];
+
+    for (const match of matches) {
+      const cmd = match[1];
+      msg = msg.replace(`type: [${match[1]}]`, `<span class="click suggest" data-cmd="run" data-id="${match[1]}">${match[1]}</span>`  );
+    }
+    return msg;
+  }
+
   initMenu() {
     
   }

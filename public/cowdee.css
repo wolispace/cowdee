@@ -63,6 +63,16 @@ a {
     background-color: rgb(143, 31, 31);
 }
 
+.suggest {
+  border-bottom: 1px solid slategrey;
+  border-left: 1px solid slategrey;
+  border-right: 1px solid slategrey;
+  padding: 0 .3rem;
+  border-radius: 0.2rem;
+  color: moccasin;
+  white-space: nowrap;
+}
+
 a:hover {
   color: white;
   text-decoration: underline;
@@ -299,6 +309,7 @@ menu {
   border-radius: .5rem;
   box-shadow: 0 0 1rem black;
   height: 100%;
+  line-height: 1.5rem;
 }
 
 .info form textarea {
