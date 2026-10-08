@@ -19,8 +19,8 @@ export class Cowmands {
       let firstword = rest.trim();
       firstword = firstword.replace(/`/g, "'");
       // --- Step 2: Handle target history ---
-      const ltarget = this.context?.target || this.context?.last_target || '';
-      const lsecond = this.context?.second || '';
+      let ltarget = this.context?.target || this.context?.last_target || '';
+      let lsecond = this.context?.second || '';
       // --- Step 3: Identify search locations (the 'in' keyword) ---
       let getLocValue = 0;
       let getSecondLocValue = 0;
@@ -103,6 +103,10 @@ export class Cowmands {
           this.context[varName(getBits[2])] = '';
         }
       }
+      // the original name for the target and second
+      this.context.ntarget = this.context.target;
+      this.context.nsecond = this.context.second;
+
       // Resolve pronouns
       if (['it', 'them'].includes((this.context.target || '').toLowerCase())) {
         this.context.target = this.context.it;
@@ -112,28 +116,31 @@ export class Cowmands {
       }
       // --- Step 7: Resolve objects (like perl's get_resolve) ---
       if (this.context.target === 'location') {
-        this.context.target = this.context.loc;
+        ltarget = this.context.loc;
+        const obj = await this.app.db.getById(this.context.loc);
+        this.context.ntarget = obj.class;
       }
       if (this.context.second === 'location') {
-        this.context.second = this.context.loc;
+        lsecond = this.context.loc;
+        const obj = await this.app.db.getById(this.context.loc);
+        this.context.nsecond = obj.class;
       }
-      const ntarget = this.context.target;
-      const nsecond = this.context.second;
       // Restore previous target/second before resolving
+      // TODO: this is probably redundant as we remember last targets as 'it'
       this.context.target = ltarget;
       this.context.second = lsecond;
 
-      if (ntarget) {
-        if (this.app.db.isId(ntarget)) {
-          this.context.target = ntarget;
+      if (this.context.ntarget) {
+        if (this.app.db.isId(this.context.ntarget)) {
+          this.context.target = this.context.ntarget;
         } else {
-          this.context.found = await this.app.db.findByNameInLoc(ntarget, getLocValue, true);
+          this.context.found = await this.app.db.findByNameInLoc(this.context.ntarget, getLocValue, true);
           if (this.context.found && this.context.found.length == 1) {
             this.context.target = this.context.found[0];
             delete this.context.found;
           } else {
             // more that one possible target so present a list of the user to choose from
-            this.context.clickcmd = this.context.cmd.replace(ntarget, '{id}');
+            this.context.clickcmd = this.context.cmd.replace(this.context.ntarget, '{id}');
           }
         }
         // last interacted with target will be the next commands 'it'
@@ -141,17 +148,17 @@ export class Cowmands {
           this.app.player.it = this.context.target;
         }
       }
-      if (nsecond) {
-        if (this.app.db.isId(nsecond)) {
-          this.context.second = nsecond;
+      if (this.context.nsecond) {
+        if (this.app.db.isId(this.context.nsecond)) {
+          this.context.second = this.context.nsecond;
         } else {
-          this.context.found = await this.app.db.findByNameInLoc(nsecond, getSecondLocValue, true);
+          this.context.found = await this.app.db.findByNameInLoc(this.context.nsecond, getSecondLocValue, true);
           if (this.context.found && this.context.found.length == 1) {
             this.context.second = this.context.found[0];
             delete this.context.found;
           } else {
             // more that one possible target so present a list of the user to choose from
-            this.context.clickcmd = this.context.cmd.replace(nsecond, '{id}');
+            this.context.clickcmd = this.context.cmd.replace(this.context.nsecond, '{id}');
           }
         }
       }
@@ -498,7 +505,7 @@ export class Cowmands {
     },
     // COLORPICKER
     colorpicker: async (rest) => {
-      // this.context.clickcmd = this.context.cmd.replace(ntarget, '{id}');
+      // this.context.clickcmd = this.context.cmd.replace(this.context.ntarget, '{id}');
       const data = await this.app.lookManager.colorpicker({ ...this.context });
       await this.app.ui.addMessage(data);
     },

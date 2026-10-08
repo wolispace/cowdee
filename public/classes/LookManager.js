@@ -66,7 +66,7 @@ export class LookManager {
     this.sentences = [];
     let list = '';
     for (const color of this.app.ui.colorNames()) {
-      list += `<span class='click' data-cmd='paint' data-id='${context.target}' data-color='${color}' style='color:${color};'>${color} </span>`;
+      list += `<span class='click' data-cmd='paint' data-id='${context.target}' data-color='${color}' style='color:${color};' title='paint ${context.ntarget} ${color}'>${context.ntarget} </span>`;
     }
     console.log({list});
     this.sentences.push(list);
