@@ -46,12 +46,12 @@ export class UI {
       return;
     }
 
-    if (!context.for && context.loc != this.app.player.loc) {
+    if (!context.to && context.loc != this.app.player.loc) {
       // console.log(`${this.app.name} --- msg not shown`, context.loc, context.msg.slice(0, 30));
       return;
     }
-    // if the for is added then only that entiry can see the msg
-    if (context.for && context.for !== 'all' && context.for != this.app.player.id) {
+    // if its to someone but not to all or the player then return
+    if (context.to && context.to !== 'all' && context.to != this.app.player.id) {
       console.log(`${this.app.name} --- msg not for this player`, context.for, context.msg.slice(0, 30));
       return;
     }

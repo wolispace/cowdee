@@ -446,7 +446,10 @@ export class Cowmands {
       if (rawInitCmd) {
         this.context.init_cmd = await this.resolveValue(rawInitCmd);
       }
-      this.context.for = 'all';
+      // blank, zero or all loc means its to all
+      if (['','0','all'].includes(this.context.loc)) {
+        this.context.to = 'all';
+      }
 
       await this.app.ui.addMessage(this.context);
     },
