@@ -97,6 +97,27 @@ export class LookManager {
     return this.returnData();
   }
 
+  async about(context) {
+    // show info about cow using server.php?stats=1
+    this.app.player.editing = true;
+    this.context = context;
+    this.sentences = [];
+    // YOU ARE HERE
+    // why not fetchJson?
+    // make pretty
+    const stats = await this.app.io._doFetch('server', {stats: 1});
+    // {"totalObjects":34,"totalDbSize":31532,"totalCodeSize":216590}
+    const val = `<table>    
+    <tr><td>${stats.appTitle}</td><td>v${stats.appVersion}</td></tr>
+    <tr><td>Total objects</td><td class="num">${stats.totalObjects}</td></tr>
+    <tr><td>Data size</td><td  class="num">${Math.round(stats.totalDbSize / 1024)}</td><td>KB</td></tr> 
+    <tr><td>Code size</td><td class="num">${Math.round(stats.totalCodeSize / 1024)}</td><td>KB</td></tr>
+    </table>
+    `;
+    this.sentences.push(`<div class='info'>${val}</div><div class="click buttonize click-close" data-cmd="close">X</div>`);
+    return this.returnData();
+  }
+
       /**
    * Returns the html info of the object
    * @param {Context} context 
@@ -144,14 +165,14 @@ export class LookManager {
 
   wrapEditForm(type, id, value) {
     value = value.replaceAll("\n", "&#10;");
-    return `<div class='info'><form>
+    return `<form class='info'>
       <input type="hidden" name="type" value="${type}">
       <input type="hidden" name="id" value="${id}">
       <textarea name="val">${value}</textarea>
       <div class="buttons">
       <button type="submit" name="action" value="cancel">Cancel</button>
       <button type="submit" name="action" value="save">Save</button>
-      </form></div>`;
+      </form>`;
   }
 
   /**
@@ -316,7 +337,7 @@ export class LookManager {
   returnData() {
     // console.log(`${this.app.name}  ## sentences:`, this.sentences);
     return {
-      msg: '<div><p>' + this.sentences.join(`.</p><p>`) + '.</p></div>',
+      msg: '<p>' + this.sentences.join(`.</p><p>`) + '.</p>',
       loc: this.context.loc,
       for: this.context.for,
       actor: this.context.actor,

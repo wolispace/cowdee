@@ -515,6 +515,11 @@ export class Cowmands {
       const data = await this.app.lookManager.colorpicker({ ...this.context });
       await this.app.ui.addMessage(data);
     },
+    // ABOUT
+    about: async (rest) => {
+      const data = await this.app.lookManager.about({ ...this.context });
+      await this.app.ui.addMessage(data);
+    },
     // EXAMINE
     examine: async (rest) => {
       const obj = await this.resolveValue(rest.trim());

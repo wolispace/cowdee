@@ -238,7 +238,7 @@ export class App {
     // Static schedule — the key is the tick type passed to runTick.
     // Runtime state (type, timerId, targetTs, lastRunBoundary) is injected below.
     this.tickConfigs = {
-      tick:     { period: 20 * 1000,           phase: 0 },
+      tick:     { period: 20 * 100_1000,           phase: 0 }, // DEBUG turn of ticks
       tickhour: { period: 60 * 60 * 1000,      phase: 5 * 60 * 1000  }, // 5 mins into the hour
       tickday:  { period: 24 * 60 * 60 * 1000, phase: 10 * 60 * 1000 }, // 10 mins after midnight
     };

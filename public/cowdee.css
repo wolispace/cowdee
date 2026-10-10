@@ -49,7 +49,7 @@ a {
 .click-close {
   position:absolute;
   top: 1rem;
-  right: 3rem;
+  right: 4rem;
   background-color: rgb(143, 31, 31);
   color: rgba(255, 255, 255, 0.75);
   padding:0 .2rem;
@@ -238,8 +238,8 @@ section div {
 /* ── Hamburger menu ── */
 #menu {
   position: fixed;
-  top: 0.5rem;
-  right: 0.3rem;
+  top: 0.8rem;
+  right: 1.5rem;
   z-index: 1000;
   width: 2rem;
   height: 2rem;
@@ -317,4 +317,17 @@ menu {
   height: 6.5rem;
   color: var(--font-color);
   background-color: #111216;
+}
+
+.info table {
+ border-collapse: collapse;
+}
+
+.info table td {
+  border: 1px solid darkslategrey;
+  padding: .2rem;
+}
+
+.info table td.num {
+  text-align: right;
 }

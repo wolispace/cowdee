@@ -63,6 +63,38 @@ function handleInput($request)
     logIt("commands batch done: {$processed}/" . count($request['commands']) . " written");
     outputJson(['status' => 'ok', 'count' => $processed]);
 
+  } else if (isset($request['stats']) ) {
+    $dbDir = DB_DIR;
+    $publicDir = __DIR__;
+    $classesDir = __DIR__ . '/classes';
+
+    $totalObjects = 0;
+    if (is_dir($dbDir)) {
+      $entries = scandir($dbDir);
+      if ($entries !== false) {
+        foreach ($entries as $entry) {
+          if ($entry === '.' || $entry === '..') continue;
+          if (fnmatch('id*.json', $entry)) {
+            $path = $dbDir . '/' . $entry;
+            if (is_file($path)) {
+              $totalObjects++;
+            }
+          }
+        }
+      }
+    }
+
+    $totalDbSize = getDirFilesSize($dbDir, true);
+    $totalCodeSize = getDirFilesSize($publicDir, false) + getDirFilesSize($classesDir, false);
+
+    outputJson([
+      'appName'         => APP_NAME,
+      'appTitle'        => APP_TITLE,
+      'appVersion'      => APP_VERSION,
+      'totalObjects'    => $totalObjects,
+      'totalDbSize'     => $totalDbSize,
+      'totalCodeSize'   => $totalCodeSize,
+    ]);
   } else if (!empty($request['cmd'])) {
     $mstimestamp = round(microtime(true) * 1000);
     $lastContext = $request['lastContext'] ?? '0';
@@ -215,3 +247,5 @@ function saveJson($file, $data)
   logIt('save ' . $file . ' ' . json_encode($data));
   file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
 }
+
+

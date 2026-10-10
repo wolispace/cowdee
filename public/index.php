@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <?php
-$version = '0.8.0';
+require_once "utils.php";
 $rnd = rand(0, 999999); ?>
 <html>
 
 <head>
   <meta charset='utf-8'>
-  <title>cowdee <?= $version ?></title>
+  <title><?= APP_NAME ?> <?= APP_VERSION ?></title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
   <link rel='stylesheet' href='cowdee.css?<?= $rnd ?>' />
   <script type="module" src='cowdee.js?<?= $rnd ?>'></script>
@@ -16,7 +16,7 @@ $rnd = rand(0, 999999); ?>
   <content>
     <div id="panels">
       <section id="top">
-        <h2>Welcome to distributed cow v<?= $version ?></h2>
+        <h2>Welcome to <?= APP_TITLE ?> v<?= APP_VERSION ?></h2>
         <p>Log in to enter the world.</p>
 
       </section>

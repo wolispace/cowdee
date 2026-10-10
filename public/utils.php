@@ -1,8 +1,8 @@
 <?php
 // require_once "utils.php";
- 
-
-
+define('APP_NAME', 'cowdee'); // name for cow
+define('APP_TITLE', 'Dirstibuted COW'); // name for cow
+define('APP_VERSION', '0.9.0'); // the version
 
 define('CONTEXT_DIR', '_contexts'); // folder for context files relative to public
 define('CONTEXT_EXT', '.json'); // file type for json
@@ -63,3 +63,33 @@ function get_last_context() {
     return $lastfile;
 }
 
+
+/**
+ * Calculates total size of files in a directory.
+ * @param string $dir
+ * @param bool $recursive
+ * @return int
+ */
+function getDirFilesSize($dir, $recursive = false)
+{
+  $size = 0;
+  if (!is_dir($dir)) {
+    return 0;
+  }
+  $entries = scandir($dir);
+  if ($entries === false) {
+    return 0;
+  }
+  foreach ($entries as $entry) {
+    if ($entry === '.' || $entry === '..') {
+      continue;
+    }
+    $path = $dir . DIRECTORY_SEPARATOR . $entry;
+    if (is_file($path)) {
+      $size += filesize($path);
+    } else if ($recursive && is_dir($path)) {
+      $size += getDirFilesSize($path, true);
+    }
+  }
+  return $size;
+}

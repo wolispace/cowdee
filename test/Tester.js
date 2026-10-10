@@ -96,7 +96,32 @@ export class Tester {
       qty: 1,
       lock: 1,
       code: `if target of push then pushme;##pushme: say 'say', "[$actor] says 'Oi! quit pushing!'";##tick:runsub doit/10;##doit:say 'think',"[$actor] .oO( I keep thinking its Tuesday )";`,
-      info: `Type short commands and press Enter \ntype: [look] shows you where you are.\ntype: [say hello], type: [think I wonder if..] and type: [do sits down] are ways of communicating with others\n\nYou can type: [create] simple one word objects like type: [create a book] or type: [create a table]\nYou can type: [paint], type: [put], type: [pose] and type: [push] objects eg \ntype: [paint the table orange]\ntype: [put the book on the table]\ntype: [pose the book as sitting]\ntype: [push the book] (so its not sitting on the table)\n\nYou can type: [get] and type: [drop] things and use type: [inv] to see what you are carrying.\n\nNew locations can be built in two ways:\ntype: [build a castle]\nor\ntype: [build a bridge to a castle]\nYou can type: [go] different locations eg: type: [go castle] or type: [go bridge]\n\nYou can type: [edit] objects so when the are type: [examine]ed people read what you wrote.\n\nYou can also type: [code] objects but you need to know about CowScript for this.\n\nIf you get stuck, try reloading the browser, or type: [goto bob] to teleport to the player Bob wherever they are right now.`
+      info: `Type short commands and press Enter. 
+type: [look] shows you where you are.
+type: [say hello], type: [think I wonder if..] and type: [do sits down] are ways of communicating with others
+
+NOTE: This is a test DB so anything you create will be lost!
+
+You can create objects like type: [create a book] or type: [create a table]
+You can paint, put, pose and push objects eg 
+type: [paint the table orange] or type: [paint the table] (to use the colour picker)
+type: [put the book on the table]
+type: [pose the book as sitting]
+type: [push the book] (so its not sitting on the table)
+
+You can get and drop things and use type: [inv] to see what you are carrying.
+
+New locations can be built in two ways:
+type: [build a castle]
+or
+type: [build a bridge to a castle]
+You can go to different locations eg: type: [go castle] or type: [go bridge]
+
+You can edit objects eg type: [edit the book] then eveyrone can type: [examine the book] while type: [read the book] should work from anywhere so books in the pibrary can be read without standing near them.
+
+You can also code objects but you need to know about CowScript for this.
+
+If you get stuck, try reloading the browser, or type: [goto bob] to teleport to the player Bob wherever they are right now.`
     };
     await this.app.db.save(sign);
 
@@ -230,6 +255,9 @@ export class Tester {
       name: "link",
       code: `get $target,'to',$second in $loc;\nset $target's link = $second;\nset $second's link = $target;\nsay 'link', "[$actor] links [$target] to [$second]";\nrelook $loc;`
     }, {
+      name: "about",
+      code: `about;`
+    }, {    
       name: "point",
       code: `find $loc, random not me;\nsay 'point', "[$actor] points at [$found_id]";`
     }
