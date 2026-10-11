@@ -254,7 +254,7 @@ section::-webkit-scrollbar-thumb:hover {
 }
 
 /* ── Hamburger menu ── */
-#menu {
+#showmenu {
   position: fixed;
   top: 0.8rem;
   right: 1.5rem;
@@ -273,7 +273,7 @@ section::-webkit-scrollbar-thumb:hover {
   -webkit-tap-highlight-color: transparent;
 }
 
-#menu:hover {
+#showmenu:hover {
   background: rgba(0, 0, 0, 0.7);
   color: white;
 }
@@ -348,4 +348,21 @@ menu {
 
 .info table td.num {
   text-align: right;
+}
+
+.hide {
+  display: none;
+}
+
+#menu {
+  position:absolute;
+  top:0;
+  right:0;
+  width: 75%;
+  height: 100%;
+  background-color: rgb(77, 36, 36);
+  box-shadow: 0 0 1rem black;
+  color: rgba(255,255,255.75);
+  padding: .5rem;
+  line-height: 1.5rem;
 }

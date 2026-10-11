@@ -405,5 +405,13 @@ export class App {
       });
     }
   }
+
+  menu() {
+    const menu = document.getElementById("menu");
+    menu.innerHTML = 'Menu options..<br>One<br>Two</br>';
+    menu.classList.toggle("hide");
+    console.log('menu');
+
+  }
 }
 
