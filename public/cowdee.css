@@ -115,11 +115,6 @@ section {
   overflow-y: auto;
 }
 
-section div {
-  padding-bottom: 0.5rem;
-  padding-right: 1rem;
-}
-
 #top {
   /* starts at ~30%, grows/shrinks */
   flex: 1 1 30%;
@@ -312,7 +307,7 @@ menu {
   line-height: 1.5rem;
 }
 
-.info form textarea {
+.info textarea {
   width: 100%;
   height: 6.5rem;
   color: var(--font-color);

@@ -20,6 +20,7 @@ export class LookManager {
    * @param {Context} context 
    */
   async list(context) {
+    this.info = null;
     this.app.player.editing = true;
     this.context = context;
     const loc = await this.app.db.getById(this.context.loc);
@@ -69,7 +70,7 @@ export class LookManager {
       list += `<span class='click' data-cmd='paint' data-id='${context.target}' data-color='${color}' style='color:${color};' title='paint ${context.ntarget} ${color}'>${context.ntarget} </span>`;
     }
     console.log({list});
-    this.sentences.push(list);
+    this.info = this.wrapInfo(html);
     this.context.clickcmd = `paint [${context.target}] {color}`;
     return this.returnData();
   }
@@ -82,19 +83,25 @@ export class LookManager {
     this.app.player.editing = true;
     this.context = context;
     this.sentences = [];
-    let val = await this.app.db.getInfo(context.target);
-        val = val.replaceAll("\n", "<br/>");
-    if (!val) {
+    let html = await this.app.db.getInfo(context.target);
+        html = html.replaceAll("\n", "<br/>");
+    if (!html) {
       const obj = await this.app.db.getById(context.target);
       if (!obj) {
-        val = `Opps.. I can't find object ID ${context.target}. Reload. `; 
+        html = `Opps.. I can't find object ID ${context.target}. Reload. `; 
       } else {
-        val = `It's a pretty ordinary ${obj.class}`;
+        html = `It's a pretty ordinary ${obj.class}`;
       }
     };
-    val = this.app.ui.makeClickLinks(val);
-    this.sentences.push(`<div class='info'>${val}</div><div class="click buttonize click-close" data-cmd="close">X</div>`);
+    html = this.app.ui.makeClickLinks(html);
+
+    this.info = this.wrapInfo(html);
     return this.returnData();
+  }
+
+  wrapInfo(html) {
+    return `<div class='info'>${html}</div><div class="click buttonize click-close" data-cmd="close">X</div>`;
+
   }
 
   async about(context) {
@@ -107,14 +114,15 @@ export class LookManager {
     // make pretty
     const stats = await this.app.io._doFetch('server', {stats: 1});
     // {"totalObjects":34,"totalDbSize":31532,"totalCodeSize":216590}
-    const val = `<table>    
+    const html = `<table>    
     <tr><td>${stats.appTitle}</td><td>v${stats.appVersion}</td></tr>
     <tr><td>Total objects</td><td class="num">${stats.totalObjects}</td></tr>
     <tr><td>Data size</td><td  class="num">${Math.round(stats.totalDbSize / 1024)}</td><td>KB</td></tr> 
     <tr><td>Code size</td><td class="num">${Math.round(stats.totalCodeSize / 1024)}</td><td>KB</td></tr>
     </table>
     `;
-    this.sentences.push(`<div class='info'>${val}</div><div class="click buttonize click-close" data-cmd="close">X</div>`);
+    this.info = this.wrapInfo(html);
+    //this.sentences.push(this.wrapInfo(html));
     return this.returnData();
   }
 
@@ -159,7 +167,7 @@ export class LookManager {
     };
 
     const form = this.wrapEditForm('info', context.target, val);
-    this.sentences.push(form);
+    this.info = form;
     return this.returnData();
   }
 
@@ -180,6 +188,7 @@ export class LookManager {
    * @param {Context} context 
    */
   async look(context) {
+    this.info = null;
     // unless the user send the command, dont generate a look msg for the top panel
     if (this.app.player.editing) {
       return;
@@ -336,8 +345,12 @@ export class LookManager {
    */
   returnData() {
     // console.log(`${this.app.name}  ## sentences:`, this.sentences);
+    let msg = '<p>' + this.sentences.join(`.</p><p>`) + '.</p>';
+    if (this.info && this.info.length > 0) {
+      msg = this.info; 
+    }
     return {
-      msg: '<p>' + this.sentences.join(`.</p><p>`) + '.</p>',
+      msg: msg,
       loc: this.context.loc,
       for: this.context.for,
       actor: this.context.actor,
