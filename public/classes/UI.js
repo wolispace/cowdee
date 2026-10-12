@@ -170,7 +170,7 @@ export class UI {
     this.app.db.formatObject(obj);
     const prop = attr || defaultProp;
     let val = obj[prop] !== undefined ? obj[prop] : '';
-    if (['longname', 'thename'].includes(prop) && id === context.playerId) val = `${obj.name} (you)`;
+    if (['longname', 'thename'].includes(prop) && id === context.playerId) val = `${obj.name ?? obj.class} (you)`;
     if (!['thename', 'longname', 'name', 'shorname', 'class'].includes(prop)) return val;
     if (obj.extra) val = `${val} ${obj.extra.trim()}`;
     if (format !== 'html') return val;

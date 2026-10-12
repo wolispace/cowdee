@@ -65,11 +65,10 @@ export class LookManager {
     this.app.player.editing = true;
     this.context = context;
     this.sentences = [];
-    let list = '';
+    let html = '';
     for (const color of this.app.ui.colorNames()) {
-      list += `<span class='click' data-cmd='paint' data-id='${context.target}' data-color='${color}' style='color:${color};' title='paint ${context.ntarget} ${color}'>${context.ntarget} </span>`;
+      html += `<span class='click' data-cmd='paint' data-id='${context.target}' data-color='${color}' style='color:${color};' title='paint ${context.ntarget} ${color}'>${context.ntarget} </span>`;
     }
-    console.log({list});
     this.info = this.wrapInfo(html);
     this.context.clickcmd = `paint [${context.target}] {color}`;
     return this.returnData();

@@ -43,8 +43,47 @@ export class Player {
    */
   async welcome() {
     if (!this.app.window) return;
+    if (this.isBot()) {
+        const obj = await this.newBot();
+        return;
+    }
     this.app.ui.showDialog(this.loginFormContent());
     document.getElementById('playername')?.focus();
+  }
+
+  /**
+   * If the url references an obj by ID then this is a bot and we read the initial object.
+   * wolispace.com/cowdee?_wol_slug = '?_wol_slug' = '_wol' as the ID and ignoe everything else
+   * @returns {boolean}
+   */
+
+  isBot() {
+    const params = window.location.search.split('_');
+    if (params.length < 2) return false;
+    this.initObj = `_${params[1]}`;
+    return true;
+  }
+
+  /**
+   * Create a new object that is a bot so saving saves it into the bot__.json index
+   */
+  async newBot() {
+    this.remember = false;
+    const botName = 'bunny';
+    const target = await this.app.db.getById(this.initObj);
+    this.loc = target.loc;
+    this.id = this.app.id.new();
+    this.name = botName;
+    const obj = {
+      id: this.id,
+      class: botName,
+      loc: this.loc,
+      color: 'wheat',
+      bot: true,
+    };
+    await this.app.db.save(obj);
+    console.log(`${this.app.name} bot logs in`);
+    await this.wake();
   }
 
   loginFormContent() {
@@ -217,7 +256,8 @@ export class Player {
     const result = await this.app.io.fetchJson('server', { 'lastContext': 1 });
     console.log(` ${this.app.name} wake `, result);
     this.app.lastContext = result?.lastContext || '0';
-    await this.app.sendCommand({ cmd: 'look', actor: this.id, loc: this.loc, saveHistory: false });
+    const initCmd = this.bot ? `examine ${initObj}` : 'look' 
+    await this.app.sendCommand({ cmd: initCmd, actor: this.id, loc: this.loc, saveHistory: false });
     this.app.ui.closeDialog();
   }
   /**

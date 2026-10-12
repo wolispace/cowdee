@@ -617,6 +617,9 @@ export class DB {
     if (obj.pw) {
       await this.set('pw', obj.id, obj.pw);
     }
+    if (obj.bot) {
+      await this.addSub('bot', '__', obj.id);
+    }    
     // remove things we dont need to save into id:
     const clearList = ['info', 'code', 'pw'];
     for (const prop of clearList) {
