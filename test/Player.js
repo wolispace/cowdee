@@ -26,7 +26,7 @@ console.log('✔ Direct properties and compatibility getter pass');
 
 // Test 2: Login with "Remember me" checked
 console.log('\nTEST 2: Login with "Remember me"');
-await app.player.handleLogon({ playername: 'Wolis', remember: '1' });
+await app.player.handleFindPlayer({ playername: 'Wolis', remember: '1' });
 if (app.player.id !== '_wol') {
   throw new Error(`FAILED: Expected player ID _wol, got ${app.player.id}`);
 }

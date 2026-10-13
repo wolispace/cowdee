@@ -174,7 +174,7 @@ export class App {
   // forms dont need to fetch anymore, as the data is in memory (or fetch to fill memory)
   async handleForm(data) {
     if (data.type === 'login') {
-      await this.player.handleLogon(data);
+      await this.player.handleFindPlayer(data);
     } else if (data.type == 'checkpw') {
       await this.player.handleCheckPw(data);
     } else if (data.type == 'newplayer') {

@@ -22,29 +22,6 @@ export class Player {
     this.app = app;
   }
 
-  // Compatibility getters/setters for legacy code
-  get playername() {
-    return this.name;
-  }
-  set playername(val) {
-    this.name = val;
-  }
-
-  get info() {
-    return this;
-  }
-  set info(val) {
-    if (val && typeof val === 'object') {
-      if (val.id !== undefined) this.id = val.id;
-      if (val.name !== undefined) this.name = val.name;
-      if (val.playername !== undefined) this.name = val.playername;
-      if (val.loc !== undefined) this.loc = val.loc;
-      if (val.it !== undefined) this.it = val.it;
-      if (val.editing !== undefined) this.editing = val.editing;
-      if (val.history !== undefined) this.history = val.history;
-    }
-  }
-
   /** 
    * Show the logon form 
    */
@@ -54,7 +31,8 @@ export class Player {
         const obj = await this.newBot();
         return;
     }
-    this.app.ui.showDialog(this.loginFormContent());
+    // TODO: pass focus element as 2nd paran
+    this.app.ui.showDialog(this.findPlayerFormContent());
     document.getElementById('playername')?.focus();
   }
 
@@ -63,7 +41,6 @@ export class Player {
    * wolispace.com/cowdee?_wol_slug = '?_wol_slug' = '_wol' as the ID and ignoe everything else
    * @returns {boolean}
    */
-
   isBot() {
     const params = window.location.search.split('_');
     if (params.length < 2) return false;
@@ -75,6 +52,7 @@ export class Player {
    * Create a new object that is a bot so saving saves it into the bot__.json index
    */
   async newBot() {
+    // TODO: change to use context 'wake' to make new player
     this.remember = false;
     const botName = 'bunny';
     const target = await this.app.db.getById(this.initObj);
@@ -93,7 +71,7 @@ export class Player {
     await this.wake();
   }
 
-  loginFormContent() {
+  findPlayerFormContent() {
     const defaultName = this.app.local ? 'Wolis' : '';
     return `
       <form method="dialog" id="loginform">
@@ -166,13 +144,18 @@ export class Player {
     `;
   }
 
-  async handleLogon(data) {
+  /**
+   * Takes login form data (playername and remember)
+   * Find that player. If found check pw else treat as a new player 
+   * @param {object} data 
+   */
+  async handleFindPlayer(data) {
     if (data?.remember !== undefined) {
       this.remember = Boolean(data.remember === '1' || data.remember === true);
     }
     const obj = await this.app.db.findPlayer(data);
 
-    console.log(`${this.app.name} logon `, obj);
+    console.log(`${this.app.name} handleFindPlayer found `, obj);
     if (obj) {
       this.name = obj.name;
       this.id = obj.id;
@@ -301,6 +284,8 @@ export class Player {
     const result = await this.app.io.fetchJson('server', { 'lastContext': 1 });
     console.log(` ${this.app.name} wake `, result);
     this.app.lastContext = result?.lastContext || '0';
+    // TODO: bots need to wake a new bot player without password
+    // need to use same sendCmd to wake but not check qw, and run a 'read'
     if (this.bot) {
       await this.app.sendCommand({ cmd: `examine ${this.initObj}`, actor: this.id, loc: this.loc, saveHistory: false });
     } else {

@@ -36,9 +36,9 @@ async function runMultiUserSimulation() {
     console.log('-----------------------------------------------------');
     console.log('TEST 1: Player login and storage records');
     console.log('-----------------------------------------------------');
-    await wolis.player.handleLogon({ playername: 'Wolis' });
-    await bob.player.handleLogon({ playername: 'Bob' });
-    await jane.player.handleLogon({ playername: 'Jane' });
+    await wolis.player.handleFindPlayer({ playername: 'Wolis' });
+    await bob.player.handleFindPlayer({ playername: 'Bob' });
+    await jane.player.handleFindPlayer({ playername: 'Jane' });
 
     console.log(`   Wolis logged in: ID="${wolis.player.id}", Loc="${wolis.player.loc}"`);
     console.log(`   Bob logged in:   ID="${bob.player.id}", Loc="${bob.player.loc}"`);

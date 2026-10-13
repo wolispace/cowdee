@@ -30,7 +30,7 @@ console.log('-------------- END ----------------');
 process.exit(0);
 
 async function testCommands() {
-  await app.player.handleLogon({ playername: 'Wolis' });
+  await app.player.handleFindPlayer({ playername: 'Wolis' });
   console.log(` - Wolis logged in: ID="${app.player.info.id}", Loc="${app.player.info.loc}", Namespace="${app.storage.getNamespace()}"`);
 
   app.tester.context.actor = app.player.info.id;

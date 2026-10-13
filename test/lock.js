@@ -11,11 +11,11 @@ await wolis.tester.initObjects();
 await wolis.tester.initPlayers();
 await wolis.tester.initCommands();
 await wolis.db.saveToDisk();
-await wolis.player.handleLogon({ playername: 'Wolis' });
+await wolis.player.handleFindPlayer({ playername: 'Wolis' });
 await wolis.start();
 
 const bob = new App({settings: {name: 'bobApp'}});
-await bob.player.handleLogon({ playername: 'Bob' });
+await bob.player.handleFindPlayer({ playername: 'Bob' });
 await bob.start();
 
 

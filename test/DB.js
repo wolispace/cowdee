@@ -18,7 +18,7 @@ if (app.settings.generate) {
   console.log(`✔ Initialized test database fixtures. DB Counter: ${app.id.counter}\n`);
   
   await app.start();  
-  await app.player.handleLogon({ playername: 'Wolis' });
+  await app.player.handleFindPlayer({ playername: 'Wolis' });
   await app.utils.sleep(300);
   const playerCommands = `
     build a pantry 
