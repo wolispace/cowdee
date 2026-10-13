@@ -89,12 +89,8 @@ export class App {
         }
       });
     }
-
   }
 
-  wakePlayer() {
-    console.log('wake player');
-  }
 
   // returns this font-rne js or node script communicates with
   getWebroot() {
@@ -138,14 +134,15 @@ export class App {
   async sendCommand(data) {
     this.player.editing = false;
     if (!data.ts) {
-        this.ui.showLoading();
+      console.log(`${this.name} No ts.. why do we care?`);
+        // this.ui.showLoading();
     }
     if (typeof data === 'string') {
       data = { cmd: data };
     }
     // every command sent needs and actor, loc, it, lastContext, counter
-    data.actor = data.actor ?? this.player.id;
-    data.loc = data.loc ?? this.player.loc;
+    data.actor = data.actor ?? (this.player.id || this.player.name);
+    data.loc = data.loc ?? (this.player.loc || '_2');
     data.it = this.player.it;
     data.lastContext = this.lastContext;
     data.counter = this.id.counter;

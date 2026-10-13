@@ -1,5 +1,12 @@
 import './bcrypt.js';
-const bcrypt = globalThis.bcrypt;
+let bcrypt = globalThis.bcrypt;
+if (!bcrypt && typeof process !== 'undefined' && typeof window === 'undefined') {
+  try {
+    const { createRequire } = await import('module');
+    const require = createRequire(import.meta.url);
+    bcrypt = require('./bcrypt.js');
+  } catch (e) {}
+}
 
 // Handles current player info, logging in, updating storage, command history
 export class Player {
@@ -177,8 +184,10 @@ export class Player {
       }
     } else {
       this.name = data.playername;
-      this.app.ui.showDialog(this.newPlayerContent());
-      document.getElementById('pw')?.focus();
+      if (this.app.window) {
+        this.app.ui.showDialog(this.newPlayerContent());
+        document.getElementById('pw')?.focus();
+      }
     }
   }
 
@@ -202,25 +211,61 @@ export class Player {
     }
   }
 
+  _newPlayerResolve = null;
+
+  async waitForId() {
+    if (this.id) return;
+    return new Promise(resolve => {
+      this._newPlayerResolve = resolve;
+      setTimeout(() => resolve(), 3000);
+    });
+  }
+
   async handleNewPlayer(data) {
     if (data?.remember !== undefined) {
       this.remember = Boolean(data.remember === '1' || data.remember === true);
     }
-    const hash = await bcrypt.hash(data.pw, 10);
+    this.pendingPw = await bcrypt.hash(data.pw, 10);
+    this.loc = '_2';
+    await this.wake();
+  }
+
+  async newPlayer(name) {
     const startingLocation = '_2';
     const newId = this.app.id.new();
     const obj = {
       id: newId,
       class: 'player',
-      name: this.name,
+      name: name,
       loc: startingLocation,
       lock: 1,
       owner: newId,
-      color: 'gold',
-      pw: hash
+      color: 'gold'
     };
+    if (this.pendingPw && this.name === name) {
+      obj.pw = this.pendingPw;
+      delete this.pendingPw;
+    }
     await this.app.db.save(obj);
-    await this.logon(obj);
+
+    if (!this.id && this.name === name) {
+      this.id = obj.id;
+      this.loc = obj.loc;
+      this.app.name = obj.id;
+      this.loadHistory();
+      if (this.remember) {
+        this.app.storage?.setItem('rememberedPlayer', this.id);
+      } else {
+        this.app.storage?.removeItem('rememberedPlayer');
+      }
+      this.save();
+      console.log(`${this.app.name} new player created and logged in`);
+      if (this._newPlayerResolve) {
+        this._newPlayerResolve();
+        this._newPlayerResolve = null;
+      }
+    }
+    return obj;
   }
 
   /**
@@ -256,9 +301,21 @@ export class Player {
     const result = await this.app.io.fetchJson('server', { 'lastContext': 1 });
     console.log(` ${this.app.name} wake `, result);
     this.app.lastContext = result?.lastContext || '0';
-    const initCmd = this.bot ? `examine ${initObj}` : 'look' 
-    await this.app.sendCommand({ cmd: initCmd, actor: this.id, loc: this.loc, saveHistory: false });
+    if (this.bot) {
+      await this.app.sendCommand({ cmd: `examine ${this.initObj}`, actor: this.id, loc: this.loc, saveHistory: false });
+    } else {
+      await this.app.sendCommand({ cmd: 'wake', actor: this.id || this.name, loc: this.loc || '_2', saveHistory: false });
+      if (!this.id) {
+        await this.waitForId();
+      }
+      await this.app.sendCommand({ cmd: 'look', actor: this.id, loc: this.loc || '_2', saveHistory: false });
+    }
     this.app.ui.closeDialog();
+  }
+
+  async wakePlayer(actor) {
+    console.log(`${this.app.name} wakePlayer:`, actor);
+    return await this.newPlayer(actor);
   }
   /**
    * Silently refresh what the player is seeing without anoucing they look around (do this after editing and returning to a tab etc..)
@@ -343,5 +400,7 @@ export class Player {
     this.editing = false;
     this.history = [];
     this.remember = false;
+    this.pendingPw = null;
+    this._newPlayerResolve = null;
   }
 }

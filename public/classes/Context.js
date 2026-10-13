@@ -26,12 +26,25 @@ export class Context {
    * Entry point for processing this context
    */
   async process() {
-    if (!this.app.player.id) return;
     // Each context carries the counter from the client that created it;
     // sync up so our counter never falls behind any peer's.
     this.app.id.sync(this.counter);
     if (this.app.seen(this.key())) return;
     if (!this.cmd) return;
+
+    if (this.cmd === 'wake') {
+      const isExistingPlayer = this.app.db.isId(this.actor) || (await this.app.db.getById(this.actor));
+      if (!isExistingPlayer) {
+        console.log(`${this.app.name} we need to create a new player`, this.actor);
+        await this.app.player.wakePlayer(this.actor);
+      } else {
+        console.log(`${this.app.name} player ${this.actor} wakes up`);
+      }
+      this.app.ui.hideLoading();
+      return;
+    }
+
+    if (!this.app.player.id) return;
     // same player then remember the last 'it'
     if (this.actor === this.app.player.id && this.app.player.id) {
       this.app.player.it = this.it;
