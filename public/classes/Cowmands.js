@@ -125,6 +125,16 @@ export class Cowmands {
         const obj = await this.app.db.getById(this.context.loc);
         this.context.nsecond = obj.class;
       }
+      if (['me','myself'].includes(this.context.target)) {
+        ltarget = this.context.actor;
+        const obj = await this.app.db.getById(this.context.actor);
+        delete this.context.ntarget;
+      }
+      if (['me','myself'].includes(this.context.second)) {
+        lsecond = this.context.actor;
+        const obj = await this.app.db.getById(this.context.actor);
+        delete this.context.nsecond;
+      }
       // Restore previous target/second before resolving
       // TODO: this is probably redundant as we remember last targets as 'it'
       this.context.target = ltarget;
