@@ -325,7 +325,7 @@ export class Cowmands {
       // what the click command will be
       this.context.cmd = 'examine';
       this.context.msg = this.expandTemplate(template);
-      delete this.context.for;
+      delete this.context.to;
       await this.app.ui.addMessage(this.context);
     },
     // MSG - advanced say where we can control the location and who gets to see the msg
@@ -508,6 +508,7 @@ export class Cowmands {
     relook: async (rest) => {
       const loc = await this.resolveValue(rest.trim());
       this.context.loc = loc;
+      this.context.to = this.context.actor;
       const data = await this.app.lookManager.look({ ...this.context });
       await this.app.ui.addMessage(data);
     },
@@ -515,19 +516,21 @@ export class Cowmands {
     list: async (rest) => {
       const loc = await this.resolveValue(rest.trim());
       this.context.loc = loc;
-      this.context.for = this.context.actor;
+      this.context.to = this.context.actor;
       const data = await this.app.lookManager.list({ ...this.context });
       await this.app.ui.addMessage(data);
     },
     // COLORPICKER
     colorpicker: async (rest) => {
       // this.context.clickcmd = this.context.cmd.replace(this.context.ntarget, '{id}');
+      this.context.to = this.context.actor;
       const data = await this.app.lookManager.colorpicker({ ...this.context });
       await this.app.ui.addMessage(data);
     },
     // ABOUT
     about: async (rest) => {
       const data = await this.app.lookManager.about({ ...this.context });
+      this.context.to = this.context.actor;
       await this.app.ui.addMessage(data);
     },
     // EXAMINE
@@ -538,7 +541,7 @@ export class Cowmands {
         return;
       }
       this.context.target = obj;
-      this.context.for = this.context.actor;
+      this.context.to = this.context.actor;
       const data = await this.app.lookManager.examine({ ...this.context });
       await this.app.ui.addMessage(data);
     },
@@ -550,7 +553,7 @@ export class Cowmands {
         return;
       }
       this.context.target = obj;
-      this.context.for = this.context.actor;
+      this.context.to = this.context.actor;
       const data = await this.app.lookManager.code({ ...this.context });
       await this.app.ui.addMessage(data);
     },
@@ -561,7 +564,7 @@ export class Cowmands {
         return;
       }
       this.context.target = obj;
-      this.context.for = this.context.actor;
+      this.context.to = this.context.actor;
       const data = await this.app.lookManager.edit({ ...this.context });
       await this.app.ui.addMessage(data);
     },

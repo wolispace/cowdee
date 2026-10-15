@@ -351,7 +351,7 @@ export class LookManager {
     return {
       msg: msg,
       loc: this.context.loc,
-      for: this.context.for,
+      to: this.context.to,
       actor: this.context.actor,
       cmd: this.context.clickcmd,
       trigger: this.context.trigger,
