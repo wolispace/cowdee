@@ -46,7 +46,7 @@ export class Player {
     if (!this.app.window) return;
     if (this.isBot) {
        // send cmd to make a new bunny
-        const obj = await this.logon();
+        await this.sendWakeCmd();
         return;
     }
     // TODO: pass focus element as 2nd paran
@@ -54,28 +54,6 @@ export class Player {
     document.getElementById('playername')?.focus();
   }
 
-  /**
-   * Create a new object that is a bot so saving saves it into the bot__.json index
-   */
-  async newBot() {
-    // TODO: change to use context 'wake' to make new player
-    this.remember = false;
-    const botName = 'bunny';
-    const target = await this.app.db.getById(this.botTarget);
-    this.loc = target.loc;
-    this.id = this.app.id.new();
-    this.name = botName;
-    const obj = {
-      id: this.id,
-      class: botName,
-      loc: this.loc,
-      color: 'wheat',
-      bot: true,
-    };
-    await this.app.db.save(obj);
-    console.log(`${this.app.name} bot logs in`);
-    await this.sendWakeCmd();
-  }
 
   findPlayerFormContent() {
     const defaultName = this.app.local ? 'Wolis' : '';
@@ -180,6 +158,10 @@ export class Player {
     }
   }
 
+  /**
+   * Take the password entry form and do something with its values
+   * @param {object} data 
+   */
   async handleCheckPw(data) {
     if (data?.remember !== undefined) {
       this.remember = Boolean(data.remember === '1' || data.remember === true);
@@ -200,16 +182,10 @@ export class Player {
     }
   }
 
-  _newPlayerResolve = null;
-
-  async waitForId() {
-    if (this.id) return;
-    return new Promise(resolve => {
-      this._newPlayerResolve = resolve;
-      setTimeout(() => resolve(), 3000);
-    });
-  }
-
+  /**
+   * Take the form with the new players password, save it for later then wake the new player
+   * @param {object} data 
+   */
   async handleNewPlayer(data) {
     if (data?.remember !== undefined) {
       this.remember = Boolean(data.remember === '1' || data.remember === true);
@@ -220,37 +196,42 @@ export class Player {
   }
 
   /**
-   * Takes a name like 'player-bob-_2' anem makes a nre player, returning the new players id
+   * Takes a name like 'player-bob-_2' and make a new object, returning the new object id
+   * This could be a new plater or a new bot
    * @param {string} name 
    * @returns {string}
    */
   async newPlayer(name) {
-    // split name on _. eg 'player-bob-_2' or 'bunny--_2'
+    // split name on _. eg 'player-bob-_2' or 'bunny-_5-_2'
     const parts = name.split('-');
-    const newClass = parts[0];
-    const newName = parts[1] ? parts[1] : '';
-    const newLoc = parts[2];
-    const newLock = newClass === 'player' ? 1 : 0;
 
     const newId = this.app.id.new();
-    const obj = {
+    const obj = { 
       id: newId,
-      class: newClass,
-      name: newName,
-      loc: newLoc,
-      lock: newLock,
-      owner: newId,
-      color: 'gold'
+      loc: parts[2] ?? this.startingLocation, 
     };
-
-    // is this the player who sent the context to create a new player?
-    if (this.pendingPw) {
-      obj.pw = this.pendingPw;
-      delete this.pendingPw;
+    
+    if (parts[0] === 'player') {
+      obj.class = 'player';
+      obj.name = parts[1] ?? 'Unnamed';
+      obj.loc = parts[2] ?? this.startingLocation;
+      obj.owner = newId;
+      obj.color = 'gold';
+      // is this the player who sent the context to create a new player?
+      if (this.pendingPw) {
+        obj.pw = this.pendingPw;
+        delete this.pendingPw;
+      }
+    } else {
+      obj.class = 'bunny';
+      obj.color = 'tan';
+      // remember the second param as the object the bot is reading
+      this.botTarget = parts[1];
     }
+
     await this.app.db.save(obj);
 
-    // if this browser has not current player it becomes this playerprep
+    // if this browser has not current player it becomes this player
     if (this.id === '') {
       this.id = obj.id;
       this.loc = obj.loc;
@@ -292,16 +273,14 @@ export class Player {
     await this.welcome();
   }
 
+  /**
+   * Sends a wake context with sufficient info in the name to re-build the new object when the context is processed
+   * 'class-name-loc' or 'class-botTarget-loc' eg: 'player-bob-_2' or 'bunny-_5-_2'
+   */
   async sendWakeCmd() {
     const result = await this.app.io.fetchJson('server', { 'lastContext': 1 });
     this.app.lastContext = result?.lastContext || '0';
 
-    // TODO: bots need to wake a new bot player without password
-    // need to use same sendCmd to wake but not check qw, and run a 'read'
-
-    // send the wake cmd 
-    // if the player and pw are ok, then the actor is this.id 
-    // else its a new object then actor is 'class-name-loc' eg: 'player-mark-_2' or 'bunny--_2'
 
     const params = { 
       cmd: 'wake', 
@@ -314,22 +293,28 @@ export class Player {
     if (!this.id) {
       params.loc = this.startingLocation;      
       if (this.isBot) {
-        params.actor = `bunny--${params.loc}`;
+        const target = await this.app.db.getById(this.botTarget);
+        params.loc = target.loc;
+        params.actor = `bunny-${target.id}-${params.loc}`;
       } else {
         params.actor = `player-${this.name}-${params.loc}`;
       }
     }
-
     await this.app.sendCommand(params);
-    this.app.ui.closeDialog();
   }
 
   /**
-   * The player objects now exists and its attached to this.player so wake them by looking around 
+   * The player objects now exists and its attached to this.player 
+   * so wake them by looking around or if its a bot, read the botTarget object
    */
   async wakePlayer() {
     console.log(`${this.app.name} wakePlayer:`, this.name, this.id, this.loc);
-    await this.app.sendCommand({ cmd: 'look', actor: this.id, loc: this.loc || '_2', saveHistory: false });
+    // if this is a bot, then the new command is 'read'
+    if (this.botTarget) {
+      await this.app.sendCommand({ cmd: `read ${this.botTarget}`, actor: this.id, loc: this.loc, saveHistory: false });
+    } else {
+      await this.app.sendCommand({ cmd: 'look', actor: this.id, loc: this.loc, saveHistory: false });
+    }
   }
 
   /**
@@ -416,6 +401,5 @@ export class Player {
     this.history = [];
     this.remember = false;
     this.pendingPw = null;
-    this._newPlayerResolve = null;
   }
 }
