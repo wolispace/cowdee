@@ -74,7 +74,7 @@ export class Player {
     };
     await this.app.db.save(obj);
     console.log(`${this.app.name} bot logs in`);
-    await this.wake();
+    await this.sendWakeCmd();
   }
 
   findPlayerFormContent() {
@@ -216,9 +216,14 @@ export class Player {
     }
     this.pendingPw = await bcrypt.hash(data.pw, 10);
     this.loc = '_2';
-    await this.wake();
+    await this.sendWakeCmd();
   }
 
+  /**
+   * Takes a name like 'player-bob-_2' anem makes a nre player, returning the new players id
+   * @param {string} name 
+   * @returns {string}
+   */
   async newPlayer(name) {
     // split name on _. eg 'player-bob-_2' or 'bunny--_2'
     const parts = name.split('-');
@@ -255,6 +260,7 @@ export class Player {
       }
       this.save();
     }
+    return obj.id;
   }
 
   /**
@@ -277,7 +283,7 @@ export class Player {
     }
     this.save();
     console.log(`${this.app.name} logs in`);
-    await this.wake();
+    await this.sendWakeCmd();
   }
 
   // Clear player and show welcome login dialog
@@ -286,7 +292,7 @@ export class Player {
     await this.welcome();
   }
 
-  async wake() {
+  async sendWakeCmd() {
     const result = await this.app.io.fetchJson('server', { 'lastContext': 1 });
     this.app.lastContext = result?.lastContext || '0';
 
@@ -295,7 +301,7 @@ export class Player {
 
     // send the wake cmd 
     // if the player and pw are ok, then the actor is this.id 
-    // else its a new object then actor is 'class_name' eg: 'player_mark' or 'bunny'
+    // else its a new object then actor is 'class-name-loc' eg: 'player-mark-_2' or 'bunny--_2'
 
     const params = { 
       cmd: 'wake', 
@@ -304,7 +310,7 @@ export class Player {
       saveHistory: false,
     };
 
-    // the name is 'class-name|loc' eg 'player|bob|_2'
+    // the name is 'class-name-loc' eg 'player-bob-_2'
     if (!this.id) {
       params.loc = this.startingLocation;      
       if (this.isBot) {
@@ -315,18 +321,6 @@ export class Player {
     }
 
     await this.app.sendCommand(params);
-    
-
-
-    // if (this.bot) {
-    //   //await this.app.sendCommand(params);
-    // } else {
-    //   //await this.app.sendCommand(params);
-    //   if (!this.id) {
-    //     await this.waitForId();
-    //   }
-    //   await this.app.sendCommand({ cmd: 'look', actor: this.id, loc: this.loc || '_2', saveHistory: false });
-    // }
     this.app.ui.closeDialog();
   }
 
