@@ -17,23 +17,12 @@ export class Player {
   editing = false;
   history = [];
   remember = true;
+  startingLocation = '_2';
+  isBot = false;
 
   constructor(app) {
     this.app = app;
-  }
-
-  /** 
-   * Show the logon form 
-   */
-  async welcome() {
-    if (!this.app.window) return;
-    if (this.isBot()) {
-        const obj = await this.newBot();
-        return;
-    }
-    // TODO: pass focus element as 2nd paran
-    this.app.ui.showDialog(this.findPlayerFormContent());
-    document.getElementById('playername')?.focus();
+    this.checkBot();
   }
 
   /**
@@ -41,11 +30,28 @@ export class Player {
    * wolispace.com/cowdee?_wol_slug = '?_wol_slug' = '_wol' as the ID and ignoe everything else
    * @returns {boolean}
    */
-  isBot() {
+  checkBot() {
+    if (!this.app.window) return;
     const params = window.location.search.split('_');
     if (params.length < 2) return false;
-    this.initObj = `_${params[1]}`;
-    return true;
+    // what is the bot reading? 
+    this.botTarget = `_${params[1]}`;
+    this.isBot = true;
+  }
+  
+  /** 
+   * Show the logon form 
+   */
+  async welcome() {
+    if (!this.app.window) return;
+    if (this.isBot) {
+       // send cmd to make a new bunny
+        const obj = await this.logon();
+        return;
+    }
+    // TODO: pass focus element as 2nd paran
+    this.app.ui.showDialog(this.findPlayerFormContent());
+    document.getElementById('playername')?.focus();
   }
 
   /**
@@ -55,7 +61,7 @@ export class Player {
     // TODO: change to use context 'wake' to make new player
     this.remember = false;
     const botName = 'bunny';
-    const target = await this.app.db.getById(this.initObj);
+    const target = await this.app.db.getById(this.botTarget);
     this.loc = target.loc;
     this.id = this.app.id.new();
     this.name = botName;
@@ -214,41 +220,41 @@ export class Player {
   }
 
   async newPlayer(name) {
-    const startingLocation = '_2';
+    // split name on _. eg 'player-bob-_2' or 'bunny--_2'
+    const parts = name.split('-');
+    const newClass = parts[0];
+    const newName = parts[1] ? parts[1] : '';
+    const newLoc = parts[2];
+    const newLock = newClass === 'player' ? 1 : 0;
+
     const newId = this.app.id.new();
     const obj = {
       id: newId,
-      class: 'player',
-      name: name,
-      loc: startingLocation,
-      lock: 1,
+      class: newClass,
+      name: newName,
+      loc: newLoc,
+      lock: newLock,
       owner: newId,
       color: 'gold'
     };
-    if (this.pendingPw && this.name === name) {
+
+    // is this the player who sent the context to create a new player?
+    if (this.pendingPw) {
       obj.pw = this.pendingPw;
       delete this.pendingPw;
     }
     await this.app.db.save(obj);
 
-    if (!this.id && this.name === name) {
+    // if this browser has not current player it becomes this playerprep
+    if (this.id === '') {
       this.id = obj.id;
       this.loc = obj.loc;
       this.app.name = obj.id;
-      this.loadHistory();
       if (this.remember) {
         this.app.storage?.setItem('rememberedPlayer', this.id);
-      } else {
-        this.app.storage?.removeItem('rememberedPlayer');
       }
       this.save();
-      console.log(`${this.app.name} new player created and logged in`);
-      if (this._newPlayerResolve) {
-        this._newPlayerResolve();
-        this._newPlayerResolve = null;
-      }
     }
-    return obj;
   }
 
   /**
@@ -282,26 +288,56 @@ export class Player {
 
   async wake() {
     const result = await this.app.io.fetchJson('server', { 'lastContext': 1 });
-    console.log(` ${this.app.name} wake `, result);
     this.app.lastContext = result?.lastContext || '0';
+
     // TODO: bots need to wake a new bot player without password
     // need to use same sendCmd to wake but not check qw, and run a 'read'
-    if (this.bot) {
-      await this.app.sendCommand({ cmd: `examine ${this.initObj}`, actor: this.id, loc: this.loc, saveHistory: false });
-    } else {
-      await this.app.sendCommand({ cmd: 'wake', actor: this.id || this.name, loc: this.loc || '_2', saveHistory: false });
-      if (!this.id) {
-        await this.waitForId();
+
+    // send the wake cmd 
+    // if the player and pw are ok, then the actor is this.id 
+    // else its a new object then actor is 'class_name' eg: 'player_mark' or 'bunny'
+
+    const params = { 
+      cmd: 'wake', 
+      actor: this.id, 
+      loc: this.loc, 
+      saveHistory: false,
+    };
+
+    // the name is 'class-name|loc' eg 'player|bob|_2'
+    if (!this.id) {
+      params.loc = this.startingLocation;      
+      if (this.isBot) {
+        params.actor = `bunny--${params.loc}`;
+      } else {
+        params.actor = `player-${this.name}-${params.loc}`;
       }
-      await this.app.sendCommand({ cmd: 'look', actor: this.id, loc: this.loc || '_2', saveHistory: false });
     }
+
+    await this.app.sendCommand(params);
+    
+
+
+    // if (this.bot) {
+    //   //await this.app.sendCommand(params);
+    // } else {
+    //   //await this.app.sendCommand(params);
+    //   if (!this.id) {
+    //     await this.waitForId();
+    //   }
+    //   await this.app.sendCommand({ cmd: 'look', actor: this.id, loc: this.loc || '_2', saveHistory: false });
+    // }
     this.app.ui.closeDialog();
   }
 
-  async wakePlayer(actor) {
-    console.log(`${this.app.name} wakePlayer:`, actor);
-    return await this.newPlayer(actor);
+  /**
+   * The player objects now exists and its attached to this.player so wake them by looking around 
+   */
+  async wakePlayer() {
+    console.log(`${this.app.name} wakePlayer:`, this.name, this.id, this.loc);
+    await this.app.sendCommand({ cmd: 'look', actor: this.id, loc: this.loc || '_2', saveHistory: false });
   }
+
   /**
    * Silently refresh what the player is seeing without anoucing they look around (do this after editing and returning to a tab etc..)
    */

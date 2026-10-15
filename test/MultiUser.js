@@ -101,10 +101,10 @@ async function runMultiUserSimulation() {
 
     await wolis.sendCommand(`go shed`);
     await initApp.utils.sleep(600);
-    console.log(`wolis is now in `, wolis.player.info.loc);
+    console.log(`wolis is now in `, wolis.player.loc);
     await wolis.sendCommand(`drop the frog`);
 
-    if (wolis.player.info.loc === '_2') {
+    if (wolis.player.loc === '_2') {
       throw new Error(`FAILED: Expected wolis to be in new location not in _2 starting location`);
     }
 

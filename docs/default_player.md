@@ -16,7 +16,7 @@ The importat part of all this is not just an auto-login as the last user you log
 
 If you find that local storage doesnt need to be namespaced (as I simply use incogneto mode to be any number of new/different concurrent players). That hopefully simplifies the local strorage.
 
-One fineal tidy up.. we use this.app.player.info.loc and .info.history etc.. so we simply store whatever is in player.info into and outof local storage.
+One fineal tidy up.. we use this.app.player.loc and .info.history etc.. so we simply store whatever is in player into and outof local storage.
 
 This seems a redundant extra lavel, so maybe we simplify how we get player details eg this.app.player.id and player.loc .. at the expence of a slitly more specific player.load() and .save() so we are not writing more than we need into local storage for retrieval next login.
 

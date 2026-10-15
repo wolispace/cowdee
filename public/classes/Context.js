@@ -33,13 +33,22 @@ export class Context {
     if (!this.cmd) return;
 
     if (this.cmd === 'wake') {
-      const isExistingPlayer = this.app.db.isId(this.actor) || (await this.app.db.getById(this.actor));
-      if (!isExistingPlayer) {
-        console.log(`${this.app.name} we need to create a new player`, this.actor);
-        await this.app.player.wakePlayer(this.actor);
-      } else {
-        console.log(`${this.app.name} player ${this.actor} wakes up`);
+      // if the actor is an id then we have an existing player
+      if ( !this.app.db.isId(this.actor)) {
+        await this.app.player.newPlayer(this.actor);
       }
+      await this.app.player.wakePlayer();
+      
+      // // else generate the new object/player
+      // // for this player send the wake command
+      // // if its a bot perform a read on botTarget (this has to be )
+      // const isExistingPlayer = this.app.db.isId(this.actor) || (await this.app.db.getById(this.actor));
+      // if (!isExistingPlayer) {
+      //   console.log(`${this.app.name} we need to create a new player`, this.actor);
+      //   await this.app.player.wakePlayer(this.actor);
+      // } else {
+      //   console.log(`${this.app.name} player ${this.actor} wakes up`);
+      // }
       this.app.ui.hideLoading();
       return;
     }

@@ -16,11 +16,11 @@ await app.db.saveToDisk();
 console.log('TEST 1: Direct properties & info backward-compatibility');
 app.player.id = 'wol';
 app.player.loc = '_2';
-if (app.player.id !== 'wol' || app.player.info.id !== 'wol') {
-  throw new Error('FAILED: app.player.id or app.player.info.id failed');
+if (app.player.id !== 'wol' || app.player.id !== 'wol') {
+  throw new Error('FAILED: app.player.id or app.player.id failed');
 }
-if (app.player.loc !== '_2' || app.player.info.loc !== '_2') {
-  throw new Error('FAILED: app.player.loc or app.player.info.loc failed');
+if (app.player.loc !== '_2' || app.player.loc !== '_2') {
+  throw new Error('FAILED: app.player.loc or app.player.loc failed');
 }
 console.log('✔ Direct properties and compatibility getter pass');
 

@@ -31,19 +31,19 @@ process.exit(0);
 
 async function testCommands() {
   await app.player.handleFindPlayer({ playername: 'Wolis' });
-  console.log(` - Wolis logged in: ID="${app.player.info.id}", Loc="${app.player.info.loc}", Namespace="${app.storage.getNamespace()}"`);
+  console.log(` - Wolis logged in: ID="${app.player.id}", Loc="${app.player.loc}", Namespace="${app.storage.getNamespace()}"`);
 
-  app.tester.context.actor = app.player.info.id;
+  app.tester.context.actor = app.player.id;
   app.tester.context.cmd = 'build a shed';
-  app.tester.context.loc = app.player.info.loc;
+  app.tester.context.loc = app.player.loc;
   await app.tester.context.process();
   console.log('msg in', app.tester.context.loc, app.tester.context.msg);
 
   app.tester.context.cmd = 'go shed';
-  app.tester.context.loc = app.player.info.loc;
+  app.tester.context.loc = app.player.loc;
   await app.tester.context.process();
   console.log('msg in', app.tester.context.loc, app.tester.context.msg);
-  console.log(app.player.info);
+  console.log(app.player);
 
   await app.db.saveToDisk();
 }

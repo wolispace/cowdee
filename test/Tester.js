@@ -9,8 +9,8 @@ export class Tester {
     // a context to use for creating new objects so they have the same seed
     const rawContext = {
       ts: 12345,
-      actor: this.app.player.info.id,
-      loc: this.app.player.info.loc,
+      actor: this.app.player.id,
+      loc: this.app.player.loc,
       cmd: 'do nothing',
       counter: this.app.id.counter,
     };
