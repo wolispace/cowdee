@@ -626,7 +626,7 @@ export class DB {
       delete obj[prop];
     }
     if (!obj.created) {
-      obj.creted = this.app.utils.now();
+      obj.created = this.app.utils.now();
     }
     obj.updated = this.app.utils.now();
     await this.set('id', obj.id, obj);

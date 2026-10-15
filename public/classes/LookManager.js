@@ -82,10 +82,10 @@ export class LookManager {
     this.app.player.editing = true;
     this.context = context;
     this.sentences = [];
+    const obj = await this.app.db.getById(context.target);
     let html = await this.app.db.getInfo(context.target);
         html = html.replaceAll("\n", "<br/>");
     if (!html) {
-      const obj = await this.app.db.getById(context.target);
       if (!obj) {
         html = `Opps.. I can't find object ID ${context.target}. Reload. `; 
       } else {
@@ -93,6 +93,7 @@ export class LookManager {
       }
     };
     html = this.app.ui.makeClickLinks(html);
+    html = await this.addStats(html, obj);
 
     this.info = this.wrapInfo(html);
     return this.returnData();
@@ -100,7 +101,14 @@ export class LookManager {
 
   wrapInfo(html) {
     return `<div class='info'>${html}</div><div class="click buttonize click-close" data-cmd="close">X</div>`;
+  }
 
+  async addStats(html, obj) {
+    if (obj) {
+      const owner = await this.app.db.getById(obj.owner);
+      html += `<div class='tiny'>Created ${obj.created} by ${owner.name}<br/>Updated ${obj.updated}</div>`;
+    }
+    return html;
   }
 
   async about(context) {

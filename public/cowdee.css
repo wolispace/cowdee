@@ -366,3 +366,8 @@ menu {
   padding: .5rem;
   line-height: 1.5rem;
 }
+
+.tiny {
+  font-size: 65%;
+  color: tan;
+}
