@@ -28,7 +28,7 @@ export class DB {
     if (this.wordKeys.includes(type)) key = key.toLowerCase();
     if (!this.memory[type]) this.memory[type] = {};
     if (!this.memory[type][prefix]) {
-      console.log(`${this.app.name} - had to load ${type}${prefix} from disk for key ${key}`);
+      // console.log(`${this.app.name} - had to load ${type}${prefix} from disk for key ${key}`);
       this.memory[type][prefix] = await this.app.io.loadJson(this.makeFileName(type, prefix));
     }
     return this.memory[type][prefix][key];
@@ -56,7 +56,7 @@ export class DB {
       const fileMap = await this.app.io.loadFiles(files);
       for (const [filename, items] of Object.entries(fileMap)) {
         const prefix = filename.slice(-2); // filename.slice(0, filename.length - 2); // remove the last two chars to get the prefix
-        console.log(`${this.app.name} - preLoad ${type}${prefix} from disk`);
+        // console.log(`${this.app.name} - preLoad ${type}${prefix} from disk`);
         this.memory[type][prefix] = items;
       }
     }
