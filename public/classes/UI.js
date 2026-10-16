@@ -179,7 +179,7 @@ export class UI {
     if (obj.link) { cmd = 'doorway'; hint = 'Go'; }
     if (context.cmd && context.cmd != '') { cmd = context.cmd; hint = `Choose this to ${context.cmd}`; }
     const locked = (obj.lock && obj.lock != '') ? 'locked' : '';
-    return `<span class="click ${locked}" data-cmd="${cmd}" ${style} data-id="${id}" title="${hint} ${val} [${id}]">${val}</span>`;
+    return `<span class="click ${locked}" data-cmd="${cmd}" ${style} data-id="${id}" title="${hint} ${val} ${id}">${val}</span>`;
   }
 
   makeClickLinks(msg) {
