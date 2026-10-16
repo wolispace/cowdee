@@ -89,12 +89,25 @@ export class Utils {
 
 
   /**
-   * Returns todays datetime as a formatted string eg "Mon 23 Jan 2023 at 10:23am"
+   * Returns todays datetime UTC "2026-10-16T05:49:19.111Z". 
+   * Use toLocalTime() to show this in the browsers local time
    * @returns {string}
    */
   now() {
-    return this.formatDate(new Date());
+    return new Date().toISOString();
   }
+
+  /**
+   * Takes a UTC date string andoutputs in local time a string like:
+   * "2026-10-16T05:49:19.349Z"
+   * "Fri 16 Oct 2026 at 4:19pm"
+   * @param {string} isoString 
+   * @returns {string}
+   */
+  toLocalTime(isoString) {
+    return this.formatDate(new Date(isoString));
+  }
+  
   /**
    * Returns a formatted string of a datetime eg "Mon 23 Jan 2023 at 10:23am"
    * @param {Date} d 

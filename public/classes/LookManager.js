@@ -104,9 +104,10 @@ export class LookManager {
   }
 
   async addStats(html, obj) {
+    const createDate = this.app.utils.toLocalTime(obj.created);
+    const updateDate = this.app.utils.toLocalTime(obj.updated);
     if (obj) {
-      const owner = await this.app.db.getById(obj.owner);
-      html += `<div class='tiny'>Created ${obj.created} by ${owner.name}<br/>Updated ${obj.updated}</div>`;
+      html += `<div class='tiny'>Created ${createDate} by [${obj.owner}]<br/>Updated ${updateDate}</div>`;
     }
     return html;
   }
