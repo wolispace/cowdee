@@ -50,8 +50,7 @@ export class Player {
         return;
     }
     // TODO: pass focus element as 2nd paran
-    this.app.ui.showDialog(this.findPlayerFormContent());
-    document.getElementById('playername')?.focus();
+    this.app.ui.showDialog(this.findPlayerFormContent(), 'playername');
   }
 
 
@@ -146,14 +145,12 @@ export class Player {
       if (!this.app.window || (this.app.local && this.app.quickLogin)) {
         await this.logon(obj);
       } else {
-        this.app.ui.showDialog(this.checkPwContent());
-        document.getElementById('pw')?.focus();
+        this.app.ui.showDialog(this.checkPwContent(), 'pw');
       }
     } else {
       this.name = data.playername;
       if (this.app.window) {
-        this.app.ui.showDialog(this.newPlayerContent());
-        document.getElementById('pw')?.focus();
+        this.app.ui.showDialog(this.newPlayerContent(), 'pw');
       }
     }
   }

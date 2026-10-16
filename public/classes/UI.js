@@ -59,10 +59,7 @@ export class UI {
     // DEBUG: If the user simply includes 'logoff' in the msg then logoff - make a propper command later
     if (context?.msg?.includes('logoff')) {
       this.app.player.clear();
-      this.showDialog('You have logged off<form><menu><button class="buttonize">Ok</button></menu></form>', () => { 
-        this.app.ui.closeDialog();
-        this.app.player.welcome();
-      });
+      this.app.player.welcome();
       return;
     }
     context.playerId = this.app.player.id;
@@ -215,13 +212,14 @@ export class UI {
    * @param {string} html 
    * @param {function} closeCallback 
    */
-  showDialog(html, closeCallback = () => { }) {
+  showDialog(html, element, closeCallback = () => { }) {
     this.closeCallback = closeCallback;
     if (this.dialogElement) {
       this.dialogElement.addEventListener("close", this.closeCallback);
       this.dialogElement.innerHTML = html;
       this.dialogElement.showModal();
     }
+    document.getElementById(element).focus();
   }
 
   /**
