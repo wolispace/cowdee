@@ -192,6 +192,7 @@ export class Player {
     }
     this.pendingPw = await bcrypt.hash(data.pw, 10);
     this.loc = '_2';
+    this.app.ui.closeDialog();
     await this.sendWakeCmd();
   }
 
