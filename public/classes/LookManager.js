@@ -127,6 +127,7 @@ export class LookManager {
     <tr><td>Total objects</td><td class="num">${stats.totalObjects}</td></tr>
     <tr><td>Data size</td><td  class="num">${Math.round(stats.totalDbSize / 1024)}</td><td>KB</td></tr> 
     <tr><td>Code size</td><td class="num">${Math.round(stats.totalCodeSize / 1024)}</td><td>KB</td></tr>
+    <tr><td>Players</td><td class="num">${stats.totalPlayers}</td></tr>
     </table>
     `;
     this.info = this.wrapInfo(html);

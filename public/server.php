@@ -87,6 +87,11 @@ function handleInput($request)
     $totalDbSize = getDirFilesSize($dbDir, true);
     $totalCodeSize = getDirFilesSize($publicDir, false) + getDirFilesSize($classesDir, false);
 
+    // open the name_P.json file to read how many players
+    $playerFile = DB_DIR . '/name_P.json';
+    $pnames = json_decode(file_get_contents($playerFile), true);
+    $totalPlayers = count($pnames['player']);
+
     outputJson([
       'appName'         => APP_NAME,
       'appTitle'        => APP_TITLE,
@@ -94,6 +99,7 @@ function handleInput($request)
       'totalObjects'    => $totalObjects,
       'totalDbSize'     => $totalDbSize,
       'totalCodeSize'   => $totalCodeSize,
+      'totalPlayers'    => $totalPlayers,
     ]);
   } else if (!empty($request['cmd'])) {
     $mstimestamp = round(microtime(true) * 1000);
