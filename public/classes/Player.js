@@ -192,7 +192,6 @@ export class Player {
     }
     this.pendingPw = await bcrypt.hash(data.pw, 10);
     this.loc = '_2';
-    this.app.ui.closeDialog();
     await this.sendWakeCmd();
   }
 
@@ -279,6 +278,8 @@ export class Player {
    * 'class-name-loc' or 'class-botTarget-loc' eg: 'player-bob-_2' or 'bunny-_5-_2'
    */
   async sendWakeCmd() {
+    this.app.ui.closeDialog();
+    this.app.ui.showLoading();
     const result = await this.app.io.fetchJson('server', { 'lastContext': 1 });
     this.app.lastContext = result?.lastContext || '0';
 

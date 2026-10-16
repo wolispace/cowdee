@@ -422,7 +422,6 @@ export class UI {
   // set a timeout of 500ms to animate this.top opacity from current (usually 0%) to 50% opacity over a 500ms period. 
   showLoading() {
     if (!this.app.window) return;
-    console.trace(`${this.app.name} showing loader`);
     this.loading = setTimeout(() => {
       this.top.style.opacity = '0.25';
     }, 500);
