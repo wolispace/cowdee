@@ -638,6 +638,45 @@ export class Cowmands {
       }
     },
 
+    // GO
+    go: async (rest) => {
+      // change the actors location to tne doorway
+      const targetId = await this.resolveValue(rest.trim());
+      if (!targetId) {
+        // console.log(`${this.app.name} examine '${rest}' failed to resolve targetId`);
+        return;
+      }
+      this.context.target = targetId;
+      const target = await this.app.db.getById(targetId);
+      const obj = await this.app.db.getById(this.context.actor);
+      const oldObj = { ...obj };
+
+      if (!target.link) {
+        console.log(`${this.app.name} target=(${this.context.target}) cant find: $target's link: ${target.link}`)
+        return;
+      }
+
+      // move actor into new location
+      const link = await this.app.db.getById(target.link);
+      obj.loc = link.loc;
+      await this.app.db.save(obj, oldObj);
+
+      // build a message saying the actor left via the target
+      let data = { ...this.context };
+      data.msg = `[${this.context.actor}] goes through [${this.context.target}]`;
+      await this.app.ui.addMessage(data);
+      data = await this.app.lookManager.look({ ...data });
+      await this.app.ui.addMessage(data);
+
+      // build a message saying the actor arrivde via the target's link
+      data.loc = link.loc;
+      data.msg = `[${this.context.actor}] arrives via [${link.id}]`;
+      await this.app.ui.addMessage(data);
+      data = await this.app.lookManager.look({ ...data });
+      await this.app.ui.addMessage(data);
+
+    },
+
     // FLUSH
     flush: ($rest) => {
       this.app.db.flush();

@@ -137,7 +137,33 @@ If you get stuck, try reloading the browser, or type: [goto bob] to teleport to 
     };
     await this.app.db.save(fridge);
 
+    const bunny = {
+        id: this.app.id.new(),
+      loc: '_2',
+      class: 'bunny',
+      color: 'pink',
+      owner: '_wol',
+      qty: 1,
+      code: `##tXick:runsub doit;##doit:find $loc, random doorway;go $found_id;`,
+      info: `Do not type: [push the fridge] or type: [shout hello]`
+    };
+    // await this.app.db.save(bunny);
+
+    const beachball = {
+        id: this.app.id.new(),
+      loc: '_2',
+      class: 'ball',
+      color: 'pink',
+      owner: '_wol',
+      qty: 1,
+      code: `if target of push then doit;##doit:find $loc, random doorway;go $found_id;`,
+      info: `Do not type: [push the fridge] or type: [shout hello]`
+    };
+    await this.app.db.save(beachball);
+
+
   }
+
 
   async initPlayers() {
     // pw hash of 'aaa' is:
