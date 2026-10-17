@@ -135,12 +135,8 @@ export class Cowmands {
         const obj = await this.app.db.getById(this.context.actor);
         delete this.context.nsecond;
       }
-      // Restore previous target/second before resolving
-      // TODO: this is probably redundant as we remember last targets as 'it'
-      this.context.target = ltarget;
-      this.context.second = lsecond;
 
-      if (this.context.ntarget) {
+      if (this.context.ntarget && !this.app.db.isId(this.context.target)) {
         if (this.app.db.isId(this.context.ntarget)) {
           this.context.target = this.context.ntarget;
         } else {
@@ -158,7 +154,7 @@ export class Cowmands {
           this.app.player.it = this.context.target;
         }
       }
-      if (this.context.nsecond) {
+      if (this.context.nsecond && !this.app.db.isId(this.context.target)) {
         if (this.app.db.isId(this.context.nsecond)) {
           this.context.second = this.context.nsecond;
         } else {
