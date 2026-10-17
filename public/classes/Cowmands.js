@@ -661,19 +661,18 @@ export class Cowmands {
       obj.loc = link.loc;
       await this.app.db.save(obj, oldObj);
 
-      // build a message saying the actor left via the target
-      let data = { ...this.context };
-      data.msg = `[${this.context.actor}] goes through [${this.context.target}]`;
-      await this.app.ui.addMessage(data);
-      data = await this.app.lookManager.look({ ...data });
-      await this.app.ui.addMessage(data);
+      // build a message saying the actor left via the target and tell everyone there to relook
+      this.context.msg = `[${this.context.actor}] goes through [${this.context.target}]`;
+      await this.app.ui.addMessage(this.context);
+      this.context = await this.app.lookManager.look({ ...this.context });
+      await this.app.ui.addMessage(this.context);
 
-      // build a message saying the actor arrivde via the target's link
-      data.loc = link.loc;
-      data.msg = `[${this.context.actor}] arrives via [${link.id}]`;
-      await this.app.ui.addMessage(data);
-      data = await this.app.lookManager.look({ ...data });
-      await this.app.ui.addMessage(data);
+      // build a message saying the actor arrivde via the target's link and tell everyone there to relook
+      this.context.loc = link.loc;
+      this.context.msg = `[${this.context.actor}] arrives via [${link.id}]`;
+      await this.app.ui.addMessage(this.context);
+      this.context = await this.app.lookManager.look({ ...this.context });
+      await this.app.ui.addMessage(this.context);
 
     },
 
