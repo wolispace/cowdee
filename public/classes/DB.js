@@ -738,6 +738,8 @@ export class DB {
       delete this.memory.info[infoPrefix][id];
       this.markDirty('info', infoPrefix);
     }
+    // remove from bot and pw
+    
   }
 
   /**

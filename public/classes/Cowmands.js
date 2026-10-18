@@ -646,7 +646,7 @@ export class Cowmands {
       this.context.target = await this.resolveValue(rest.trim());
       if (!this.context.target) {
         this.context.msg = `[${this.context.actor}] tried to go somewhere but failed`;
-        await this.app.ui.addMessage({ ...this.context});
+        await this.app.ui.addMessage(this.context);
         return;
       }
 
@@ -656,7 +656,7 @@ export class Cowmands {
 
       if (!target.link) {
         this.context.msg = `[${this.context.actor}] discovers [${this.context.target}] is not a doorway`;
-        await this.app.ui.addMessage({ ...this.context});        
+        await this.app.ui.addMessage(this.context);        
         console.log(`${this.app.name} target=(${this.context.target}) cant find: $target's link: ${target.link}`)
         return;
       }
@@ -706,10 +706,14 @@ export class Cowmands {
         await this.app.ui.addMessage(this.context);
         return;
       }
-      await this.app.db.delete(target.id);
-
-      this.context.msg = `[${this.context.actor}] deleted [${obj.id}`;
+      // send msg showing it was deleted so we can expand its id
+      this.context.msg = `[${this.context.actor}] deleted [${target.id}]`;
       await this.app.ui.addMessage(this.context);
+
+      // then delete it and trigger a relook
+      await this.app.db.remove(target.id);
+      this.context = await this.app.lookManager.look({ ...this.context });
+      await this.app.ui.addMessage(this.context);      
 
     },
 
