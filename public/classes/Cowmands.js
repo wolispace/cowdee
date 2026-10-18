@@ -640,25 +640,36 @@ export class Cowmands {
 
     // GO
     go: async (rest) => {
+      // remove any previous triggers so we dont re-rtigger the same command
+      delete this.context.trigger;
       // change the actors location to tne doorway
-      const targetId = await this.resolveValue(rest.trim());
-      if (!targetId) {
-        // console.log(`${this.app.name} examine '${rest}' failed to resolve targetId`);
+      this.context.target = await this.resolveValue(rest.trim());
+      if (!this.context.target) {
+        this.context.msg = `[${this.context.actor}] tried to go somewhere but failed`;
+        await this.app.ui.addMessage({ ...this.context});
         return;
       }
-      this.context.target = targetId;
-      const target = await this.app.db.getById(targetId);
+
+      const target = await this.app.db.getById(this.context.target);
       const obj = await this.app.db.getById(this.context.actor);
       const oldObj = { ...obj };
 
       if (!target.link) {
+        this.context.msg = `[${this.context.actor}] discovers [${this.context.target}] is not a doorway`;
+        await this.app.ui.addMessage({ ...this.context});        
         console.log(`${this.app.name} target=(${this.context.target}) cant find: $target's link: ${target.link}`)
         return;
       }
 
+      const moves = {away: 'leaves via', arrives: 'arrives via'};
+      if (obj.movehow) {
+        moves.away = `${obj.movehow} away via`;
+        moves.arrives = `${obj.movehow} in via`;
+      }
+      
       // build a message saying the actor left via the target and tell everyone there to relook
-      this.context.msg = `[${this.context.actor}] goes through [${this.context.target}]`;
-      await this.app.ui.addMessage({ ...this.context});
+      this.context.msg = `[${this.context.actor}] ${moves.away} [${this.context.target}]`;
+      await this.app.ui.addMessage(this.context);
 
       // move actor into new location
       const link = await this.app.db.getById(target.link);
@@ -670,14 +681,35 @@ export class Cowmands {
       }
       // tell old location to relook now actor has gone
       this.context = await this.app.lookManager.look({ ...this.context });
-      await this.app.ui.addMessage({ ...this.context});
+      await this.app.ui.addMessage(this.context);
 
       // build a message saying the actor arrived in the new location via the target's link and tell everyone there to relook
       this.context.loc = obj.loc;
-      this.context.msg = `[${this.context.actor}] arrives via [${link.id}]`;
-      await this.app.ui.addMessage({ ...this.context});
+      this.context.msg = `[${this.context.actor}] ${moves.arrives} [${link.id}]`;
+      await this.app.ui.addMessage(this.context);
       this.context = await this.app.lookManager.look({ ...this.context });
-      await this.app.ui.addMessage({ ...this.context});
+      await this.app.ui.addMessage(this.context);
+
+    },
+    // DELETE
+    delete: async (rest) => {
+      this.context.target = await this.resolveValue(rest.trim());
+      if (!this.context.target) {
+        this.context.msg = `[${this.context.actor}] tried to delete something that was not there`;
+        await this.app.ui.addMessage(this.context);
+        return;
+      }
+      
+      const target = await this.app.db.getById(this.context.target);
+      if (!target) {
+        this.context.msg = `[${this.context.actor}] tried to delete something that was not there`;
+        await this.app.ui.addMessage(this.context);
+        return;
+      }
+      await this.app.db.delete(target.id);
+
+      this.context.msg = `[${this.context.actor}] deleted [${obj.id}`;
+      await this.app.ui.addMessage(this.context);
 
     },
 

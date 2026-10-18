@@ -143,6 +143,7 @@ If you get stuck, try reloading the browser, or type: [goto bob] to teleport to 
       class: 'bunny',
       color: 'pink',
       owner: '_wol',
+      movehow: 'hops',
       qty: 1,
       code: `##tXick:runsub doit;##doit:find $loc, random doorway;go $found_id;`,
       info: `Do not type: [push the fridge] or type: [shout hello]`
@@ -155,6 +156,7 @@ If you get stuck, try reloading the browser, or type: [goto bob] to teleport to 
       class: 'ball',
       color: 'pink',
       owner: '_wol',
+      movehow: 'bounces',
       qty: 1,
       code: `if target of push then doit;##doit:find $loc, random doorway;go $found_id;`,
       info: `Do not type: [push the fridge] or type: [shout hello]`
