@@ -656,23 +656,28 @@ export class Cowmands {
         return;
       }
 
+      // build a message saying the actor left via the target and tell everyone there to relook
+      this.context.msg = `[${this.context.actor}] goes through [${this.context.target}]`;
+      await this.app.ui.addMessage({ ...this.context});
+
       // move actor into new location
       const link = await this.app.db.getById(target.link);
       obj.loc = link.loc;
       await this.app.db.save(obj, oldObj);
-
-      // build a message saying the actor left via the target and tell everyone there to relook
-      this.context.msg = `[${this.context.actor}] goes through [${this.context.target}]`;
-      await this.app.ui.addMessage(this.context);
+      if (this.app.player.id === obj.id) {
+        this.app.player.loc = obj.loc;
+        this.app.player.save();
+      }
+      // tell old location to relook now actor has gone
       this.context = await this.app.lookManager.look({ ...this.context });
-      await this.app.ui.addMessage(this.context);
+      await this.app.ui.addMessage({ ...this.context});
 
-      // build a message saying the actor arrivde via the target's link and tell everyone there to relook
-      this.context.loc = link.loc;
+      // build a message saying the actor arrived in the new location via the target's link and tell everyone there to relook
+      this.context.loc = obj.loc;
       this.context.msg = `[${this.context.actor}] arrives via [${link.id}]`;
-      await this.app.ui.addMessage(this.context);
+      await this.app.ui.addMessage({ ...this.context});
       this.context = await this.app.lookManager.look({ ...this.context });
-      await this.app.ui.addMessage(this.context);
+      await this.app.ui.addMessage({ ...this.context});
 
     },
 

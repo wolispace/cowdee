@@ -239,6 +239,12 @@ If you get stuck, try reloading the browser, or type: [goto bob] to teleport to 
       name: "outof",
       code: `set $target = $loc;\nset $loc = $target's loc;\nset $actor's loc to $loc;\nsay 'arrives',"[$actor] apears outside [$target]!";\nrelook $loc;`
     }, {
+      name: "delete",
+      code: `get $target in $loc;delete $target;`
+    }, {
+      name: "ggo",
+      code: `get $target in $loc;go $target;`
+    }, {      
       name: "flush",
       code: `flush;say 'flush',"[$actor] flushed the pools";`
     }, {
