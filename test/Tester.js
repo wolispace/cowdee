@@ -154,18 +154,15 @@ If you get stuck, try reloading the browser, or type: [goto bob] to teleport to 
         id: this.app.id.new(),
       loc: '_2',
       class: 'ball',
-      color: 'pink',
+      color: 'dodgerblue',
       owner: '_wol',
       movehow: 'bounces',
       qty: 1,
       code: `if target of push then doit;##doit:find $loc, random doorway;go $found_id;`,
-      info: `Do not type: [push the fridge] or type: [shout hello]`
+      info: `type: [push the ball];`
     };
     await this.app.db.save(beachball);
-
-
   }
-
 
   async initPlayers() {
     // pw hash of 'aaa' is:

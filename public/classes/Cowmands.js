@@ -642,6 +642,8 @@ export class Cowmands {
     go: async (rest) => {
       // remove any previous triggers so we dont re-rtigger the same command
       delete this.context.trigger;
+      delete this.context.to;
+      
       // change the actors location to tne doorway
       this.context.target = await this.resolveValue(rest.trim());
       if (!this.context.target) {
@@ -680,15 +682,15 @@ export class Cowmands {
         this.app.player.save();
       }
       // tell old location to relook now actor has gone
-      this.context = await this.app.lookManager.look({ ...this.context });
-      await this.app.ui.addMessage(this.context);
+      let data = await this.app.lookManager.look({ ...this.context });
+      await this.app.ui.addMessage(data);
 
       // build a message saying the actor arrived in the new location via the target's link and tell everyone there to relook
       this.context.loc = obj.loc;
       this.context.msg = `[${this.context.actor}] ${moves.arrives} [${link.id}]`;
       await this.app.ui.addMessage(this.context);
-      this.context = await this.app.lookManager.look({ ...this.context });
-      await this.app.ui.addMessage(this.context);
+      data = await this.app.lookManager.look({ ...this.context });
+      await this.app.ui.addMessage(data);
 
     },
     // DELETE
@@ -712,8 +714,8 @@ export class Cowmands {
 
       // then delete it and trigger a relook
       await this.app.db.remove(target.id);
-      this.context = await this.app.lookManager.look({ ...this.context });
-      await this.app.ui.addMessage(this.context);      
+      const data = await this.app.lookManager.look({ ...this.context });
+      await this.app.ui.addMessage(data);      
 
     },
 

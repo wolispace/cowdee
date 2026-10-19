@@ -45,14 +45,17 @@ export class UI {
       console.trace(`${this.app.name} no loc in context`);
       return;
     }
-
+    setTimeout(async () => {
+      await this.app.db.findTrigger(context);
+    }, 300);
+    
     if (!context.to && context.loc != this.app.player.loc) {
       // console.log(`${this.app.name} --- msg not shown`, context.loc, context.msg.slice(0, 30));
       return;
     }
     // if its to someone but not to all or the player then return
     if (context.to && context.to !== 'all' && context.to != this.app.player.id) {
-      console.log(`${this.app.name} --- msg not for this player`, context.for, context.msg.slice(0, 30));
+      console.log(`${this.app.name} --- msg not for this player. to:`, context.to, context.msg.slice(0, 30));
       return;
     }
 
@@ -73,7 +76,6 @@ export class UI {
         }
       }
       console.log(`${this.app.name} --- addMsg node: `, context.msg);
-      await this.app.db.findTrigger(context);
       return context.msg;
     }
 
@@ -96,7 +98,6 @@ export class UI {
       }
       this.blinkTitle(1000);
     }
-    await this.app.db.findTrigger(context);
   }
 
   /**
