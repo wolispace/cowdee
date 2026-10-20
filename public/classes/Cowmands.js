@@ -703,7 +703,14 @@ export class Cowmands {
     },
     // DELETE
     delete: async (rest) => {
-      this.context.target = await this.resolveValue(rest.trim());
+      let targetName = rest.trim();
+      let match = targetName.match(/(.+)\s+,\s+(.+)/i);
+      let mode = 'silent';
+      if (match) {
+        targetName = match[1];
+        mode = match[2];
+      }
+      this.context.target = await this.resolveValue(targetName);
       if (!this.context.target) {
         this.context.msg = `[${this.context.actor}] tried to delete something that was not there`;
         await this.app.ui.addMessage(this.context);
@@ -716,9 +723,12 @@ export class Cowmands {
         await this.app.ui.addMessage(this.context);
         return;
       }
-      // send msg showing it was deleted so we can expand its id
-      this.context.msg = `[${this.context.actor}] deleted [${target.id}]`;
-      await this.app.ui.addMessage(this.context);
+      
+      if (mode !== 'silent') {
+        // send msg showing it was deleted so we can expand its id
+        this.context.msg = `[${this.context.actor}] deleted [${target.id}]`;
+        await this.app.ui.addMessage(this.context);
+      }
 
       // then delete it and trigger a relook
       await this.app.db.remove(target.id);

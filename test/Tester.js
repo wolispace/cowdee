@@ -145,8 +145,11 @@ If you get stuck, try reloading the browser, or type: [goto bob] to teleport to 
       owner: '_wol',
       movehow: 'hops',
       qty: 1,
-      code: `##tXick:runsub doit;##doit:find $loc, random doorway;go $found_id;`,
-      info: `Do not type: [push the fridge] or type: [shout hello]`
+      code: `##tick:runsub doit;
+      ##doit: if $actor's steps > 8 then delme else moveme;
+      ##moveme: find $loc, random doorway;go $found_id;
+      ##delme: say 'bye', "[$actor] dissapears in a puff of logic";delete $actor;`,
+      info: `Im a roaming temporary bunny`
     };
     // await this.app.db.save(bunny);
 
@@ -158,7 +161,10 @@ If you get stuck, try reloading the browser, or type: [goto bob] to teleport to 
       owner: '_wol',
       movehow: 'bounces',
       qty: 1,
-      code: `if target of push then doit;##doit:find $loc, random doorway;go $found_id;`,
+      code: `if target of push then doit;
+      ##doit: if $actor's steps > 2 then delme else moveme;
+      ##moveme: say 'step', "[$actor] has moved [$actor.steps]";set $actor's blip = 'ONE';find $loc, random doorway;go $found_id;
+      ##delme: say 'bye', "[$actor] dissapears in a puff of logic";delete $actor;`,
       info: `type: [push the ball];`
     };
     await this.app.db.save(beachball);
