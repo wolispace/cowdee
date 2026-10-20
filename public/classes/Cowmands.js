@@ -242,8 +242,9 @@ export class Cowmands {
       if (!obj) return;
 
       // dont set anything if its locked and the actor is not the owner
-      if (obj.lock != null) {
-        if (obj.owner !== this.context.actor) {
+      if (obj.lock != null && obj.lock !== '' && obj.owner !== this.context.actor) {
+        // if this is not the owner or the trigegring obj is not the owner then fail
+        if (![obj.owner,obj.id].includes(this.context.triggerby)) {
           this.context.msg = `Opps... ${obj.longname} is locked.`;
           this.app.ui.addMessage(this.context);
           // end the commands in this context
@@ -259,7 +260,7 @@ export class Cowmands {
       obj[prop] = val;
       await this.app.db.save(obj, oldObj);
       // update the players location
-      if (this.app.player.id == obj.id && this.app.player.loc != obj.loc) {
+      if (this.app.player.id == obj.id && prop === 'loc') {
         this.app.player.loc = obj.loc;
         this.app.player.save();
       }
@@ -277,6 +278,10 @@ export class Cowmands {
         const prop = pair.substring(0, eqIdx).trim();
         const val = await this.resolveValue(pair.substring(eqIdx + 1).trim());
         obj[prop] = val;
+        if (this.app.player.id == obj.id && prop === 'loc') {
+          this.app.player.loc = obj.loc;
+          this.app.player.save();
+        }
       }
       await this.app.db.save(obj, oldObj);
     },
@@ -676,11 +681,14 @@ export class Cowmands {
       // move actor into new location
       const link = await this.app.db.getById(target.link);
       obj.loc = link.loc;
+      // increment the steps this object has made (moving from one location to another - excluding teleportation)
+      obj.steps = obj.steps ? obj.steps + 1 : 1;
       await this.app.db.save(obj, oldObj);
       if (this.app.player.id === obj.id) {
         this.app.player.loc = obj.loc;
         this.app.player.save();
       }
+
       // tell old location to relook now actor has gone
       let data = await this.app.lookManager.look({ ...this.context });
       await this.app.ui.addMessage(data);

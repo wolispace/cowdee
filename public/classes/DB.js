@@ -260,6 +260,7 @@ export class DB {
     for (const pair of triggerable) {
       for (const [id, block] of Object.entries(pair)) {
         // prepare the context for this execution
+        context.triggerby = context.actor;
         context.actor = id;
         const code = await this.getCode(id);
         await context.runCodeFrom(code, block);
