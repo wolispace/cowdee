@@ -534,12 +534,14 @@ export class Cowmands {
     },
     // ABOUT
     about: async (rest) => {
+      if (this.context.actor !== this.app.player.id) return;
       const data = await this.app.lookManager.about({ ...this.context });
       this.context.to = this.context.actor;
       await this.app.ui.addMessage(data);
     },
     // EXAMINE
     examine: async (rest) => {
+      if (this.context.actor !== this.app.player.id) return;
       const obj = await this.resolveValue(rest.trim());
       if (!obj) {
         // console.log(`${this.app.name} examine '${rest}' failed to resolve obj`);
@@ -552,6 +554,7 @@ export class Cowmands {
     },
     // CODE
     code: async (rest) => {
+      if (this.context.actor !== this.app.player.id) return;
       const obj = await this.resolveValue(rest.trim());
       if (!obj) {
         // console.log(`${this.app.name} code '${rest}' failed to resolve obj`);
@@ -564,6 +567,7 @@ export class Cowmands {
     },
     // EDIT
     edit: async (rest) => {
+      if (this.context.actor !== this.app.player.id) return;
       const obj = await this.resolveValue(rest.trim());
       if (!obj) {
         return;
@@ -723,7 +727,7 @@ export class Cowmands {
         await this.app.ui.addMessage(this.context);
         return;
       }
-      
+
       if (mode !== 'silent') {
         // send msg showing it was deleted so we can expand its id
         this.context.msg = `[${this.context.actor}] deleted [${target.id}]`;
