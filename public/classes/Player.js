@@ -206,6 +206,7 @@ export class Player {
     const obj = { 
       id: newId,
       loc: parts[2] ?? this.startingLocation, 
+      qty: 1,
     };
     
     if (parts[0] === 'player') {
@@ -221,7 +222,13 @@ export class Player {
       }
     } else {
       obj.class = 'bunny';
-      obj.color = 'tan';
+      obj.color = 'pink';
+      obj.movehow = 'hops';
+      obj.code = `##tick:runsub doit;
+##doit: if $actor's steps > 8 then delme else moveme;
+##moveme: find $loc, random doorway;go $found_id;
+##delme: say 'bye', "[$actor] dissapears in a puff of logic";delete $actor;`,
+      obj.info = `Im a roaming temporary bunny`      
       // remember the second param as the object the bot is reading
       this.botTarget = parts[1];
     }
