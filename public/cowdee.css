@@ -332,17 +332,18 @@ menu {
 }
 
 .info textarea {
-  width: 100%;
   height: 6rem;
-  color: var(--font-color);
-  background-color: var(--info-input-bg);
 }
 
-.info input {
+.infoinput {
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   width: 100%;
   color: var(--font-color);
   background-color: var(--info-input-bg);
-
+  box-shadow: inset 0.1rem 0.1rem 0.2rem 0.1rem black;
+  border-bottom-style: inset;
+  border-radius: .2rem;
+  border: 0;
 }
 
 .info table {

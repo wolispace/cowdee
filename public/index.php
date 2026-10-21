@@ -30,7 +30,7 @@ $rnd = rand(0, 999999); ?>
     <form id="input" class="commandform" autocomplete="off">
       <input type="hidden" name="type" value="cmd" />
       <label for="cmd" class="commandlabel">Cmd </label>
-      <input type="text" class="commandterm" name="cmd" id="cmd" placeholder="What do you want to do?" value=""
+      <input type="text" class="commandterm infoinput" name="cmd" id="cmd" placeholder="What do you want to do?" value=""
         autofocus spellcheck="false" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" />
       <input type="submit" class="commandbutton" value="Go" />
     </form>

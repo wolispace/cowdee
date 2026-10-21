@@ -187,8 +187,8 @@ export class LookManager {
     return `<form class='info'>
       <input type="hidden" name="type" value="${type}">
       <input type="hidden" name="id" value="${id}">
-      <textarea name="val">${value}</textarea>
-      <input type="text" name="extra" value="${extra}" title="The extra information shown when looking around" />
+      <textarea class="infoinput" name="val" placeholder="What you see when you examine or read this">${value}</textarea>
+      <input class="infoinput" type="text" name="extra" value="${extra}" placeholder="Extrat text after its name when looking" title="The extra information shown when looking around" />
       <div class="buttons">
       <button type="submit" name="action" value="cancel">Cancel</button>
       <button type="submit" name="action" value="save">Save</button>
