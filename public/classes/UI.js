@@ -154,7 +154,7 @@ export class UI {
       for (const match of matches) {
         const [token, id, attr] = match;
         const obj = loadedObjs[id];
-        const replacement = this.expandToken(obj, id, attr, defaultProp, context, format);
+        const replacement = await this.expandToken(obj, id, attr, defaultProp, context, format);
         context.msg = context.msg.replace(token, replacement);
       }
       context.msg = context.msg.replace(/\s+/g, ' ').trim();
@@ -163,7 +163,7 @@ export class UI {
     return context.msg;
   }
 
-  expandToken(obj, id, attr, defaultProp, context, format) {
+  async expandToken(obj, id, attr, defaultProp, context, format) {
     if (!obj) return ` (can't find id=${id}) `;
     this.app.db.formatObject(obj);
     const prop = attr || defaultProp;
@@ -174,10 +174,26 @@ export class UI {
     if (format !== 'html') return val;
     const style = obj.color ? `style="color: ${obj.color}"` : '';
     let cmd = 'examine', hint = 'Examine';
-    if (obj.link) { cmd = 'doorway'; hint = 'Go'; }
+    let showloc = '';
+    if (obj.link) { 
+      cmd = 'doorway'; 
+      hint = 'Go';
+      showloc = await this.seeThroughDoorway(obj);
+    }
+    
     if (context.cmd && context.cmd != '') { cmd = context.cmd; hint = `Choose this to ${context.cmd}`; }
     const locked = (obj.lock && obj.lock != '') ? 'locked' : '';
-    return `<span class="click ${locked}" data-cmd="${cmd}" ${style} data-id="${id}" title="${hint} ${val} ${id}">${val}</span>`;
+    return `<span class="click ${locked}" data-cmd="${cmd}" ${style} data-id="${id}" title="${hint} ${val} ${id}">${val}</span>${showloc}`;
+  }
+
+  async seeThroughDoorway(obj) {
+    let showloc = '';
+    const linked = await this.app.db.getById(obj.link);
+    if (linked.loc !== obj.id) {
+      const newloc = await this.app.db.getById(linked.loc);
+      showloc = ` (through this you can see a ${newloc.class}) `;
+    }
+    return showloc;
   }
 
   makeClickLinks(msg) {
