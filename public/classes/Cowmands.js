@@ -267,12 +267,15 @@ export class Cowmands {
     },
     // UPDATE handler
     update: async (rest) => {
-      const match = rest.match(/^(\$[\w'\s]+)\s+(?:to|=)\s+["']?(.+?)["']?$/i);
+      rest = this.app.utils.decodeString(rest);
+      const debug = JSON.stringify(rest);
+
+      const match = rest.match(/^(.+?)\s*(to|=)\s*\"(.+)\"$/i);
       if (!match) return;
       const obj = await this.resolveObj(match[1].trim());
       if (!obj) return;
       const oldObj = { ...obj };
-      for (const pair of match[2].split(',')) {
+      for (const pair of match[3].split(',')) {
         const eqIdx = pair.indexOf('=');
         if (eqIdx === -1) continue;
         const prop = pair.substring(0, eqIdx).trim();

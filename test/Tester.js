@@ -197,22 +197,22 @@ If you get stuck, try reloading the browser, or type: [goto bob] to teleport to 
   async initCommands() {
     const commands = [{
       name: "say",
-      code: `get $text,$rel,$target in $loc;\nif $target > 0 then sayto else saytext;\n\n##sayto:\nif $niceness > 0 then saynice;\nif $text like \"?\" then asktoit else saytoit;\n##asktoit:\nsay 'ask',\"[$actor] $prefix asks [$target] '$text'\";\n##saytoit:\nsay 'say',\"[$actor] $prefix says '$text' to [$target]\";\n\n##saytext:\nget $text;\nif $niceness > 0 then saynice else saynormal;\nif $text like \"?\" then askit else sayit;\n##askit:\nsay 'ask',\"[$actor] $prefix asks '$text'\";\n##sayit:\nsay 'say',\"[$actor] $prefix says '$text'\";\n\n##saynice:\nvar $prefix to (sweetly,nicely,politely);`,
+      code: `get $text,$rel,$target in $loc;\nif $target > 0 then sayto else saytext;\n\n##sayto:\nif $niceness > 0 then saynice;\nif $text like "?" then asktoit else saytoit;\n##asktoit:\nsay 'ask',"[$actor] $prefix asks [$target] '$text'";\n##saytoit:\nsay 'say',"[$actor] $prefix says '$text' to [$target]";\n\n##saytext:\nget $text;\nif $niceness > 0 then saynice else saynormal;\nif $text like "?" then askit else sayit;\n##askit:\nsay 'ask',"[$actor] $prefix asks '$text'";\n##sayit:\nsay 'say',"[$actor] $prefix says '$text'";\n\n##saynice:\nvar $prefix to (sweetly,nicely,politely);`,
     }, {
       name: "think",
-      code: `get $text;\nif $text ne '' then thinkit else ponder;\n##thinkit:\nsay 'think',\"[$actor] .oO( $text )\";\n##ponder:\nsay 'think',\"[$actor] .o0( I keep thinking its Tuesday )\"`
+      code: `get $text;\nif $text ne '' then thinkit else ponder;\n##thinkit:\nsay 'think',"[$actor] .oO( $text )";\n##ponder:\nsay 'think',"[$actor] .o0( I keep thinking its Tuesday )"`
     }, {
       name: "shout",
-      code: `get $text;\nif $text ne 'shout' then shoutit else fail;\n##shoutit:\nmsg 0,$actor,0,0,'shout',\"You hear [$actor] shout '$text!'\",$actor;\n##fail:\nvar $mm to (Hello,Hay,Bingo,Ahoy there mates,Its life Jim,Horse,Four,My my,AAARGH);\nmsg 0,$actor,0,0,'shout',"[$actor] shouts '$mm!'",$actor;`
+      code: `get $text;\nif $text ne 'shout' then shoutit else fail;\n##shoutit:\nmsg 0,$actor,0,0,'shout',"You hear [$actor] shout '$text!'",$actor;\n##fail:\nvar $mm to (Hello,Hay,Bingo,Ahoy there mates,Its life Jim,Horse,Four,My my,AAARGH);\nmsg 0,$actor,0,0,'shout',"[$actor] shouts '$mm!'",$actor;`
     }, {
       name: "do",
-      code: `get $text;\nif $text ne '' then doit else fail;\n##doit:\nsay 'action',\"[$actor] $text\";\n##fail:\nvar $text to (claps,dances around the room,sits down);\nrunsub doit;`
+      code: `get $text;\nif $text ne '' then doit else fail;\n##doit:\nsay 'action',"[$actor] $text";\n##fail:\nvar $text to (claps,dances around the room,sits down);\nrunsub doit;`
     }, {
       name: "create",
       code: `get $text;\nnew $text;\nsay 'create',"[$actor] creates [$target]";\nrelook $loc;`
     }, {
       name: "find",
-      code: `get $target;\nvar $dest to $target's loc;\nif $target > 0 then itshere else fail;\n##itshere:\nvar $dest to $target's loc;\nsay 'msg',\"[$actor] finds [$target] in [$dest]\";\n##fail;\nsay 'msg',\"[$actor] wants to find '$cmd_text' but has no idea where to start looking\";`
+      code: `get $target;\nvar $dest to $target's loc;\nif $target > 0 then itshere else fail;\n##itshere:\nvar $dest to $target's loc;\nsay 'msg',"[$actor] finds [$target] in [$dest]";\n##fail;\nsay 'msg',"[$actor] wants to find '$cmd_text' but has no idea where to start looking";`
     }, {
       name: "look",
       code: `say 'look',"[$actor] looks around";\nrelook $loc;`
@@ -221,16 +221,16 @@ If you get stuck, try reloading the browser, or type: [goto bob] to teleport to 
       code: `list $loc;`
     }, {
       name: "put",
-      code: `get $target,$rel,$second in $loc,$loc;\nset $target's hosthow to \"$rel\";\nset $target's host to $second;\nset $target's hosthow to \"$rel\";\nset $target's pose to '';\nsay 'put',\"[$actor] put [$target] $rel [$second]\";\nrelook $loc;`
+      code: `get $target,$rel,$second in $loc,$loc;\nset $target's hosthow to "$rel";\nset $target's host to $second;\nset $target's hosthow to "$rel";\nset $target's pose to '';\nsay 'put',"[$actor] put [$target] $rel [$second]";\nrelook $loc;`
     }, {
       name: "push",
-      code: `get $target in $loc;\nclear $target,all;\nsay 'push',\"[$actor] pushes [$target]\";\nrelook $loc;`
+      code: `get $target in $loc;\nclear $target,all;\nsay 'push',"[$actor] pushes [$target]";\nrelook $loc;`
     }, {
       name: "pose",
-      code: `get $target,''as',$text,non-greedy in $loc;\nset $target's pose to $text;\nsay 'pose',\"[$actor] poses [$target] as $text\";\nrelook $loc;`
+      code: `get $target,''as',$text,non-greedy in $loc;\nset $target's pose to $text;\nsay 'pose',"[$actor] poses [$target] as $text";\nrelook $loc;`
     }, {
       name: "goto",
-      code: `get $target;clear $actor,all;\nset $actor's loc to $target's loc;\nsay 'leaves',\"[$actor] dissapears in a puff of smoke\";\nvar $loc to $target's loc;\nsay 'arrives',\"[$actor] appears out of thin air!\";\nrelook $loc;`
+      code: `get $target;clear $actor,all;\nset $actor's loc to $target's loc;\nsay 'leaves',"[$actor] dissapears in a puff of smoke";\nvar $loc to $target's loc;\nsay 'arrives',"[$actor] appears out of thin air!";\nrelook $loc;`
     }, {
       name: "go",
       code: `get $target in $loc; go $target;`
@@ -254,19 +254,19 @@ If you get stuck, try reloading the browser, or type: [goto bob] to teleport to 
       code: `flush;say 'flush',"[$actor] flushed the pools";`
     }, {
       name: "build",
-      code: `get $text,'to',$text2;\nif $text2 ne '' then complex else simple;\n\n##complex:\nnew $text;\nvar $door1 to $new_id;\ncopy $new_id;\nvar $door2 to $new_id;\nnew $text2;\nupdate $new_id to \"worth=0, loc=$door1, pose='hidden'\";\nset $new_id's pwd to $actor's pwd; \nupdate $door2 to \"loc=$new_id, link=$door1, color='paleblue', worth=0, material='_door_'\";\nupdate $door1 to \"link=$door2, color='tomato', worth=0, material='_door_'\";\nsay 'create',\"[$actor] built [$door1] to somewhere $rather interesting\";\nrelook $loc;\n\n##simple:\nnew exit;\nvar $exit to $new_id;\nnew $text;\nupdate $new_id to \"link=$exit, color='lightgreen'\";\nupdate $exit to \"link=$new_id, loc=$new_id, extra='from here', qty=1, class='exit', color='lightgreen'\";\nsay 'create',\"[$actor] built [$new_id]\";\nrelook $loc;`
+      code: `get $text,'to',$text2;\nif $text2 ne '' then complex else simple;\n\n##complex:\nnew $text;\nvar $door1 to $new_id;\ncopy $new_id;\nvar $door2 to $new_id;\nnew $text2;\nupdate $new_id to "worth=0, loc=$door1, pose='hidden'";\nset $new_id's pwd to $actor's pwd; \nupdate $door2 to "loc=$new_id, link=$door1, color='paleblue', worth=0, material='_door_'";\nupdate $door1 to "link=$door2, color='tomato', worth=0, material='_door_'";\nsay 'create',"[$actor] built [$door1] to somewhere $rather interesting";\nrelook $loc;\n\n##simple:\nnew exit;\nvar $exit to $new_id;\nnew $text;\nupdate $new_id to "link=$exit, color='lightgreen'";\nupdate $exit to "link=$new_id, loc=$new_id, extra='from here', qty=1, class='exit', color='lightgreen'";\nsay 'create',"[$actor] built [$new_id]";\nrelook $loc;`
     }, {
       name: "copy",
       code: `get $target in $loc;\ncopy $target;\nsay 'copy', "[$actor] copies [$target]";\nrelook $loc;`
     }, {
       name: "paint",
-      code: `get $target,$lastword in $loc;\nif $lastword ne '' then paintit else picker;\n##picker:\ncolorpicker;\n##paintit:\nset $target's color to $lastword;\nsay 'paint',\"[$actor] paints [$target] $lastword\";\nrelook $loc;`
+      code: `get $target,$lastword in $loc;\nif $lastword ne '' then paintit else picker;\n##picker:\ncolorpicker;\n##paintit:\nset $target's color to $lastword;\nsay 'paint',"[$actor] paints [$target] $lastword";\nrelook $loc;`
     }, {
       name: "get",
-      code: `get $target in $loc;\nunhost $target;\nclear $target,all;\nset $target's pose to \"\";\nset $target's loc to $actor;\nsay 'gets',\"[$actor] gets [$target]\";\nrelook $loc;\nvar $loc to $actor;\n msg $loc,$actor,$target,0,'arrives',\"[$target] appears from nowhere\";\nrelook $actor's loc;`
+      code: `get $target in $loc;\nunhost $target;\nclear $target,all;\nset $target's pose to "";\nset $target's loc to $actor;\nsay 'gets',"[$actor] gets [$target]";\nrelook $loc;\nvar $loc to $actor;\n msg $loc,$actor,$target,0,'arrives',"[$target] appears from nowhere";\nrelook $actor's loc;`
     }, {
       name: "drop",
-      code: `get $target in $actor;\nvar $dest to $actor's loc;\nset $target's loc to $dest;\nsay 'drops',\"[$actor] drops [$target]\";\nvar $loc to $dest;\nrelook $loc;\nvar $loc to $actor;\nsay 'gone',\"[$target] has gone\";\nrelook $actor's loc;`
+      code: `get $target in $actor;\nvar $dest to $actor's loc;\nset $target's loc to $dest;\nsay 'drops',"[$actor] drops [$target]";\nvar $loc to $dest;\nrelook $loc;\nvar $loc to $actor;\nsay 'gone',"[$target] has gone";\nrelook $actor's loc;`
     }, {
       name: "inv",
       code: `list $actor;\n`

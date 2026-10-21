@@ -1,6 +1,7 @@
 :root {
   --font-color: rgba(255, 255, 255, 0.75);
   --background-color: #090a0d;
+  --info-input-bg: #111216;
   --max-width: 800px;
   --splitter-height: 1rem;
   --input-height: 2rem;
@@ -332,9 +333,16 @@ menu {
 
 .info textarea {
   width: 100%;
-  height: 6.5rem;
+  height: 6rem;
   color: var(--font-color);
-  background-color: #111216;
+  background-color: var(--info-input-bg);
+}
+
+.info input {
+  width: 100%;
+  color: var(--font-color);
+  background-color: var(--info-input-bg);
+
 }
 
 .info table {

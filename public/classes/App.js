@@ -195,7 +195,10 @@ export class App {
 
   buildSaveCommand(data) {
     let encoded = this.utils.encodeString(data.val);
-    let cmd = `::run set ${data.id}'s ${data.type} to "${encoded}";`;
+    let extra = this.utils.encodeString(data.extra);
+    // let cmd = `::run set ${data.id}'s ${data.type} to "${encoded}";`;
+    // update $new_id to "worth=0, loc=$door1, pose='hidden'";
+    let cmd = `::run update ${data.id} to "${data.type}='${encoded}', extra='${extra}'";`;
     cmd += `relook $actor's loc;`;
     cmd += `say 'edit',"[$actor] finishes with [${data.id}]";`;
     return cmd;
