@@ -14,9 +14,9 @@ define('ID_COUNTER_FILE', '_counter.txt'); // the counter of the last highest ID
 function logIt($str) {
   $dateTime = date('Ymd H:i:s');
   file_put_contents('_log.txt', "{$dateTime},{$_SERVER['REMOTE_ADDR']},{$str}\n", FILE_APPEND | LOCK_EX);
-  }
-  
-  function get_new_contexts($lastContext) {
+}
+
+function get_new_contexts($lastContext) {
   $files = glob(CONTEXT_DIR . '/*' . CONTEXT_EXT);
   if (!$files) return [];
   sort($files);
@@ -29,7 +29,8 @@ function logIt($str) {
   $contexts = [];
   foreach ($files as $file) {
     $ts = substr(basename($file), 0, 13);
-    if ($ts < (time() - 3600) * 1000) { 
+    // 900 seconds = 15mins
+    if ($ts < (time() - 900) * 1000) { 
       @unlink($file);
       logIt('kill old file ' . $file . ', ' . $ts . ' < ' . (time() - 3600) * 1000); 
       continue; 
