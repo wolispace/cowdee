@@ -39,6 +39,7 @@ export class Context {
       }
       await this.app.player.wakePlayer();
       this.msg = `[${this.actor}] wakes up`;
+      this.to = 'all';
       await this.app.ui.addMessage(this);
       this.app.ui.hideLoading();
       return;
