@@ -51,51 +51,45 @@ export class Tester {
     return names[this.context.random(names.length)];
   }
 
+  async initObjects() {
+    const startingLocId = this.app.id.new();
+    const wolisId = this.app.id.new();
+    const libraryId = this.app.id.new();
+    const libraryDoorId = this.app.id.new();
 
-  async initObjects(max) {
-    let counter = 0;
-    while (counter++ < max) {
-      const obj = {
-        id: this.app.id.new(),
-        class: this.randomName(),
-        qty: 1,
-        owner: '_wol',
-        loc: '_' + this.app.id.encodeInt(this.context.random(this.app.settings.max)),
-        color: this.randomColor()
-      };
-      obj.info = `It's a pretty ordinary ${obj.class}`;
-      await this.app.db.save(obj);
-      if (counter % 10 === 0) {
-        process.stdout.write(":");
-      }
-    }
-    const kitchen = await this.app.db.get('id', '_2');
-    const old1 = { ...kitchen };
-    kitchen.class = 'kitchen';
-    kitchen.loc = '__';
-    kitchen.lock = 1;
-    kitchen.info = `It's a cozy kitchen with yellow paint on the walls`;
-    this.app.db.setPluralName(kitchen);
-    await this.app.db.save(kitchen, old1);
+    let obj = {
+      id: startingLocId,
+      class: 'Old village',
+      qty: 0,
+      owner: wolisId,
+      loc: '__',
+      color: 'tan',
+      lock: 1,
+    };
+    await this.app.db.save(obj);
 
-    const library = await this.app.db.get('id', '_3');
-    const old2 = { ...library };
-    library.class = 'library';
-    library.loc = '__';
-    library.lock = 1;
-    library.info = 'It is vast, cavenous and built from solid marble';
-    this.app.db.setPluralName(library);
-    await this.app.db.save(library, old2);
+    obj = {
+      id: wolisId,
+      class: 'player',
+      name: 'Wolis',
+      qty: 1,
+      owner: wolisId,
+      loc: startingLocId,
+      color: 'goldenrod',
+      lock: 1,
+      pw: "$2b$10$KrEhOb\/LpXNnqimUWwfKdO\/IITbgYbtImzEHQQZ\/a5OV\/VjoDU.3q",
+      info: 'Creator of COW',
+    };
+    await this.app.db.save(obj);
 
-    const sign = {
+    obj = {
       id: this.app.id.new(),
-      loc: '_2',
+      loc: startingLocId,
       class: 'sign',
       color: 'white',
-      owner: '_wol',
+      owner: wolisId,
       qty: 1,
       lock: 1,
-      code: `if target of push then pushme;##pushme: say 'say', "[$actor] says 'Oi! quit pushing!'";##tick:runsub doit/10;##doit:say 'think',"[$actor] .oO( I keep thinking its Tuesday )";`,
       info: `Type short commands and press Enter. 
 type: [look] shows you where you are.
 type: [say hello], type: [think I wonder if..] and type: [do sits down] are ways of communicating with others
@@ -123,78 +117,36 @@ You can also code objects but you need to know about CowScript for this.
 
 If you get stuck, try reloading the browser, or type: [goto bob] to teleport to the player Bob wherever they are right now.`
     };
-    await this.app.db.save(sign);
-
-    const fridge = {
-      id: this.app.id.new(),
-      loc: '_2',
-      class: 'fridge',
-      color: 'white',
-      owner: '_wol',
+    await this.app.db.save(obj);
+    
+    obj = {
+      id: libraryId,
+      class: 'library',
       qty: 1,
-      code: `if reacting to say then pushit;##pushit:\nfind $loc, sign;\nsay 'push', "[$actor] pushes [$found_id]";##tick:runsub noiseit/5;##noiseit:$how = (quietly,loudly,abruptly);$noise = (gurgles,pops,dings,groans,wheezes);say 'do',"[$actor] $how $noise";##tiXckhour:say 'think',"[$actor] .oO( Brrr );`,
-      info: `Do not type: [push the fridge] or type: [shout hello]`
-    };
-    await this.app.db.save(fridge);
-
-    const bunny = {
-        id: this.app.id.new(),
-      loc: '_2',
-      class: 'bunny',
-      color: 'pink',
-      owner: '_wol',
-      movehow: 'hops',
-      qty: 1,
-      code: `##tick:runsub doit;
-      ##doit: if $actor's steps > 8 then delme else moveme;
-      ##moveme: find $loc, random doorway;go $found_id;
-      ##delme: say 'bye', "[$actor] dissapears in a puff of logic";delete $actor;`,
-      info: `Im a roaming temporary bunny`
-    };
-    // await this.app.db.save(bunny);
-
-    const beachball = {
-        id: this.app.id.new(),
-      loc: '_2',
-      class: 'ball',
-      color: 'dodgerblue',
-      owner: '_wol',
-      movehow: 'bounces',
-      qty: 1,
-      code: `if target of push then doit;
-      ##doit: if $actor's steps > 2 then delme else moveme;
-      ##moveme: say 'step', "[$actor] has moved [$actor.steps]";set $actor's blip = 'ONE';find $loc, random doorway;go $found_id;
-      ##delme: say 'bye', "[$actor] dissapears in a puff of logic";delete $actor;`,
-      info: `type: [push the ball];`
-    };
-    await this.app.db.save(beachball);
-  }
-
-  async initPlayers() {
-    // pw hash of 'aaa' is:
-    const hash = "$2b$10$KrEhOb\/LpXNnqimUWwfKdO\/IITbgYbtImzEHQQZ\/a5OV\/VjoDU.3q";
-    const players = [
-      { loc: '_2', name: 'Wolis', id: '_wol' },
-      { loc: '_2', name: 'Bob', id: '_bob' },
-      { loc: '_3', name: 'Jane', id: '_jan' },
-    ];
-
-    for (const player of players) {
-      const obj = {};
-      obj.id = player.id;
-      obj.loc = player.loc;
-      obj.name = player.name;
-      obj.pw = hash;
-      obj.qty = 1;
-      obj.owner = player.id;
-      obj.lock = 1;
-      obj.class = 'player';
-      obj.color = 'goldenrod';
-      await this.app.db.save(obj);
+      owner: wolisId,
+      loc: startingLocId,
+      color: 'lightslategrey',
+      lock: 1,
+      link: libraryDoorId,
     }
+    await this.app.db.save(obj);
+
+    obj = {
+      id: libraryDoorId,
+      class: 'front door',
+      qty: 1,
+      owner: wolisId,
+      loc: libraryId,
+      color: 'tan',
+      lock: 1,
+      link: libraryId,
+    }
+    await this.app.db.save(obj);
+
+    await this.initCommands(libraryId, wolisId);
   }
 
-  async initCommands() {
+  async initCommands(loc, owner) {
     const commands = [{
       name: "say",
       code: `get $text,$rel,$target in $loc;\nif $target > 0 then sayto else saytext;\n\n##sayto:\nif $niceness > 0 then saynice;\nif $text like "?" then asktoit else saytoit;\n##asktoit:\nsay 'ask',"[$actor] $prefix asks [$target] '$text'";\n##saytoit:\nsay 'say',"[$actor] $prefix says '$text' to [$target]";\n\n##saytext:\nget $text;\nif $niceness > 0 then saynice else saynormal;\nif $text like "?" then askit else sayit;\n##askit:\nsay 'ask',"[$actor] $prefix asks '$text'";\n##sayit:\nsay 'say',"[$actor] $prefix says '$text'";\n\n##saynice:\nvar $prefix to (sweetly,nicely,politely);`,
@@ -246,9 +198,6 @@ If you get stuck, try reloading the browser, or type: [goto bob] to teleport to 
     }, {
       name: "delete",
       code: `get $target in $loc;delete $target;`
-    }, {
-      name: "go",
-      code: `get $target in $loc;go $target;`
     }, {      
       name: "flush",
       code: `flush;say 'flush',"[$actor] flushed the pools";`
@@ -302,15 +251,61 @@ If you get stuck, try reloading the browser, or type: [goto bob] to teleport to 
 
     for (const obj of commands) {
       obj.id = this.app.id.new();
-      obj.loc = '_3';
+      obj.loc = loc;
       obj.class = 'command';
       obj.qty = 1;
       obj.lock = 1;
-      obj.owner = '_wol',
+      obj.owner = owner,
         obj.color = this.randomColor();
       await this.app.db.save(obj);
     }
   }
 
+  async oldObjs() {
+    
+    const fridge = {
+      id: this.app.id.new(),
+      loc: '_2',
+      class: 'fridge',
+      color: 'white',
+      owner: '_wol',
+      qty: 1,
+      code: `if reacting to say then pushit;##pushit:\nfind $loc, sign;\nsay 'push', "[$actor] pushes [$found_id]";##tick:runsub noiseit/5;##noiseit:$how = (quietly,loudly,abruptly);$noise = (gurgles,pops,dings,groans,wheezes);say 'do',"[$actor] $how $noise";##tiXckhour:say 'think',"[$actor] .oO( Brrr );`,
+      info: `Do not type: [push the fridge] or type: [shout hello]`
+    };
+    await this.app.db.save(fridge);
 
+    const bunny = {
+        id: this.app.id.new(),
+      loc: '_2',
+      class: 'bunny',
+      color: 'pink',
+      owner: '_wol',
+      movehow: 'hops',
+      qty: 1,
+      code: `##tick:runsub doit;
+      ##doit: if $actor's steps > 8 then delme else moveme;
+      ##moveme: find $loc, random doorway;go $found_id;
+      ##delme: say 'bye', "[$actor] dissapears in a puff of logic";delete $actor;`,
+      info: `Im a roaming temporary bunny`
+    };
+    // await this.app.db.save(bunny);
+
+    const beachball = {
+        id: this.app.id.new(),
+      loc: '_2',
+      class: 'ball',
+      color: 'dodgerblue',
+      owner: '_wol',
+      movehow: 'bounces',
+      qty: 1,
+      code: `if target of push then doit;
+      ##doit: if $actor's steps > 2 then delme else moveme;
+      ##moveme: say 'step', "[$actor] has moved [$actor.steps]";set $actor's blip = 'ONE';find $loc, random doorway;go $found_id;
+      ##delme: say 'bye', "[$actor] dissapears in a puff of logic";delete $actor;`,
+      info: `type: [push the ball];`
+    };
+    await this.app.db.save(beachball);
+
+  }
 } 

@@ -133,10 +133,6 @@ export class App {
    */
   async sendCommand(data) {
     this.player.editing = false;
-    if (!data.ts) {
-      console.log(`${this.name} No ts.. why do we care?`);
-        // this.ui.showLoading();
-    }
     if (typeof data === 'string') {
       data = { cmd: data };
     }

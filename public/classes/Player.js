@@ -214,6 +214,7 @@ export class Player {
       obj.name = parts[1] ?? 'Unnamed';
       obj.loc = parts[2] ?? this.startingLocation;
       obj.owner = newId;
+      obj.lock = 1;
       obj.color = 'gold';
       // is this the player who sent the context to create a new player?
       if (this.pendingPw) {
@@ -283,7 +284,7 @@ export class Player {
    */
   async sendWakeCmd() {
     this.app.ui.closeDialog();
-    this.app.ui.showLoading();
+    //this.app.ui.showLoading();
     const result = await this.app.io.fetchJson('server', { 'lastContext': 1 });
     this.app.lastContext = result?.lastContext || '0';
 
