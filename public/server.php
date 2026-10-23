@@ -68,6 +68,10 @@ function handleInput($request)
     $publicDir = __DIR__;
     $classesDir = __DIR__ . '/classes';
 
+    $totalObjects = @file_get_contents(DB_DIR . '/' . ID_COUNTER_FILE);
+    $totalDbSize = getDirFilesSize($dbDir, true);
+    $totalCodeSize = getDirFilesSize($publicDir, false) + getDirFilesSize($classesDir, false);
+
     $totalObjects = 0;
     if (is_dir($dbDir)) {
       $entries = scandir($dbDir);
@@ -77,15 +81,14 @@ function handleInput($request)
           if (fnmatch('id*.json', $entry)) {
             $path = $dbDir . '/' . $entry;
             if (is_file($path)) {
-              $totalObjects++;
+              $idList = json_decode(file_get_contents($path), true);
+              $totalObjects += count(array_keys($idList));
             }
           }
         }
       }
     }
 
-    $totalDbSize = getDirFilesSize($dbDir, true);
-    $totalCodeSize = getDirFilesSize($publicDir, false) + getDirFilesSize($classesDir, false);
 
     // open the name_P.json file to read how many players
     $playerFile = DB_DIR . '/name_P.json';
