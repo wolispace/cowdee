@@ -303,8 +303,7 @@ export class Player {
         params.loc = target.loc;
         params.actor = `bunny-${target.id}-${params.loc}`;
       } else {
-       // params.actor = `player-${this.name}-${params.loc}`;
-       return;
+        params.actor = `player-${this.name}-${params.loc}`;
       }
     }
     await this.app.sendCommand(params);
