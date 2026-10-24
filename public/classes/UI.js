@@ -178,7 +178,7 @@ export class UI {
     if (obj.link) { 
       cmd = 'doorway'; 
       hint = 'Go';
-      showloc = await this.seeThroughDoorway(obj);
+      showloc = await this.seeThroughDoorway(context, obj);
     }
     
     if (context.cmd && context.cmd != '') { cmd = context.cmd; hint = `Choose this to ${context.cmd}`; }
@@ -186,7 +186,8 @@ export class UI {
     return `<span class="click ${locked}" data-cmd="${cmd}" ${style} data-id="${id}" title="${hint} ${val} ${id}">${val}</span>${showloc}`;
   }
 
-  async seeThroughDoorway(obj) {
+  async seeThroughDoorway(context, obj) {
+    if (!context.top) return '';
     let showloc = '';
     const linked = await this.app.db.getById(obj.link);
     if (linked.loc !== obj.id) {
