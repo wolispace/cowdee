@@ -2,7 +2,7 @@
 // require_once "utils.php";
 define('APP_NAME', 'cowdee'); // name for cow
 define('APP_TITLE', 'Dirstibuted COW'); // name for cow
-define('APP_VERSION', '0.10.2'); // the version
+define('APP_VERSION', '0.10.3'); // the version
 
 define('CONTEXT_DIR', '_contexts'); // folder for context files relative to public
 define('CONTEXT_EXT', '.json'); // file type for json

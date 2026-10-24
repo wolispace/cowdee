@@ -17,8 +17,18 @@ if (app.settings.generate) {
   const playerCommands = `
     create a fountain
     paint it lightblue
+    lock it
     build a bakery
     paint it darkkahki
+    lock it
+    build a road to a bridge
+    lock the road
+    paint it tan
+    go road
+    build a fisherman
+    lock the fisherman
+    lock the road
+    paint it tan
   `;
   for(const cmd of playerCommands.split('\n')) {
     if (cmd.trim()) {

@@ -382,6 +382,10 @@ export class Player {
 
   addHistory(cmd) {
     if (!cmd || typeof cmd !== 'string') return;
+    // if any word in the command starts with an underscore, dont save it eg: dont save 'go _4'
+    const words = cmd.split(' ');
+    if (words.some(word => word.startsWith('_'))) return;
+
     cmd = cmd.trim();
     if (!cmd) return;
     if (!Array.isArray(this.history)) {

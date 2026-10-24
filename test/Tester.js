@@ -221,7 +221,7 @@ If you get stuck, try reloading the browser, or type: [goto bob] to teleport to 
       code: `list $actor;\n`
     }, {
       name: "read",
-      code: `get $target in $loc;\nsay 'read',"[$actor] reads [$target]";\nexamine $target;`
+      code: `get $target;\nsay 'read',"[$actor] reads [$target]";\nexamine $target;`
     }, {
       name: "examine",
       code: `get $target in $loc;\nsay 'examine',"[$actor] examines [$target]";\nexamine $target;`
