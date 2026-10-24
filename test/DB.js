@@ -17,6 +17,8 @@ if (app.settings.generate) {
   const playerCommands = `
     create a fountain
     paint it lightblue
+    build a bakery
+    paint it darkkahki
   `;
   for(const cmd of playerCommands.split('\n')) {
     if (cmd.trim()) {

@@ -78,17 +78,29 @@ export class DB {
    * @returns {set} of IDs with this name
    */
   async findByName(word) {
-    let name = word.replace(/^(?:the|an|a)\b/i, '').trim().toLocaleLowerCase();
+    let name = word.replace(/\b(the|an|a|of|for|with|named|called)\b/gi, '').trim().toLocaleLowerCase().replace(/\s+/g, ' ');
 
-    // assume singular 'cat' or 'bus' but may get plural 'cats'
-    let candidates = await this.get('name', name);
+    const words = name.split(' ');
+    let candidates;
+    if (words.length === 1) {
+      candidates = await this.get('name', name);
+    } else {
+      // get IDs for each word, intersect so ALL words must match the same ID
+      const sets = await Promise.all(
+        words.map(w => this.get('name', w)
+      ));
+      if (sets.some(set => !set || set.length === 0)) return undefined; // any word unmatched = no result
+      candidates = sets.reduce(
+        (acc, ids) => acc.filter(id => ids.includes(id)
+      ));   
+    }
+
     if (!candidates) {
-      // non found so try converted to singular then try  again 'cat' or 'bu'
       name = this.guessSingular(name);
       candidates = await this.get('name', name);
     }
     return candidates;
-  };
+  }
 
   /**
    * Returns IDs of all objects whose name starts with the given prefix string.
