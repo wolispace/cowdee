@@ -124,8 +124,7 @@ export class DB {
 
   /**
   * Return the obj of the player matching the name
-  * TODO: worry about passwords later
-  * @param {object} data with data.username and data.pw
+  * @param {object} data with data.username
   * @returns {object}
   */
   async findPlayer(data) {
@@ -136,7 +135,6 @@ export class DB {
       const obj = await this.getById(id);
       if (obj?.class == 'player') {
         // first player with matching name..
-        // TODO: compare passwords too
         return obj;
       }
     }
