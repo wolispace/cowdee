@@ -148,6 +148,7 @@ export class App {
     if (data.cmd && data.saveHistory !== false && !data.cmd.startsWith('::run')) {
       this.player.addHistory(data.cmd);
     }
+    console.log(`{$this.name} sendCommand `, data);
     const result = await this.io.fetchJson('server', data);
     if (result?.contexts) {
       // TODO a list of player Ids should be coming back with these contexts
@@ -410,21 +411,11 @@ export class App {
     const ids = await this.db.get(type, '__');
     if (!ids || ids.length === 0) return;
 
-    // loop through all ids and build a list of locations
-    // check each location for an active player(?)
-    // only find he code for objects in those locations 
-    const locations = new Set();
     for (const id of ids) {
       const obj = await this.db.get('id', id);
       if (!obj) continue;
-      locations.add(obj.loc);
-    }
-
-
-
-    for (const id of ids) {
-      const obj = await this.db.get('id', id);
-      if (!obj) continue;
+      // only tick in locations with active players
+      if (!this.activeLocations.has(obj.loc)) continue;
       const code = await this.db.getCode(id);
       if (!code) continue;
       await this.sendCommand({

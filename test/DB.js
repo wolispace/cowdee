@@ -46,7 +46,7 @@ if (app.settings.generate) {
     const fisherman = await app.db.getById(fishermanId[0]);
 
     console.log({fisherman});
-    fisherman.code = `if reacting to push then pushit;##pushit:\nsay 'say', "[$actor] Hmm? What?";##tick:runsub noiseit/5;##noiseit:$how = (quietly,loudly,abruptly);$noise = (hums,whistles,scratches their head,groans,wheezes);say 'do',"[$actor] $how $noise";`;
+    fisherman.code = `if reacting to push then pushit;##pushit:\nsay 'say', "[$actor] Hmm? What?";##tick:runsub noiseit;##noiseit:$how = (quietly,loudly,abruptly);$noise = (hums,whistles,scratches their head,groans,wheezes);say 'do',"[$actor] $how $noise";`;
     await app.db.save(fisherman);
     await app.db.saveToDisk();
   }
