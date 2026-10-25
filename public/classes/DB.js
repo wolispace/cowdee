@@ -208,6 +208,17 @@ export class DB {
     return await this.get('pw', id);
   }
 
+  /**
+   * Returns the first object matching this name
+   * @param {string} name 
+   * @returns {object}
+   */
+  async getObjByName(name) {
+    const objIds = await app.db.findByName(name);
+    if (objIds) {
+      return await app.db.getById(objIds[0]);
+    }
+  }
 
   /**
    * Find the first named command (look in player then location then globaly so long as its a command)

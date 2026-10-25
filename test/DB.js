@@ -25,8 +25,10 @@ if (app.settings.generate) {
     lock the road
     paint it tan
     go road
-    build a fisherman
-    lock the fisherman
+    lochow on
+    create a fisherman
+    paint it olive
+    lock it
     lock the road
     paint it tan
   `;
@@ -41,12 +43,19 @@ if (app.settings.generate) {
   await app.db.saveToDisk();
 
   // find the fisherman and have them say something on a tick
-  const fishermanId = await app.db.findByName('fisherman');
-  if (fishermanId) {
-    const fisherman = await app.db.getById(fishermanId[0]);
-
+  const fisherman = await app.db.getObjByName('fisherman');
+  if (fisherman) {
     console.log({fisherman});
-    fisherman.code = `if reacting to push then pushit;##pushit:\nsay 'say', "[$actor] Hmm? What?";##tick:runsub noiseit;##noiseit:$how = (quietly,loudly,abruptly);$noise = (hums,whistles,scratches their head,groans,wheezes);say 'do',"[$actor] $how $noise";`;
+    fisherman.info = `I'm just minding my own business. Best not [type: push fisherman]`;
+    fisherman.code = `if reacting to push then pushit;
+  ##pushit:
+  $msg = (Hmm... what?, Yup... I'm real, I'll just ignore that);
+  say 'say', "[$actor] says '$msg'";
+  ##tick:runsub noiseit/3;
+  ##noiseit:
+  $how = (quietly, loudly, abruptly, slowly, hipnotically, gruffly);
+  $noise = (hums, whistles, scans the horizon, squints at the sun, scratches his head, groans, wheezes, coughs, smiles, winks, fishes, sits down, paces about);
+  say 'do', "[$actor] $how $noise";`;
     await app.db.save(fisherman);
     await app.db.saveToDisk();
   }

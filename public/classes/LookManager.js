@@ -225,7 +225,7 @@ export class LookManager {
     this.app.db.formatObject(loc);
     this.objs[loc.id] = loc;
     this.found = await this.app.db.findInLoc(loc.id);
-    const inon = 'in';
+    const inon = loc.lochow ? loc.lochow : 'in';
     this.sentences = [`You are ${inon} [${loc.id}]`];
     const info = await this.app.db.getInfo(loc.id);
     if (info) {
