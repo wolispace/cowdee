@@ -25,6 +25,16 @@ export class Player {
     this.checkBot();
   }
 
+/**
+ * Returns a unique player ID which is their ID and location
+ * Sent to the server with each request so it knows who is active where
+ * eg '_2-_g4' for player _2 in location _g4
+ * @returns {string}
+ */
+  pid() {
+    if (this.id) return `${this.id}-${this.loc}`;
+  }
+
   /**
    * If the url references an obj by ID then this is a bot and we read the initial object.
    * wolispace.com/cowdee?_wol_slug = '?_wol_slug' = '_wol' as the ID and ignoe everything else

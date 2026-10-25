@@ -1,14 +1,14 @@
-I have a distributed browsr game where each browser keeps its won copt of the DB up to daye.
+every request to the server send the current users pid.. which is id-loc eg: '_2-_g5'
 
-As each user logs in we send a wake command.. so we can add 'wake' players into a list of currently active players.
+The server saves this in _players as _2-g5.txt
 
-But we dont know when they sleep (log off) as they could have their browser in the background or have closed their browser or PC crashed etc..
+Each response returns players: ['_2-g5', ...] all of the current pids
 
-Every browser calculates the 20second tick and sends that. so every 20 seconds we can determin who is logged in.
+While gathering them it deletes any older than 20 seconds
 
-We need a global list of active platers in App.js
-Each tick (20 seconds) the user sendCommands() to the server so we can pass the players ID to the server.
+When recieing players, we split into app.activePlayers and app.activeLocations
 
-If we dont get a msg from one or more browsers after 21 seconds we assume they have logged off and remove them from our active player list.
+At any point we can list current players and only run ticks within all of the active locations
 
-This means the returning msg from sendCommands() needs to have a list of active player Ids.
+To list players, we can pre-load all payer ids and all locations to build a list of players showing where they currently are.
+

@@ -17,6 +17,8 @@ export class App {
   serverOffset = 0;
   tickConfigs = {};
   tickWatchdog = null;
+  activePlayers = new Set();
+  activeLocations = new Set();
 
   constructor(options = {}) {
     this.window = (typeof window !== "undefined");
@@ -142,7 +144,7 @@ export class App {
     data.it = this.player.it;
     data.lastContext = this.lastContext;
     data.counter = this.id.counter;
-    data.pid = this.player.id;
+    data.pid = this.player.pid();
     if (data.cmd && data.saveHistory !== false && !data.cmd.startsWith('::run')) {
       this.player.addHistory(data.cmd);
     }
@@ -151,11 +153,25 @@ export class App {
       // TODO a list of player Ids should be coming back with these contexts
       // keep our blobal player list in sync with the server
       if (result.players) {
-        this.players = result.players;
-        console.log(`${this.app.name} setting players to `, this.players);
+        this.updateActivePlayers(result.players);
       }
       const contexts = typeof result.contexts === 'string' ? JSON.parse(result.contexts) : result.contexts;
       await this.processContexts(contexts);
+    }
+  }
+
+  /**
+   * Maintains a current list of active players and their locations
+   * So ticks can happen only in active locations and we can list all active players
+   * @param {array} players 
+   */
+  updateActivePlayers(players) {
+    this.activePlayers.clear();
+    this.activeLocations.clear();
+    for (const player of players) {
+      const bits = player.split('-');
+      this.activePlayers.add(bits[0]);
+      this.activeLocations.add(bits[1]);
     }
   }
 

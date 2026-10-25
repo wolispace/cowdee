@@ -20,32 +20,32 @@ export class IO {
   }
 
   async loadJson(file) {
-    const json = await this.fetchJson('server', { file, token: this.token, pid: this.app.player.id });
+    const json = await this.fetchJson('server', { file, token: this.token, pid: this.app.player.pid() });
     return json || {};
   }
 
   async loadFiles(files) {
     if (!files || files.length === 0) return {};
-    const json = await this.fetchJson('server', { files, token: this.token, pid: this.app.player.id });
+    const json = await this.fetchJson('server', { files, token: this.token, pid: this.app.player.pid() });
     return json || {};
   }
 
   async saveJson(file, json) {
-    return await this.fetchJson('server', { file, token: this.token, pid: this.app.player.id, content: JSON.stringify(json) });
+    return await this.fetchJson('server', { file, token: this.token, pid: this.app.player.pid(), content: JSON.stringify(json) });
   }
 
   async saveBatch(batch) {
     return await this.fetchJson('server', {
       batch: batch,
       token: this.token,
-      pid: this.app.player.id,
+      pid: this.app.player.pid(),
       counter: this.app.id.counter
     });
   }
 
   async fetchJson(type, payload) {
     payload.token = this.token;
-    payload.pid = this.app.player.id;
+    payload.pid = this.app.player.pid();
     payload.counter = this.app.id.counter;
 
     // cmd payloads go through the queue; everything else fires immediately
@@ -85,7 +85,7 @@ export class IO {
     const result = await this._doFetch('server', {
       commands,
       token: this.token,
-      pid: this.app.player.id,
+      pid: this.app.player.pid(),
       counter: this.app.id.counter
     });
 

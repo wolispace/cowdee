@@ -129,8 +129,7 @@ export class SSE {
           }
         }
         if (data.players) {
-          this.app.players = data.players;
-          console.log(`${this.app.name} setting players to `, this.app.players);
+          this.app.updateActivePlayers(data.players);
         }
 
       } else if (event === 'context') {
@@ -145,7 +144,7 @@ export class SSE {
         }
       }
     } catch (e) {
-      console.log(`${this.app.name} [SSE] parse error:`, e.message);
+      console.trace(`${this.app.name} [SSE] parse error:`, e.message);
     }
   }
 
