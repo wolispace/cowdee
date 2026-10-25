@@ -142,11 +142,18 @@ export class App {
     data.it = this.player.it;
     data.lastContext = this.lastContext;
     data.counter = this.id.counter;
+    data.pid = this.player.id;
     if (data.cmd && data.saveHistory !== false && !data.cmd.startsWith('::run')) {
       this.player.addHistory(data.cmd);
     }
     const result = await this.io.fetchJson('server', data);
     if (result?.contexts) {
+      // TODO a list of player Ids should be coming back with these contexts
+      // keep our blobal player list in sync with the server
+      if (result.players) {
+        this.players = result.players;
+        console.log(`${this.app.name} setting players to `, this.players);
+      }
       const contexts = typeof result.contexts === 'string' ? JSON.parse(result.contexts) : result.contexts;
       await this.processContexts(contexts);
     }
@@ -386,6 +393,18 @@ export class App {
     if (this.window && document.visibilityState === 'hidden') return;
     const ids = await this.db.get(type, '__');
     if (!ids || ids.length === 0) return;
+
+    // loop through all ids and build a list of locations
+    // check each location for an active player(?)
+    // only find he code for objects in those locations 
+    const locations = new Set();
+    for (const id of ids) {
+      const obj = await this.db.get('id', id);
+      if (!obj) continue;
+      locations.add(obj.loc);
+    }
+
+
 
     for (const id of ids) {
       const obj = await this.db.get('id', id);

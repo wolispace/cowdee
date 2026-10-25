@@ -25,6 +25,10 @@ function handleInput($request)
   if (!$request)
     return;
 
+  if (isset($request['pid'])) {
+    refreshPlayer($request['pid']);
+  }
+
   if (!empty($request['commands']) && is_array($request['commands'])) {
     // Batched commands — array of individual cmd payloads sent by the client queue
     $processed = 0;
@@ -60,8 +64,7 @@ function handleInput($request)
       if ($written !== false) $processed++;
     }
 
-    logIt("commands batch done: {$processed}/" . count($request['commands']) . " written");
-    outputJson(['status' => 'ok', 'count' => $processed]);
+    outputJson(['status' => 'ok', 'count' => $processed, 'players' => getActivePlayers()]);
 
   } else if (isset($request['stats']) ) {
     $dbDir = DB_DIR;

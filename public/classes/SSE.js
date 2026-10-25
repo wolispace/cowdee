@@ -29,23 +29,11 @@ export class SSE {
     this.sse = new EventSource(urlString);
 
     this.sse.addEventListener('contexts', async (event) => {
-      const rawContexts = JSON.parse(event.data);
-      console.log('[SSEweb] received contexts:', this.app.name, rawContexts?.length, 'lastContext:', this.app.lastContext);
-      if (Array.isArray(rawContexts)) {
-        for (const raw of rawContexts) {
-          if (raw?.ts) this.app.syncTime(raw.ts);
-          const context = new Context(this.app, raw);
-          await context.process();
-        }
-      }
+      await this.handleMessage('contexts', event.data);
     });
 
     this.sse.addEventListener('context', async (event) => {
-      const rawContext = JSON.parse(event.data);
-      console.log('[SSEweb] received:', this.app.name, event.data, 'lastContext:', this.app.lastContext);
-      if (rawContext?.ts) this.app.syncTime(rawContext.ts);
-      const context = new Context(this.app, rawContext);
-      await context.process();
+      await this.handleMessage('context', event.data);
     });
 
     this.sse.addEventListener('shutdown', async () => {
@@ -95,7 +83,7 @@ export class SSE {
 
         for (const line of lines) {
           const trimmed = line.trim();
-          if (!trimmed || trimmed.startsWith(':')) {
+          if (!trimmed) {
             // End of an SSE message block
             if (currentData) {
               await this.handleMessage(currentEvent, currentData);
@@ -131,16 +119,22 @@ export class SSE {
     try {
       const data = JSON.parse(dataStr);
       if (event === 'contexts') {
-        console.log(`${this.app.name} [SSE] received contexts:`, data?.length, 'lastContext:', this.app.lastContext);
-        if (Array.isArray(data)) {
-          for (const raw of data) {
+        console.log(`${this.app.name} [SSE] received contexts:`, data, 'lastContext:', this.app.lastContext);
+        const contexts = data.contexts;
+        if (Array.isArray(contexts)) {
+          for (const raw of contexts) {
             if (raw?.ts) this.app.syncTime(raw.ts);
             const context = new Context(this.app, raw);
             await context.process();
           }
         }
+        if (data.players) {
+          this.app.players = data.players;
+          console.log(`${this.app.name} setting players to `, this.app.players);
+        }
+
       } else if (event === 'context') {
-        console.log(`${this.app.name} [SSE] received:`, dataStr, 'lastContext:', this.app.lastContext);
+        console.log(`${this.app.name} [SSE] received context:`, dataStr, 'lastContext:', this.app.lastContext);
         if (data?.ts) this.app.syncTime(data.ts);
         const context = new Context(this.app, data);
         await context.process();

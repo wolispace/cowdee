@@ -17,7 +17,11 @@ $lastContext = $_GET['lastContext'] ?? '0';
 while (time() < $endTime) {
   $contexts = get_new_contexts($lastContext);
   if (is_array($contexts) && count($contexts) > 0) {
-    sse_event('contexts', $contexts);
+    $data = [
+      'contexts' => $contexts,
+      'players'  =>  getActivePlayers(),
+    ];
+    sse_event('contexts', $data);
     $last = end($contexts);
     $lastContext = "{$last['ts']}{$last['actor']}";
   }
