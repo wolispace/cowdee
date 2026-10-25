@@ -39,6 +39,18 @@ if (app.settings.generate) {
   
   await app.utils.sleep(300);
   await app.db.saveToDisk();
+
+  // find the fisherman and have them say something on a tick
+  const fishermanId = await app.db.findByName('fisherman');
+  if (fishermanId) {
+    const fisherman = await app.db.getById(fishermanId[0]);
+
+    console.log({fisherman});
+    fisherman.code = `if reacting to push then pushit;##pushit:\nsay 'say', "[$actor] Hmm? What?";##tick:runsub noiseit/5;##noiseit:$how = (quietly,loudly,abruptly);$noise = (hums,whistles,scratches their head,groans,wheezes);say 'do',"[$actor] $how $noise";`;
+    await app.db.save(fisherman);
+    await app.db.saveToDisk();
+  }
+
   await app.tester.deleteTestContexts();
   await app.tester.deleteTestLogs();
 
