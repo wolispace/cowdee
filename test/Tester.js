@@ -57,6 +57,8 @@ export class Tester {
     const wolisId = this.app.id.new();
     const libraryId = this.app.id.new();
     const libraryDoorId = this.app.id.new();
+    const bookOfBasicsId = this.app.id.new();
+    const bookOfOtherId = this.app.id.new();
 
     let obj = {
       id: startingLocId,
@@ -92,6 +94,9 @@ export class Tester {
       qty: 1,
       lock: 1,
       info: `Type short commands and press Enter. 
+
+      type: [read the book of basics]
+
 type: [look] shows you where you are.
 type: [say hello], type: [think I wonder if..] and type: [do sits down] are ways of communicating with others
 
@@ -144,66 +149,154 @@ If you get stuck, try reloading the browser, or type: [goto bob] to teleport to 
     }
     await this.app.db.save(obj);
 
-    await this.initCommands(libraryId, wolisId);
-  }
+    // make the book of basics
+    obj = {
+      id: bookOfBasicsId,
+      class: 'book of basics',
+      qty: 0,
+      owner: wolisId,
+      loc: libraryId,
+      color: 'lightblue',
+      lock: 1,
+      info: 'This is a book containing the basics of COW',
+    }
+    await this.app.db.save(obj);
 
-  async initCommands(loc, owner) {
-    const commands = [{
+    obj = {
+      id: bookOfOtherId,
+      class: 'book of other commands',
+      qty: 0,
+      owner: wolisId,
+      loc: libraryId,
+      color: 'lightblue',
+      lock: 1,
+      info: 'This is a book containing other rnadom commands',
+    }
+    await this.app.db.save(obj);
+
+    // create the commands in two books
+    const basicCommands = [
+      {
       name: "say",
-      info: `Say something to everyone in your location eg: type: [say Hi there] type: [say What am I doing here?]`,
+      info: `Say something to everyone in your location 
+eg: type: [say Hi there] type: [say What am I doing here?]`,
       code: `get $text,$rel,$target in $loc;\nif $target > 0 then sayto else saytext;\n\n##sayto:\nif $niceness > 0 then saynice;\nif $text like "?" then asktoit else saytoit;\n##asktoit:\nsay 'ask',"[$actor] $prefix asks [$target] '$text'";\n##saytoit:\nsay 'say',"[$actor] $prefix says '$text' to [$target]";\n\n##saytext:\nget $text;\nif $niceness > 0 then saynice else saynormal;\nif $text like "?" then askit else sayit;\n##askit:\nsay 'ask',"[$actor] $prefix asks '$text'";\n##sayit:\nsay 'say',"[$actor] $prefix says '$text'";\n\n##saynice:\nvar $prefix to (sweetly,nicely,politely);`,
     }, {
       name: "think",
-      info: `Let others in your location know what your thinking eg: type: [I keep thinking its Tuesday] or type: [think] to just think randomly`,
+      info: `Let others in your location know what your thinking
+eg: type: [I keep thinking its Tuesday] or type: [think] to just think randomly`,
       code: `get $text;\nif $text ne '' then thinkit else ponder;\n##thinkit:\nsay 'think',"[$actor] .oO( $text )";\n##ponder:\nsay 'think',"[$actor] .o0( I keep thinking its Tuesday )"`
     }, {
       name: "shout",
-      info: `Shout something to everyone in the world eg: type: [shout Hello everyone!] or type: [shout] to just shout randomly`,
+      info: `Shout something to everyone in the world
+eg: type: [shout Hello everyone!] or type: [shout] to just shout randomly`,
       code: `get $text;\nif $text ne 'shout' then shoutit else fail;\n##shoutit:\nmsg 0,$actor,0,0,'shout',"You hear [$actor] shout '$text!'",$actor;\n##fail:\nvar $mm to (Hello,Hay,Bingo,Ahoy there mates,Its life Jim,Horse,Four,My my,AAARGH);\nmsg 0,$actor,0,0,'shout',"[$actor] shouts '$mm!'",$actor;`
     }, {
       name: "do",
-      info: `Show everyone in your locationw hat you are doing eg: type: [do sits down] or type: [do claps]. `,
+      info: `Show everyone in your locationw hat you are doing
+eg: type: [do sits down] or type: [do claps]. `,
       code: `get $text;\nif $text ne '' then doit else fail;\n##doit:\nsay 'action',"[$actor] $text";\n##fail:\nvar $text to (claps,dances around the room,sits down);\nrunsub doit;`
     }, {
       name: "create",
-      info: `Create a new object. eg: type: [create a book] or type: [create a table]`,
+      info: `Create a new object
+eg: type: [create a book] or type: [create a table]`,
       code: `get $text;\nnew $text;\nsay 'create',"[$actor] creates [$target]";\nrelook $loc;`
+    }, {
+      name: "look",
+      info: `Look at your current location
+eg: type: [look]`,
+      code: `say 'look',"[$actor] looks around";\nrelook $loc;`
+    }, {
+      name: "put",
+      info: `Put an object relative to another
+eg: type: [put the book on the table] or type: [put the mouse behind the fridge]. Then you can pose it type: [pose the mouse as sleeping]`,
+      code: `get $target,$rel,$second in $loc,$loc;\nset $target's hosthow to "$rel";\nset $target's host to $second;\nset $target's hosthow to "$rel";\nset $target's pose to '';\nsay 'put',"[$actor] put [$target] $rel [$second]";\nrelook $loc;`
+    }, {
+      name: "push",
+      info: `Push an object. 
+eg: type: [push the book] to seperate it from it's host and pose. 
+If a book was on a table and posed as sitting, it would simply be a book after being pushed.`,
+      code: `get $target in $loc;\nclear $target,all;\nsay 'push',"[$actor] pushes [$target]";\nrelook $loc;`
+    }, {
+      name: "pose",
+      info: `Pose an object
+eg: type: [pose the book as sitting] or type: [pose the bird as flying]`,
+      code: `get $target,''as',$text,non-greedy in $loc;\nset $target's pose to $text;\nsay 'pose',"[$actor] poses [$target] as $text";\nrelook $loc;`
+    }, {
+      name: "go",
+      info: `Go to a location
+eg: type: [go castle] or type: [go road] to go wherever the road leads`,
+      code: `get $target in $loc; go $target;`
+    }, {
+      name: "delete",
+      info: `Delete an object
+eg: type: [delete the book]`,
+      code: `get $target in $loc;delete $target;`
+    }, {
+      name: "build",
+      info: `Build a new location
+eg: type: [build a castle] or type: [build a bridge to a castle]`,
+      code: `get $text,'to',$text2;\nif $text2 ne '' then complex else simple;\n\n##complex:\nnew $text;\nvar $door1 to $new_id;\ncopy $new_id;\nvar $door2 to $new_id;\nnew $text2;\nupdate $new_id to "worth=0, loc=$door1, pose='hidden'";\nset $new_id's pwd to $actor's pwd; \nupdate $door2 to "loc=$new_id, link=$door1, color='paleblue', worth=0, material='_door_'";\nupdate $door1 to "link=$door2, color='tomato', worth=0, material='_door_'";\nsay 'create',"[$actor] built [$door1] to somewhere $rather interesting";\nrelook $loc;\n\n##simple:\nnew exit;\nvar $exit to $new_id;\nnew $text;\nupdate $new_id to "link=$exit, color='lightgreen'";\nupdate $exit to "link=$new_id, loc=$new_id, extra='from here', qty=1, class='exit', color='lightgreen'";\nsay 'create',"[$actor] built [$new_id]";\nrelook $loc;`
+    }, {
+      name: "paint",
+      info: `Paint an object a certain colour
+eg: type: [paint the table orange] or type: [paint the table] (to use the colour picker)`,
+      code: `get $target,$lastword in $loc;\nif $lastword ne '' then paintit else picker;\n##picker:\ncolorpicker;\n##paintit:\nset $target's color to $lastword;\nsay 'paint',"[$actor] paints [$target] $lastword";\nrelook $loc;`
+    }, {
+      name: "get",
+      info: `Get something from your current location
+eg: type: [get the book]`,
+      code: `get $target in $loc;\nunhost $target;\nclear $target,all;\nset $target's pose to "";\nset $target's loc to $actor;\nsay 'gets',"[$actor] gets [$target]";\nrelook $loc;\nvar $loc to $actor;\n msg $loc,$actor,$target,0,'arrives',"[$target] appears from nowhere";\nrelook $actor's loc;`
+    }, {
+      name: "drop",
+      info: `Drop something you are carrying
+eg: type: [drop the book]`,
+      code: `get $target in $actor;\nvar $dest to $actor's loc;\nset $target's loc to $dest;\nsay 'drops',"[$actor] drops [$target]";\nvar $loc to $dest;\nrelook $loc;\nvar $loc to $actor;\nsay 'gone',"[$target] has gone";\nrelook $actor's loc;`
+    }, {
+      name: "inv",
+      info: `Show what you are carrying
+eg: type: [inv]`,
+      code: `list $actor;\n`
+    }, {
+      name: "read",
+      info: `Read the text of an object
+You can read any book even if it's in a dofferent location
+eg: type: [read the book of basics]`,
+      code: `get $target;\nsay 'read',"[$actor] reads [$target]";\rread $target;`
+    }, {
+      name: "examine",
+      info: `Examine the details of an object
+eg: type: [examine the table]`,
+      code: `get $target in $loc;\nsay 'examine',"[$actor] examines [$target]";\nexamine $target;`
+    }, {
+      name: "edit",
+      info: `Edit what people see when they examine or read an object
+eg: type: [edit the book]`,
+      code: `get $target in $loc;\nsay 'edit',"[$actor] starts to edit [$target]";\nedit $target;`
+    }
+    ];
+
+    const otherCommands = [
+    { 
+      name: "about",
+      info: `Show info about this current instance of COW`,
+      code: `about;`
+    }, {
+      name: "exit",
+      info: `Go through first 'exit' object in a location. HOpefully there is only one. type: [exit]`,
+      code: `find $loc, exit; go $found_id;`
     }, {
       name: "find",
       info: `Find an object. eg: type: [find the book]`,
       code: `get $target;\nvar $dest to $target's loc;\nif $target > 0 then itshere else fail;\n##itshere:\nvar $dest to $target's loc;\nsay 'msg',"[$actor] finds [$target] in [$dest]";\n##fail;\nsay 'msg',"[$actor] wants to find '$cmd_text' but has no idea where to start looking";`
     }, {
-      name: "look",
-      info: `Look at your current location, showing how things relate to each other`,
-      code: `say 'look',"[$actor] looks around";\nrelook $loc;`
-    }, {
       name: "list",
       info: `List all the objects in your current location`,
       code: `list $loc;`
     }, {
-      name: "put",
-      info: `Put an object relative to another. eg: type: [put the book on the table] or type: [put the mouse behind the fridge]. Then you can pose it type: [pose the mouse as sleeping]`,
-      code: `get $target,$rel,$second in $loc,$loc;\nset $target's hosthow to "$rel";\nset $target's host to $second;\nset $target's hosthow to "$rel";\nset $target's pose to '';\nsay 'put',"[$actor] put [$target] $rel [$second]";\nrelook $loc;`
-    }, {
-      name: "push",
-      info: `Push an object. eg: type: [push the book] to seperate it from its host and pose. If a book was on a table and posed as sitting, it would simply be a book after being pushed.`,
-      code: `get $target in $loc;\nclear $target,all;\nsay 'push',"[$actor] pushes [$target]";\nrelook $loc;`
-    }, {
-      name: "pose",
-      info: `Pose an object eg type: [pose the book as sitting] or type: [pose the bird as flying]`,
-      code: `get $target,''as',$text,non-greedy in $loc;\nset $target's pose to $text;\nsay 'pose',"[$actor] poses [$target] as $text";\nrelook $loc;`
-    }, {
       name: "goto",
       info: `Teleport to another object eg type: [goto sign] or type: [goto wolis] to goto player Wolis no matter where he is`,
       code: `get $target;clear $actor,all;\nset $actor's loc to $target's loc;\nsay 'leaves',"[$actor] dissapears in a puff of smoke";\nvar $loc to $target's loc;\nsay 'arrives',"[$actor] appears out of thin air!";\nrelook $loc;`
-    }, {
-      name: "go",
-      info: `Go to a location. eg: type: [go castle] or type: [go road] to go wherever the road leads`,
-      code: `get $target in $loc; go $target;`
-    }, {
-      name: "exit",
-      info: `Go through first 'exit' object in a location. HOpefully there is only one. type: [exit]`,
-      code: `find $loc, exit; go $found_id;`
     }, {      
       name: "into",
       info: `Go inside (yes inside!) any object. eg type: [create a box] type: [into box]`,
@@ -212,50 +305,14 @@ If you get stuck, try reloading the browser, or type: [goto bob] to teleport to 
       name: "outof",
       info: `Pop outside of an object you went into. eg type: [create a box] type: [into box] type: [outof]`,
       code: `set $target = $loc;\nset $loc = $target's loc;\nset $actor's loc to $loc;\nsay 'arrives',"[$actor] apears outside [$target]!";\nrelook $loc;`
-    }, {
-      name: "delete",
-      info: `Delete an object. eg: type: [delete the book]`,
-      code: `get $target in $loc;delete $target;`
     }, {      
       name: "flush",
       info: `Flush your db memory. I wonder if anyone will ever need this?`,
       code: `flush;say 'flush',"[$actor] flushed the pools";`
     }, {
-      name: "build",
-      info: `Build a new location. eg: type: [build a castle] or type: [build a bridge to a castle]`,
-      code: `get $text,'to',$text2;\nif $text2 ne '' then complex else simple;\n\n##complex:\nnew $text;\nvar $door1 to $new_id;\ncopy $new_id;\nvar $door2 to $new_id;\nnew $text2;\nupdate $new_id to "worth=0, loc=$door1, pose='hidden'";\nset $new_id's pwd to $actor's pwd; \nupdate $door2 to "loc=$new_id, link=$door1, color='paleblue', worth=0, material='_door_'";\nupdate $door1 to "link=$door2, color='tomato', worth=0, material='_door_'";\nsay 'create',"[$actor] built [$door1] to somewhere $rather interesting";\nrelook $loc;\n\n##simple:\nnew exit;\nvar $exit to $new_id;\nnew $text;\nupdate $new_id to "link=$exit, color='lightgreen'";\nupdate $exit to "link=$new_id, loc=$new_id, extra='from here', qty=1, class='exit', color='lightgreen'";\nsay 'create',"[$actor] built [$new_id]";\nrelook $loc;`
-    }, {
       name: "copy",
       info: `Make a copy of an object. eg: type: [copy the book]`,
       code: `get $target in $loc;\ncopy $target;\nsay 'copy', "[$actor] copies [$target]";\nrelook $loc;`
-    }, {
-      name: "paint",
-      info: `Paint an object a certain colour. eg: type: [paint the table orange] or type: [paint the table] (to use the colour picker)`,
-      code: `get $target,$lastword in $loc;\nif $lastword ne '' then paintit else picker;\n##picker:\ncolorpicker;\n##paintit:\nset $target's color to $lastword;\nsay 'paint',"[$actor] paints [$target] $lastword";\nrelook $loc;`
-    }, {
-      name: "get",
-      info: `Get something from your current location`,
-      code: `get $target in $loc;\nunhost $target;\nclear $target,all;\nset $target's pose to "";\nset $target's loc to $actor;\nsay 'gets',"[$actor] gets [$target]";\nrelook $loc;\nvar $loc to $actor;\n msg $loc,$actor,$target,0,'arrives',"[$target] appears from nowhere";\nrelook $actor's loc;`
-    }, {
-      name: "drop",
-      info: `Drop something you are carrying`,
-      code: `get $target in $actor;\nvar $dest to $actor's loc;\nset $target's loc to $dest;\nsay 'drops',"[$actor] drops [$target]";\nvar $loc to $dest;\nrelook $loc;\nvar $loc to $actor;\nsay 'gone',"[$target] has gone";\nrelook $actor's loc;`
-    }, {
-      name: "inv",
-      info: `Show what you are carrying`,
-      code: `list $actor;\n`
-    }, {
-      name: "read",
-      info: `Read the text description of an object`,
-      code: `get $target;\nsay 'read',"[$actor] reads [$target]";\nexamine $target;`
-    }, {
-      name: "examine",
-      info: `Examine the details of an object`,
-      code: `get $target in $loc;\nsay 'examine',"[$actor] examines [$target]";\nexamine $target;`
-    }, {
-      name: "edit",
-      info: `Edit what people see when they examine or read this`,
-      code: `get $target in $loc;\nsay 'edit',"[$actor] starts to edit [$target]";\nedit $target;`
     }, {
       name: "code",
       info: `Edit the code of an object`,
@@ -276,17 +333,22 @@ If you get stuck, try reloading the browser, or type: [goto bob] to teleport to 
       name: "lochow",
       info: `change how the location is described`,
       code: `get $text;set $loc's lochow = $text;say 'change', '[$actor] tinkers with [$loc]';relook $loc;`
-    }, { 
-      name: "about",
-      info: `Show info about this current instance of COW`,
-      code: `about;`
     }, {    
       name: "point",
       info: `Point at something in your current location`,
       code: `find $loc, random not me;\nsay 'point', "[$actor] points at [$found_id]";`
     }
-    ];
+   ];
 
+
+    await this.initCommands(basicCommands, bookOfBasicsId, wolisId);
+    await this.initCommands(otherCommands, bookOfOtherId, wolisId);
+
+  }
+
+
+
+  async initCommands(commands, loc, owner) {
     for (const obj of commands) {
       obj.id = this.app.id.new();
       obj.loc = loc;
@@ -298,6 +360,7 @@ If you get stuck, try reloading the browser, or type: [goto bob] to teleport to 
       await this.app.db.save(obj);
     }
   }
+
 
   async oldObjs() {
     

@@ -99,6 +99,35 @@ export class LookManager {
     return this.returnData();
   }
 
+  async read(context) {
+    this.app.player.editing = true;
+    this.context = context;
+    this.sentences = [];  
+    const obj = await this.app.db.getById(this.context.target);
+    let html = await this.app.db.getInfo(context.target);
+    this.found = await this.app.db.findInLoc(obj.id);
+    if (this.found) {
+      for(const found of this.found) {
+        const foundObj = await this.app.db.getById(found);
+        this.app.db.formatObject(foundObj);
+        const foundRead = await this.app.db.getInfo(foundObj.id);
+        html += `<fieldset><legend>${foundObj.longname}</legend>${foundRead}</fieldset>`;
+      }
+    }
+    html = html.replaceAll("\n", "<br/>");
+    html = this.app.ui.makeClickLinks(html);
+    this.info = this.wrapInfo(html);
+    return this.returnData();
+
+
+
+  }
+
+  /**
+   * Wraps the html in a div showing the info with a close button etc..
+   * @param {string} html 
+   * @returns {string}
+   */
   wrapInfo(html) {
     return `<div class='info'>${html}</div><div class="click buttonize click-close" data-cmd="close">X</div>`;
   }

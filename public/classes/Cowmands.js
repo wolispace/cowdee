@@ -555,6 +555,16 @@ export class Cowmands {
       const data = await this.app.lookManager.examine({ ...this.context });
       await this.app.ui.addMessage(data);
     },
+    // READ
+    read: async (rest) => {
+      if (this.context.actor !== this.app.player.id) return;
+      const objId = await this.resolveValue(rest.trim());
+      if (!objId) return;
+      this.context.target = objId;
+      this.context.to = this.context.actor;
+      const data = await this.app.lookManager.read({ ...this.context });
+      await this.app.ui.addMessage(data);
+    },    
     // CODE
     code: async (rest) => {
       if (this.context.actor !== this.app.player.id) return;
