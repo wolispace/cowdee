@@ -214,9 +214,9 @@ export class DB {
    * @returns {object}
    */
   async getObjByName(name) {
-    const objIds = await app.db.findByName(name);
+    const objIds = await this.app.db.findByName(name);
     if (objIds) {
-      return await app.db.getById(objIds[0]);
+      return await this.app.db.getById(objIds[0]);
     }
   }
 

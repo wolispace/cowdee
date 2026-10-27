@@ -179,6 +179,10 @@ export class UI {
       hint = 'Go';
       showloc = await this.seeThroughDoorway(context, obj);
     }
+    if (/book|newspaper|magazine/.test(obj.class)) {
+      cmd = 'read'; 
+      hint = 'Read';      
+    }
     
     if (context.cmd && context.cmd != '') { cmd = context.cmd; hint = `Choose this to ${context.cmd}`; }
     const locked = (obj.lock && obj.lock != '') ? 'locked' : '';

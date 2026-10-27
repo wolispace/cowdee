@@ -440,6 +440,7 @@ export class App {
    * Build the menu
    */
   menu(html) {
+    if (!this.window) return;
     const menu = document.getElementById("menu");
     html = this.ui.makeClickLinks(html);
     html = html.replaceAll("\n", "<br/>");
@@ -451,6 +452,7 @@ export class App {
    * @params {string} state - 'show', 'hide', or 'toggle'}
    */
   toggleMenu(state = 'toggle') {
+    if (!this.window) return;
     const menu = document.getElementById("menu");
     if (state === 'show') {
       menu.classList.remove("hide");
