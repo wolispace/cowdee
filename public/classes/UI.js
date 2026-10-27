@@ -22,7 +22,6 @@ export class UI {
     this.setupEvents();
     this.initDialog();
     this.initHistory();
-    this.initMenu();
 
     this.bottom.innerHTML = `<br/><br/>`;
     this.bottom.addEventListener('click', () => { 
@@ -197,18 +196,30 @@ export class UI {
     return showloc;
   }
 
+  /**
+   * Find all 'type: [...]' with a click to execute the command
+   * @param {string} msg 
+   * @returns {string} 
+   */
   makeClickLinks(msg) {
     const matches = [...msg.matchAll(/type: \[(.+?)\]/g)];
 
     for (const match of matches) {
       const cmd = match[1];
-      msg = msg.replace(`type: [${match[1]}]`, `<span class="click suggest" data-cmd="run" data-id="${match[1]}">${match[1]}</span>`  );
+      msg = msg.replace(`type: [${match[1]}]`, `<span class="click suggest" data-cmd="run" title="Click to perform this command as if you had typed it" data-id="${match[1]}">${match[1]}</span>`  );
     }
     return msg;
   }
 
   initMenu() {
-    
+    const html = `
+Distributed COW
+
+type: [read the book of basics]
+
+Learn type: [about] cow
+    `;
+    this.app.menu(html);
   }
 
   /**

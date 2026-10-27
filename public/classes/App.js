@@ -38,9 +38,11 @@ export class App {
     this.player = new Player(this);
     this.lookManager = new LookManager(this);
 
+    this.ui.initMenu();
+
     // ui elements with click commands will execute these:
     this.clickCmds = {
-      examine: el => `examine ${el.dataset.id}`,
+      read: el => `read ${el.dataset.id}`,
       close: () => `look`,
       doorway: el => `go ${el.dataset.id}`,
       paint: el => `paint ${el.dataset.id} ${el.dataset.color}`,
@@ -79,17 +81,22 @@ export class App {
       /**
        * Universal click handler to examine or go through doorways etc..
        */
-      document.querySelector('content').addEventListener('click', async (event) => {
+      document.addEventListener('click', async (event) => {
+        const container = event.target.closest('content, #menu');
+        if (!container) return;
         const el = event.target.closest('.click');
         if (!el) return;
+        if (container.matches('#menu')) {
+          this.toggleMenu('close');
+        }
         const cmd = this.clickCmds[el.dataset.cmd];
         if (cmd) {
           await this.sendCommand(cmd(el));
         } else {
-          const thisCmd = el.dataset.cmd.replace(/{id}/, el.dataset.id);
-          await this.sendCommand(thisCmd);
+          await this.sendCommand(el.dataset.cmd.replace(/{id}/, el.dataset.id));
         }
       });
+
     }
   }
 
@@ -428,12 +435,29 @@ export class App {
     }
   }
 
-  menu() {
+  /**
+   * Build the menu
+   */
+  menu(html) {
     const menu = document.getElementById("menu");
-    menu.innerHTML = 'Menu options..<br>One<br>Two</br>';
-    menu.classList.toggle("hide");
-    console.log('menu');
+    html = this.ui.makeClickLinks(html);
+    html = html.replaceAll("\n", "<br/>");
+    menu.innerHTML = html;
+  }
 
+  /**
+   * Show or hide the menu
+   * @params {string} state - 'show', 'hide', or 'toggle'}
+   */
+  toggleMenu(state = 'toggle') {
+    const menu = document.getElementById("menu");
+    if (state === 'show') {
+      menu.classList.remove("hide");
+    } else if (state === 'hide') {
+      menu.classList.add("hide");
+    } else {
+      menu.classList.toggle("hide");
+    }
   }
 }
 

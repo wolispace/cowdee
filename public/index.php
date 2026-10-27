@@ -35,7 +35,7 @@ $rnd = rand(0, 999999); ?>
       <input type="submit" class="commandbutton" value="Go" />
     </form>
   </content>
-  <div id="showmenu" class="click" onclick="app.menu()">&#9776;</div>
+  <div id="showmenu" class="click" onclick="app.toggleMenu()">&#9776;</div>
   <div id="menu" class="hide"></div>
   <dialog id="dialog" class="buttonize"></dialog>
 </body>
