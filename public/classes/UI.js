@@ -212,8 +212,7 @@ export class UI {
   }
 
   initMenu() {
-    const html = `
-Distributed COW
+    const html = `<strong>Distributed COW</strong>
 
 type: [read the book of basics]
 

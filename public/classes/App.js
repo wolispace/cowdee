@@ -43,6 +43,7 @@ export class App {
     // ui elements with click commands will execute these:
     this.clickCmds = {
       read: el => `read ${el.dataset.id}`,
+      examine: el => `examine ${el.dataset.id}`,
       close: () => `look`,
       doorway: el => `go ${el.dataset.id}`,
       paint: el => `paint ${el.dataset.id} ${el.dataset.color}`,

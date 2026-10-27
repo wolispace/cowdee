@@ -32,10 +32,10 @@ $rnd = rand(0, 999999); ?>
       <label for="cmd" class="commandlabel">Cmd </label>
       <input type="text" class="commandterm infoinput" name="cmd" id="cmd" placeholder="What do you want to do?" value=""
         autofocus spellcheck="false" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" />
-      <input type="submit" class="commandbutton" value="Go" />
+      <input type="submit" class="commandbutton button" value="Go" />
     </form>
   </content>
-  <div id="showmenu" class="click" onclick="app.toggleMenu()">&#9776;</div>
+  <div id="showmenu" title="Show or hide the exceedingly minimal menu" class="click" onclick="app.toggleMenu()">&#9776;</div>
   <div id="menu" class="hide"></div>
   <dialog id="dialog" class="buttonize"></dialog>
 </body>
