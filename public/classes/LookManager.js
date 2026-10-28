@@ -93,9 +93,9 @@ export class LookManager {
       }
     };
     html = this.app.ui.makeClickLinks(html);
-    html = await this.addStats(html, obj);
+    const stats = await this.addStats('', obj);
 
-    this.info = this.wrapInfo(html);
+    this.info = this.wrapInfo(html) + stats;
     return this.returnData();
   }
 

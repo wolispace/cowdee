@@ -628,6 +628,15 @@ export class DB {
 
     await this.addSub('loc', obj.loc, obj.id);
     await this.addName(this.classNameWords(obj), obj.id);
+
+    // find code from all objects class=material name="{name}"
+    const materialCode = await this.getMaterialCode(obj);
+    if (materialCode !== '') {
+      const matObj = {id: obj.id, code: materialCode};
+      await this.addTriggers(matObj);
+      await this.addTicks(matObj);      
+    }
+
     if (obj.code) {
       await this.set('code', obj.id, { loc: obj.loc, code: obj.code });
       await this.addTriggers(obj);
@@ -652,6 +661,30 @@ export class DB {
     }
     obj.updated = this.app.utils.now();
     await this.set('id', obj.id, obj);
+  }
+
+  /**
+   * Returns the code from all materials in the object passed in
+   * @param {obj} object that may or maynot have .materials 
+   * @returns {string}
+   */
+  async getMaterialCode(obj) {
+    let code = '';  
+    if (obj.material) {
+      const name = obj.material;
+      const matObjs = await this.get('name', name);
+      if (matObjs.length > 0) {
+        const matObjId = matObjs[0]; // first one will do for now
+        const matCode = await this.get('code', matObjId);
+        code += matCode.code;
+        // for(const name of obj.material) {
+        //   const matObj = await this.get('name', name);
+        //   code += await this.get('code', matObj.id);
+        // }
+        console.log(`>> ${this.app.name} ${obj.class} ${obj.material} code: `, code);
+      }
+    }
+    return code;
   }
 
   /**

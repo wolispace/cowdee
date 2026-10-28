@@ -235,10 +235,7 @@ export class Player {
       obj.class = 'bunny';
       obj.color = 'pink';
       obj.movehow = 'hops';
-      obj.code = `##tick:runsub doit;
-##doit: if $actor's steps > 8 then delme else moveme;
-##moveme: find $loc, random doorway;go $found_id;
-##delme: say 'bye', "[$actor] dissapears in a puff of logic";delete $actor;`,
+      obj.materials = 'roamer',
       obj.info = `Im a roaming temporary bunny`      
       // remember the second param as the object the bot is reading
       this.botTarget = parts[1];

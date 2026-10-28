@@ -59,6 +59,7 @@ export class Tester {
     const libraryDoorId = this.app.id.new();
     const bookOfBasicsId = this.app.id.new();
     const bookOfOtherId = this.app.id.new();
+    const materialBoxId = this.app.id.new();
 
     let obj = {
       id: startingLocId,
@@ -173,6 +174,36 @@ If you get stuck, try reloading the browser, or type: [goto bob] to teleport to 
       info: 'This is a book containing other rnadom commands',
     }
     await this.app.db.save(obj);
+    
+    obj = {
+      id: materialBoxId,
+      class: 'material box',
+      qty: 0,
+      owner: wolisId,
+      loc: libraryId,
+      color: 'tomato',
+      lock: 1,
+      info: 'A box bursting full of materials',
+    }
+    await this.app.db.save(obj);
+
+    obj = {
+      id: this.app.id.new(),
+      class: 'material',
+      name: 'roamer',
+      qty: 1,
+      owner: wolisId,
+      loc: materialBoxId,
+      color: 'white',
+      lock: 1,
+      info: 'Randomly roams around',
+      code: `##tick:runsub doit;
+##doit: if $actor's steps > 8 then delme else moveme;
+##moveme: find $loc, random doorway;go $found_id;
+##delme: say 'bye', "[$actor] dissapears in a puff of logic";delete $actor;`,
+    }
+    await this.app.db.save(obj);
+
 
     // create the commands in two books
     const basicCommands = [
@@ -184,12 +215,12 @@ eg: type: [say Hi there] type: [say What am I doing here?]`,
     }, {
       name: "think",
       info: `Let others in your location know what your thinking
-eg: type: [I keep thinking its Tuesday] or type: [think] to just think randomly`,
+eg: type: [think I keep thinking its Tuesday] or type: [think] to just think randomly`,
       code: `get $text;\nif $text ne '' then thinkit else ponder;\n##thinkit:\nsay 'think',"[$actor] .oO( $text )";\n##ponder:\nsay 'think',"[$actor] .o0( I keep thinking its Tuesday )"`
     }, {
       name: "shout",
       info: `Shout something to everyone in the world
-eg: type: [shout Hello everyone!] or type: [shout] to just shout randomly`,
+eg: type: [shout Hello everyone!]`,
       code: `get $text;\nif $text ne 'shout' then shoutit else fail;\n##shoutit:\nmsg 0,$actor,0,0,'shout',"You hear [$actor] shout '$text!'",$actor;\n##fail:\nvar $mm to (Hello,Hay,Bingo,Ahoy there mates,Its life Jim,Horse,Four,My my,AAARGH);\nmsg 0,$actor,0,0,'shout',"[$actor] shouts '$mm!'",$actor;`
     }, {
       name: "do",
@@ -333,7 +364,11 @@ eg: type: [edit the book]`,
       name: "lochow",
       info: `change how the location is described`,
       code: `get $text;set $loc's lochow = $text;say 'change', '[$actor] tinkers with [$loc]';relook $loc;`
-    }, {    
+    }, {
+      name: "material",
+      info: `set a material to an object`,
+      code: `get $target,'to',$text;set $target's material = $text;say 'change', '[$actor] sets [$target] to $text";`
+    }, {      
       name: "point",
       info: `Point at something in your current location`,
       code: `find $loc, random not me;\nsay 'point', "[$actor] points at [$found_id]";`

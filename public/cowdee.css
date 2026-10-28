@@ -334,14 +334,12 @@ menu {
 }
 
 .info {
-  padding: .2rem;
-  padding-right: 2rem;
+  padding: 1rem 2rem 1rem .5rem;
   border: 3px solid black;
   border-radius: .5rem;
   box-shadow: 0 0 1rem black;
   height: 100%;
   line-height: 1.5rem;
-
 }
 
 .info textarea {

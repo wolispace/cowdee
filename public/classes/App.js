@@ -156,7 +156,7 @@ export class App {
     if (data.cmd && data.saveHistory !== false && !data.cmd.startsWith('::run')) {
       this.player.addHistory(data.cmd);
     }
-    console.log(`{$this.name} sendCommand `, data);
+    console.log(`${this.name} sendCommand `, data);
     const result = await this.io.fetchJson('server', data);
     if (result?.contexts) {
       // TODO a list of player Ids should be coming back with these contexts

@@ -31,6 +31,8 @@ if (app.settings.generate) {
     lock it
     lock the road
     paint it tan
+    create a green frog
+    material it as roamer
   `;
   for(const cmd of playerCommands.split('\n')) {
     if (cmd.trim()) {
@@ -46,7 +48,7 @@ if (app.settings.generate) {
   const fisherman = await app.db.getObjByName('fisherman');
   if (fisherman) {
     console.log({fisherman});
-    fisherman.info = `I'm just minding my own business. Best not [type: push fisherman]`;
+    fisherman.info = `I'm just minding my own business. Best not type: [push fisherman]`;
     fisherman.code = `if reacting to push then pushit;
   ##pushit:
   $msg = (Hmm... what?, Yup... I'm real, I'll just ignore that);
