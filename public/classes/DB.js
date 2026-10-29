@@ -175,16 +175,59 @@ export class DB {
 
   /**
  * Retruns the code for the object.id passed in
- * for consistancy, even tho its just a string, its stored in an array with one element
+ * Plus all of its .materials code
  * @param {id} id 
  * @returns {string}
  */
   async getCode(id) {
-    const obj = await this.get('code', id);
+    const obj = await this.getById(id);
     if (!obj) return '';
+    const objCode = await this.getObjCode(id);
+    const matCode = await this.getMaterialCode(obj);
+    return `${objCode}\n${matCode}`;
+  };
+
+    /**
+ * Retruns just the code for the object id passed in
+ * @param {string} id  
+ * @returns {string}
+ */
+  async getObjCode(id) {
+    const obj = await this.get('code', id);
+    if (!obj) return '';    
     const raw = obj?.code.replaceAll('\\n', '\n') ?? '';
     return this.app.utils.decodeString(raw);
   };
+
+  /**
+   * Returns the combined code from all material definition objects matching obj.material.
+   * Looks up objects with class='material' and name matching each material word,
+   * then stitches their code together so the calling object inherits tick/trigger behaviour.
+   * @param {object} obj - object that may have a .material property (string or array)
+   * @returns {string}
+   */
+  async getMaterialCode(obj) {
+    let code = '';
+    if (!obj.material) return code;
+
+    const words = Array.isArray(obj.material) ? obj.material : obj.material.split(' ');
+
+    for (const word of words) {
+      // Find objects whose name includes this material word
+      const candidates = await this.get('name', word.toLowerCase()) ?? [];
+      // TODO check material_x.json to see if this is a material without laoding the whole object
+      const materials = await this.get('material', word.toLowerCase()) ?? [];
+
+      for (const id of candidates) {
+        if (materials.includes(id)) {
+          const matCode = await this.getObjCode(id);
+          if (matCode) code += matCode;
+        }
+      }
+    }
+    console.log(`${this.app.name} >>>>> getMaterialCode`, obj.class, obj.material, 'code', code);
+    return code;
+  }
 
   /**
    * Retruns the info for the object.id passed in
@@ -629,13 +672,13 @@ export class DB {
     await this.addSub('loc', obj.loc, obj.id);
     await this.addName(this.classNameWords(obj), obj.id);
 
-    // find code from all objects class=material name="{name}"
+    // index materials 
+    if (obj.class === 'material') {
+      await this.addSub('material', obj.name.toLowerCase(), obj.id);
+    }
+
+    // if object has materials index reactions from all material code for this object
     if (obj.material) {
-      const words = Array.isArray(obj.material) ? obj.material : obj.material.split(' ');
-      // index this object under each material word (reverse-lookup: "which objects are glass?")
-      for (const word of words) {
-        await this.addSub('material', word.toLowerCase(), obj.id);
-      }
       // gather code from material definition objects and register ticks/triggers on this object
       const materialCode = await this.getMaterialCode(obj);
       if (materialCode !== '') {
@@ -644,10 +687,9 @@ export class DB {
         await this.addTicks(matObj);
       }
     }
-
     if (obj.code) {
       await this.set('code', obj.id, { loc: obj.loc, code: obj.code });
-      // ignore code of materials
+      // do not index reactions for material objects (so they dont react to tick etc..)
       if (obj.class !== 'material') {
         await this.addTriggers(obj);
         await this.addTicks(obj);
@@ -674,35 +716,7 @@ export class DB {
     await this.set('id', obj.id, obj);
   }
 
-  /**
-   * Returns the combined code from all material definition objects matching obj.material.
-   * Looks up objects with class='material' and name matching each material word,
-   * then stitches their code together so the calling object inherits tick/trigger behaviour.
-   * @param {object} obj - object that may have a .material property (string or array)
-   * @returns {string}
-   */
-  async getMaterialCode(obj) {
-    let code = '';
-    if (!obj.material) return code;
 
-    const words = Array.isArray(obj.material) ? obj.material : obj.material.split(' ');
-
-    for (const word of words) {
-      // Find objects whose name includes this material word
-      const candidates = await this.get('name', word.toLowerCase()) ?? [];
-      for (const id of candidates) {
-        const matObj = await this.getById(id);
-        // Only use objects explicitly classed as 'material'
-        if (matObj?.class === 'material') {
-          // getCode applies decodeString consistently with all other code retrieval
-          const matCode = await this.getCode(id);
-          if (matCode) code += matCode;
-        }
-      }
-    }
-    console.log(`${this.app.name} >>>>> getMaterialCode`, obj.class, obj.material, 'code', code);
-    return code;
-  }
 
   /**
  * Adds a trigger word if this code is triggred in some way

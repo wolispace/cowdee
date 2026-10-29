@@ -426,9 +426,7 @@ export class App {
       if (!this.activeLocations.has(obj.loc)) continue;
       // Combine own code and any inherited material code into one blob —
       // mirrors what save() does: both sources are indexed independently for tick/trigger.
-      const ownCode = await this.db.getCode(id);
-      const matCode = await this.db.getMaterialCode(obj);
-      const code = ownCode + matCode;
+      const code = await this.db.getCode(id);
       if (!code) continue;
       await this.sendCommand({
         ts: boundaryTs,
