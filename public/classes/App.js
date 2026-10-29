@@ -424,7 +424,11 @@ export class App {
       if (!obj) continue;
       // only tick in locations with active players
       if (!this.activeLocations.has(obj.loc)) continue;
-      const code = await this.db.getCode(id);
+      // Combine own code and any inherited material code into one blob —
+      // mirrors what save() does: both sources are indexed independently for tick/trigger.
+      const ownCode = await this.db.getCode(id);
+      const matCode = await this.db.getMaterialCode(obj);
+      const code = ownCode + matCode;
       if (!code) continue;
       await this.sendCommand({
         ts: boundaryTs,

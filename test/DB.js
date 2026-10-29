@@ -31,7 +31,8 @@ if (app.settings.generate) {
     lock it
     lock the road
     paint it tan
-    create a green frog
+    create a frog
+    paint it green
     material it as roamer
   `;
   for(const cmd of playerCommands.split('\n')) {
