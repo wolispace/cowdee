@@ -370,7 +370,8 @@ export class App {
    * we then schedule any that are still waiting to keep them aligned.
    */
   async refreshTickTimers() {
-    console.log(`${this.name} refreshing tick timers...`);
+    console.log(`${this.name} Refreshing tick timers, send blank cmd and relook player...`);
+    await this.sendCommand('');
     const elapsed = Date.now() - (this._lastHidden ?? Date.now());
     if (elapsed > 60_000) {
       // Away long enough that memory may be stale — save pending writes then re-read fresh
@@ -414,10 +415,13 @@ export class App {
    */
   async runTick(type, boundaryTs) {
     if (!this.player?.id) return;
+    // since this browser is awake enough to tick, its location should be active even if the server is not aware of this just yet
+    this.activeLocations.add(this.player.loc);
     // Don't fire ticks while the tab is hidden — refreshTickTimers catches up on return
     if (this.window && document.visibilityState === 'hidden') return;
     const ids = await this.db.get(type, '__');
     if (!ids || ids.length === 0) return;
+    console.log(`${this.name} runTick ${type} ids:`, ids, 'activeLocations', this.activeLocations);
 
     for (const id of ids) {
       const obj = await this.db.get('id', id);

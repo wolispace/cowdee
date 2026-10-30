@@ -221,6 +221,8 @@ export class UI {
 type: [read the book of basics]
 
 Learn type: [about] cow
+
+If it all goes terribly wrong, reload your browser.
     `;
     this.app.menu(html);
   }

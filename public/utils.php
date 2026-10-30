@@ -2,7 +2,7 @@
 // require_once "utils.php";
 define('APP_NAME', 'cowdee'); // name for cow
 define('APP_TITLE', 'Dirstibuted COW'); // name for cow
-define('APP_VERSION', '0.10.5'); // the version
+define('APP_VERSION', '0.11.0'); // the version
 
 define('CONTEXT_DIR', '_contexts'); // folder for context files relative to public
 define('CONTEXT_EXT', '.json'); // file type for json
@@ -11,7 +11,7 @@ define('DB_DIR', '_db'); // folder for db json files relative to public
 define('DB_EXT', '.json'); // extension of db files
 define('LOCK_FILE', '_lockfile.txt'); // if present we have the db locked for writting
 define('PLAYER_DIR', '_players'); //where active players are recorded eg _2.txt _wol.txt etc..
-define('ACTIVE_PLAYER_SECS', 20); // if last activity from a player is > this then we consider them logged off/asleep
+define('ACTIVE_PLAYER_SECS', 25); // (a bite more than a 20sec tick) if last activity from a player is > this then we consider them logged off/asleep
 define('ID_COUNTER_FILE', '_counter.txt'); // the counter of the last highest ID
 
 function logIt($str) {
