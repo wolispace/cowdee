@@ -396,8 +396,9 @@ legend {
   box-shadow: 0 0 1rem black;
   color: rgba(255,255,255.75);
   padding: .5rem;
-  line-height: 1.5rem;
+  line-height: 1rem;
   border-radius: .5rem;
+  max-width: 15rem;
 }
 
 .tiny {

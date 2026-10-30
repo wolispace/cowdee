@@ -127,11 +127,13 @@ export class Cowmands {
       }
       if (['me','myself'].includes(this.context.target)) {
         ltarget = this.context.actor;
+        this.context.target = ltarget;
         const obj = await this.app.db.getById(this.context.actor);
         delete this.context.ntarget;
       }
       if (['me','myself'].includes(this.context.second)) {
         lsecond = this.context.actor;
+        this.context.target = lsecond;
         const obj = await this.app.db.getById(this.context.actor);
         delete this.context.nsecond;
       }

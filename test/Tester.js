@@ -365,6 +365,13 @@ eg: type: [edit the book]`,
       info: `change how the location is described`,
       code: `get $text;set $loc's lochow = $text;say 'change', '[$actor] tinkers with [$loc]';relook $loc;`
     }, {
+      name: "movehow",
+      info: `change how an object moves between locations eg: walks, hops, runs
+eg: type: [movehow me floats] or type: [movehow the mouse scurries]`,
+      code: `get $target,$lastword in $loc;if $lastword ne '' then editit else fail;
+##fail:say 'fail', "[$actor] didnt specify a move how word";
+##editit:set $target's movehow to $lastword;say 'edit',"[$actor] modifies [$target] in some way";`
+    }, {      
       name: "material",
       info: `set a material to an object`,
       code: `get $target,'to',$text;set $target's material = $text;say 'change', '[$actor] sets [$target] to $text";`

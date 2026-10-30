@@ -233,9 +233,9 @@ export class Player {
       }
     } else {
       obj.class = 'bunny';
-      obj.color = 'pink';
+      obj.color = this.app.ui.randomColor();
       obj.movehow = 'hops';
-      obj.materials = 'roamer',
+      obj.material = 'roamer',
       obj.info = `Im a roaming temporary bunny`      
       // remember the second param as the object the bot is reading
       this.botTarget = parts[1];

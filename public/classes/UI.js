@@ -483,6 +483,10 @@ If it all goes terribly wrong, reload your browser.
     console.warn(msg);
   }
 
+  randomColor() {
+    const names = this.colorNames();
+    return names[this.app.utils.random(names.length)];
+  }
     /**
    * Returns a list of known color names sorted by hue
    * @returns {array}
