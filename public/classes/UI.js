@@ -7,6 +7,9 @@ export class UI {
   splitRatio = null; // null = use CSS flex defaults; 0–1 = top's share after drag
   messages = [];
   topView = '';
+  loadingCount = 0;
+  loadingTimer = null;
+  hideTimer = null;
 
   constructor(app) {
     this.app = app;
@@ -451,26 +454,50 @@ If it all goes terribly wrong, reload your browser.
     }).observe(this.panels);
   }
 
-  // set a timeout of 500ms to animate this.top opacity from current (usually 0%) to 50% opacity over a 500ms period. 
+  // Set a timeout of 500ms to add the .loading class if loading takes longer than 500ms.
   showLoading() {
     if (!this.app.window) return;
-    this.loading = setTimeout(() => {
-      this.top.style.opacity = '0.25';
-    }, 500);
+    this.loadingCount++;
+
+    if (this.hideTimer) {
+      clearTimeout(this.hideTimer);
+      this.hideTimer = null;
+    }
+
+    if (this.loadingCount === 1 && !this.loadingTimer) {
+      this.loadingTimer = setTimeout(() => {
+        if (this.top) {
+          this.top.style.removeProperty('opacity');
+          this.top.classList.add('loading');
+        }
+      }, 500);
+    }
   }
 
-  // clear this.loading timeout if present 
-  // if this.top opacity is > 0% then fade it to 0% over250ms.
+  // Clear loading state when all pending requests complete (debounced by 80ms to avoid flicker on sequential fetches).
   hideLoading() {
     if (!this.app.window) return;
-    if (this.loading) {
-      clearTimeout(this.loading);
-      this.loading = null;
+    if (this.loadingCount > 0) {
+      this.loadingCount--;
     }
-    if (this.top.style.opacity > 0) {
-      this.top.style.opacity = '1';
+
+    if (this.loadingCount === 0) {
+      clearTimeout(this.hideTimer);
+      this.hideTimer = setTimeout(() => {
+        if (this.loadingCount === 0) {
+          if (this.loadingTimer) {
+            clearTimeout(this.loadingTimer);
+            this.loadingTimer = null;
+          }
+          if (this.top) {
+            this.top.classList.remove('loading');
+            this.top.style.opacity = '1';
+          }
+        }
+      }, 80);
     }
   }
+
 
   /**
    * Show msg in browser and add to console log

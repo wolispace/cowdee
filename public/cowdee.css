@@ -30,7 +30,7 @@ a {
 }
 
 .locked {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 .click {
@@ -48,12 +48,12 @@ a {
 }
 
 .click-close {
-  position:absolute;
+  position: absolute;
   top: 2.3rem;
   right: 1.5rem;
   background-color: rgb(143, 31, 31);
   color: rgba(255, 255, 255, 0.75);
-  padding:0 .2rem;
+  padding: 0 .2rem;
   cursor: pointer;
   text-shadow: -1px -1px 1px black;
   border-radius: .3rem;
@@ -61,7 +61,7 @@ a {
 
 .click-close:hover {
   color: white;
-    background-color: rgb(143, 31, 31);
+  background-color: rgb(143, 31, 31);
 }
 
 .suggest {
@@ -140,16 +140,18 @@ section::-webkit-scrollbar {
 }
 
 section::-webkit-scrollbar-track {
-  background: var(--background-color);     /* dark track */
+  background: var(--background-color);
+  /* dark track */
 }
 
 section::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,.5);      /* lighter thumb */
+  background: rgba(255, 255, 255, .5);
+  /* lighter thumb */
   border-radius: .25rem;
 }
 
 section::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,255,255,.75);
+  background: rgba(255, 255, 255, .75);
 }
 
 
@@ -218,12 +220,12 @@ section::-webkit-scrollbar-thumb:hover {
   height: 1.5rem;
   cursor: pointer;
   background-color: #133434;
-  color: rgba(255,255,255,.85);
+  color: rgba(255, 255, 255, .85);
 }
 
 .button:hover {
   background-color: #164d4d;
-  color: rgb(255,255,255);
+  color: rgb(255, 255, 255);
 }
 
 
@@ -358,7 +360,7 @@ menu {
 }
 
 .info table {
- border-collapse: collapse;
+  border-collapse: collapse;
 }
 
 .info table td {
@@ -373,7 +375,7 @@ menu {
 fieldset {
   margin-top: .5rem;
   border-radius: 0.35rem;
-  border-color: rgba(255,255,255,.15);
+  border-color: rgba(255, 255, 255, .15);
   box-shadow: .2rem .2rem .2rem black;
 }
 
@@ -388,13 +390,13 @@ legend {
 }
 
 #menu {
-  position:absolute;
-  top:0;
-  right:0;
+  position: absolute;
+  top: 0;
+  right: 0;
   width: 75%;
   background-color: rgb(77, 36, 36);
   box-shadow: 0 0 1rem black;
-  color: rgba(255,255,255.75);
+  color: rgba(255, 255, 255.75);
   padding: .5rem;
   line-height: 1rem;
   border-radius: .5rem;
@@ -404,4 +406,18 @@ legend {
 .tiny {
   font-size: 65%;
   color: tan;
+}
+
+.loading {
+  animation: loadingPulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes loadingPulse {
+  from {
+    opacity: 0.8;
+  }
+
+  to {
+    opacity: 0.1;
+  }
 }

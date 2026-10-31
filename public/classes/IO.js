@@ -20,14 +20,24 @@ export class IO {
   }
 
   async loadJson(file) {
-    const json = await this.fetchJson('server', { file, token: this.token, pid: this.app.player.pid() });
-    return json || {};
+    this.app.ui.showLoading();
+    try {
+      const json = await this.fetchJson('server', { file, token: this.token, pid: this.app.player.pid() });
+      return json || {};
+    } finally {
+      this.app.ui.hideLoading();
+    }
   }
 
   async loadFiles(files) {
     if (!files || files.length === 0) return {};
-    const json = await this.fetchJson('server', { files, token: this.token, pid: this.app.player.pid() });
-    return json || {};
+    this.app.ui.showLoading();
+    try {
+      const json = await this.fetchJson('server', { files, token: this.token, pid: this.app.player.pid() });
+      return json || {};
+    } finally {
+      this.app.ui.hideLoading();
+    }
   }
 
   async saveJson(file, json) {
@@ -113,7 +123,6 @@ export class IO {
       return await response.json();
     } catch (err) {
       console.log(`${this.app.name} fetch error`, err);
-      this.app.ui.hideLoading();
       return null;
     }
   }

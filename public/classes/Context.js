@@ -41,7 +41,6 @@ export class Context {
       this.msg = `[${this.actor}] wakes up`;
       this.to = 'all';
       await this.app.ui.addMessage(this);
-      this.app.ui.hideLoading();
       return;
     }
 
@@ -67,12 +66,10 @@ export class Context {
       if (!code) {
         this.msg = `[${this.actor}] tries to ${this.cmd}, but nothing happens`;
         await this.app.ui.addMessage(this);
-        this.app.ui.hideLoading();
         return;
       };
     }
     await this.runCodeFrom(code, runFrom);
-    this.app.ui.hideLoading();
 
   }
 
