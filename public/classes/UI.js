@@ -476,7 +476,7 @@ If it all goes terribly wrong, reload your browser.
           this.top.style.removeProperty('opacity');
           this.top.classList.add('loading');
         }
-      }, 500);
+      }, 100);
     }
   }
 
