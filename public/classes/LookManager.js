@@ -206,18 +206,22 @@ export class LookManager {
       }
     };
 
-    const form = this.wrapEditForm('info', context.target, val, obj.extra ?? '');
+    const form = this.wrapEditForm('info', obj, val);
     this.info = form;
     return this.returnData();
   }
 
-  wrapEditForm(type, id, value, extra) {
+  wrapEditForm(type, obj, value) {
+
     value = value.replaceAll("\n", "&#10;");
+    const material = obj.material ? obj.material.join(' ') : '';
+    const extra = obj.extra ? obj.extra : '';
     return `<form class='info'>
       <input type="hidden" name="type" value="${type}">
-      <input type="hidden" name="id" value="${id}">
+      <input type="hidden" name="id" value="${obj.id}">
       <textarea class="infoinput" name="val" placeholder="What you see when you examine or read this">${value}</textarea>
       <input class="infoinput" type="text" name="extra" value="${extra}" placeholder="Extra text after its name when looking" title="The extra information shown when looking around" />
+      <input class="infoinput" type="text" name="material" value="${material}" placeholder="What materails is this made of" title="The materials this is made of" />
       <div class="buttons">
       <button type="submit" class="button" name="action" value="cancel">Cancel</button>
       <button type="submit" class="button" name="action" value="save">Save</button>

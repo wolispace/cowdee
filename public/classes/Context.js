@@ -49,7 +49,7 @@ export class Context {
     if (this.actor === this.app.player.id && this.app.player.id) {
       this.app.player.it = this.it;
     }
-    console.log(`\n${this.app.name} ### processing:`, this.ts, this.actor, 'loc:', this.loc, 'counter:', this.app.id.counter, 'it:', this.it, 'cmd:', this.cmd);
+    console.log(`${this.app.name} received:`, this);
     const { firstword, rest } = this.app.utils.splitFirstWord(this.cmd);
     let runFrom = '__start';
     this.firstword = firstword;

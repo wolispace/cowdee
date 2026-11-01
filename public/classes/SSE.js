@@ -25,7 +25,7 @@ export class SSE {
   }
 
   async connectWeb(urlString) {
-    console.log('[SSEweb] connecting ',this.app.name, urlString);
+    // console.log('[SSEweb] connecting ',this.app.name, urlString);
     this.sse = new EventSource(urlString);
 
     this.sse.addEventListener('contexts', async (event) => {
@@ -37,14 +37,14 @@ export class SSE {
     });
 
     this.sse.addEventListener('shutdown', async () => {
-      console.log('[SSEweb] shutdown, reconnecting...', this.app.name);
+      // console.log('[SSEweb] shutdown, reconnecting...', this.app.name);
       if (!this.aborted) {
         this.close();
         await this.connect();
       }
     });
     this.sse.onerror = async (e) => {
-      console.log('[SSEweb] error, state:', this.app.name, this.sse?.readyState, e);
+      // console.log('[SSEweb] error, state:', this.app.name, this.sse?.readyState, e);
       if (!this.aborted) {
         this.close();
         setTimeout(() => this.connect(), 1000);
@@ -53,7 +53,7 @@ export class SSE {
 
   }
   async connectNode(urlString) {
-    console.log(`${this.app.name} [SSEnode] connecting`, urlString);
+    //console.log(`${this.app.name} [SSEnode] connecting`, urlString);
     try {
       this.abortController = new AbortController();
       const response = await fetch(urlString, {
@@ -61,7 +61,7 @@ export class SSE {
         signal: this.abortController.signal
       });
 
-      //console.log(`${this.app.name} [SSEnode] response `, response.status);
+      // console.log(`${this.app.name} [SSEnode] response `, response.status);
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status} ${response.statusText}`);
@@ -107,7 +107,7 @@ export class SSE {
       }
     } catch (err) {
       if (this.aborted || err.name === 'AbortError') return;
-      console.log(`${this.app.name} [SSEnode] error, state:`, err.message);
+      // console.log(`${this.app.name} [SSEnode] error, state:`, err.message);
       setTimeout(() => {
         
         if (!this.aborted) this.connect();
@@ -119,7 +119,7 @@ export class SSE {
     try {
       const data = JSON.parse(dataStr);
       if (event === 'contexts') {
-        console.log(`${this.app.name} [SSE] received contexts:`, data, 'lastContext:', this.app.lastContext);
+        // console.log(`${this.app.name} [SSE] received contexts:`, data, 'lastContext:', this.app.lastContext);
         const contexts = data.contexts;
         if (Array.isArray(contexts)) {
           for (const raw of contexts) {
@@ -133,7 +133,7 @@ export class SSE {
         }
 
       } else if (event === 'context') {
-        console.log(`${this.app.name} [SSE] received context:`, dataStr, 'lastContext:', this.app.lastContext);
+        // console.log(`${this.app.name} [SSE] received context:`, dataStr, 'lastContext:', this.app.lastContext);
         if (data?.ts) this.app.syncTime(data.ts);
         const context = new Context(this.app, data);
         await context.process();
@@ -144,7 +144,7 @@ export class SSE {
         }
       }
     } catch (e) {
-      console.trace(`${this.app.name} [SSE] parse error:`, e.message);
+      // console.trace(`${this.app.name} [SSE] parse error:`, e.message);
     }
   }
 

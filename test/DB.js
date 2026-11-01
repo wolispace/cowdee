@@ -33,6 +33,7 @@ if (app.settings.generate) {
     paint it tan
     create a frog
     paint it green
+    movehow it hops
     material it as roamer
   `;
   for(const cmd of playerCommands.split('\n')) {

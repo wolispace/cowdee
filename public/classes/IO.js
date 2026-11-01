@@ -91,7 +91,7 @@ export class IO {
     const batch = this._cmdQueue.splice(0, this._cmdQueue.length);
     const commands = batch.map(item => item.payload);
 
-    console.log(`${this.app.name} flushing ${commands.length} queued command(s)`);
+    // console.log(`${this.app.name} flushing ${commands.length} queued command(s)`);
     const result = await this._doFetch('server', {
       commands,
       token: this.token,

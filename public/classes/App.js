@@ -60,7 +60,6 @@ export class App {
     // start the SSE now we know the last context seen
     if (!this.settings.nosse) {
       this.sse = new SSE(this);
-      console.log('starting SSE');
       await this.sse.connect();
     }
 
@@ -156,7 +155,7 @@ export class App {
     if (data.cmd && data.saveHistory !== false && !data.cmd.startsWith('::run')) {
       this.player.addHistory(data.cmd);
     }
-    console.log(`${this.name} sendCommand `, data);
+    console.log(`${this.name} sendCommand:`, data);
     const result = await this.io.fetchJson('server', data);
     if (result?.contexts) {
       // TODO a list of player Ids should be coming back with these contexts
@@ -224,9 +223,10 @@ export class App {
   buildSaveCommand(data) {
     let encoded = this.utils.encodeString(data.val);
     let extra = this.utils.encodeString(data.extra);
+    let material = this.utils.encodeString(data.material);
     // let cmd = `::run set ${data.id}'s ${data.type} to "${encoded}";`;
     // update $new_id to "worth=0, loc=$door1, pose='hidden'";
-    let cmd = `::run update ${data.id} to "${data.type}='${encoded}', extra='${extra}'";`;
+    let cmd = `::run update ${data.id} to "${data.type}='${encoded}', extra='${extra}', material='${material}'";`;
     cmd += `relook $actor's loc;`;
     cmd += `say 'edit',"[$actor] finishes with [${data.id}]";`;
     return cmd;

@@ -258,8 +258,7 @@ export class Cowmands {
       const val = await this.resolveValue(match[3].trim());
       const prop = match[2].toLowerCase();
       const oldObj = { ...obj };
-      
-      obj[prop] = val;
+      this.app.db.setObjValue(obj, prop, val);
       await this.app.db.save(obj, oldObj);
       // update the players location
       if (this.app.player.id == obj.id && prop === 'loc') {
@@ -270,7 +269,6 @@ export class Cowmands {
     // UPDATE handler
     update: async (rest) => {
       rest = this.app.utils.decodeString(rest);
-      const debug = JSON.stringify(rest);
 
       const match = rest.match(/^(.+?)\s*(to|=)\s*\"(.+)\"$/i);
       if (!match) return;
@@ -282,7 +280,7 @@ export class Cowmands {
         if (eqIdx === -1) continue;
         const prop = pair.substring(0, eqIdx).trim();
         const val = await this.resolveValue(pair.substring(eqIdx + 1).trim());
-        obj[prop] = val;
+        this.app.db.setObjValue(obj, prop, val);
         if (this.app.player.id == obj.id && prop === 'loc') {
           this.app.player.loc = obj.loc;
           this.app.player.save();

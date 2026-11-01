@@ -4,8 +4,12 @@ export class DB {
   dirty = {};
   interval = 5_000;
   wordKeys = ['name', 'trigger', 'material'];
+  arrayProps = ['material']; // which properties of an object are saved as arrays
+  namedObjects = ['player', 'command']; // which objects are named and not pluralized
   reactions = 0; // reset this after each user entered command??
   maxReactions = 5;
+
+
 
   // see tests/DB2.php for some sample data
 
@@ -225,7 +229,7 @@ export class DB {
         }
       }
     }
-    console.log(`${this.app.name} >>>>> getMaterialCode`, obj.class, obj.material, 'code', code);
+    // console.log(`${this.app.name} >>>>> getMaterialCode`, obj.class, obj.material, 'code', code);
     return code;
   }
 
@@ -357,9 +361,24 @@ export class DB {
       obj.thename = `the ${obj.longname}`;
       obj.longname += ' called ' + obj.name;
     }
-    if (['player', 'command'].includes(obj.class)) {
+    if (this.namedObjects.includes(obj.class)) {
       obj.thename = obj.name;
       obj.longname = obj.name;
+    }
+  }
+
+  /**
+   * Sets the value on an object, some are converted from string to array
+   * eg: material='wood metal' becomes material=['wood', 'metal']
+   * @param {object} obj 
+   * @param {string} prop 
+   * @param {string} val 
+   */
+  setObjValue(obj, prop, val) {
+    if (this.arrayProps.includes(prop)) {
+        obj[prop] = val.split(' ').map(s => s.trim());
+    } else {
+      obj[prop] = val;
     }
   }
 
