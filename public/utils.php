@@ -110,11 +110,9 @@ function getActivePlayers()
     if (!file_exists($file))
       continue;
     // if file is ? 20 seconds old, delete it as they are nolonger active
-    if (time() - filemtime($file) > ACTIVE_PLAYER_SECS) {
-      if (file_exists($file)) {
-        unlink($file);
-        logIt("kill player file {$file}");
-      }
+    if (time() - @filemtime($file) > ACTIVE_PLAYER_SECS) {
+      @unlink($file);
+      logIt("kill player file {$file}");
     }
   }
   return $players;
