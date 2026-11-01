@@ -95,7 +95,11 @@ export class App {
         if (cmd) {
           await this.sendCommand(cmd(el));
         } else {
-          await this.sendCommand(el.dataset.cmd.replace(/{id}/, el.dataset.id));
+          if (el.dataset.cmd) {
+            await this.sendCommand(el.dataset.cmd.replace(/{id}/, el.dataset.id));
+          } else {
+            // console.log('click element has no data-cmd', el);
+          }
         }
       });
 

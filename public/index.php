@@ -14,6 +14,8 @@ $rnd = rand(0, 999999); ?>
 
 <body>
   <content>
+    <div id="menu" class="hide"></div>
+    <div id="showmenu" title="Show or hide the exceedingly minimal menu" class="click" onclick="app.toggleMenu()">&#9776;</div>
     <div id="panels">
       <section id="top">
         <h2>Welcome to <?= APP_TITLE ?> v<?= APP_VERSION ?></h2>
@@ -35,8 +37,7 @@ $rnd = rand(0, 999999); ?>
       <input type="submit" class="commandbutton button" value="Go" />
     </form>
   </content>
-  <div id="showmenu" title="Show or hide the exceedingly minimal menu" class="click" onclick="app.toggleMenu()">&#9776;</div>
-  <div id="menu" class="hide"></div>
+
   <dialog id="dialog" class="buttonize"></dialog>
 </body>
 

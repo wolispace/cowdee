@@ -269,9 +269,9 @@ section::-webkit-scrollbar-thumb:hover {
 
 /* ── Hamburger menu ── */
 #showmenu {
-  position: fixed;
+  position: absolute;
   top: 0.2rem;
-  right: 1.2rem;
+  right: 1rem;
   z-index: 1000;
   width: 2rem;
   height: 2rem;
@@ -388,7 +388,7 @@ legend {
 #menu {
   position: absolute;
   top: 0;
-  right: 0;
+  right: 1rem;
   width: 75%;
   background-color: rgb(77, 36, 36);
   box-shadow: 0 0 1rem black;
