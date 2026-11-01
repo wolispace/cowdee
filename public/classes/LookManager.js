@@ -173,16 +173,16 @@ export class LookManager {
     this.app.player.editing = true;
     this.context = context;
     this.sentences = [];
+    const obj = await this.app.db.getById(context.target);
     let val = await this.app.db.getCode(context.target);
     if (!val) {
-      const obj = await this.app.db.getById(context.target);
       if (!obj) {
         val = `Opps.. I can't find object ID ${context.target}. Reload. `; 
       } else {
         val = ``;
       }
     };
-    const form = this.wrapEditForm('code', context.target, val);
+    const form = this.wrapEditForm('code', obj, val);
     this.sentences.push(form);
     return this.returnData();
   }

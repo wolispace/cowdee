@@ -268,9 +268,6 @@ export class Cowmands {
     },
     // UPDATE handler
     update: async (rest) => {
-      // "info='one%20two%20three%0A%0A%23%23%20one', extra='', material=''"
-      rest = this.app.utils.decodeString(rest);
-
       const match = rest.match(/^(.+?)\s*(to|=)\s*\"(.+)\"$/is);
       if (!match) return;
       const obj = await this.resolveObj(match[1].trim());
@@ -280,7 +277,9 @@ export class Cowmands {
         const eqIdx = pair.indexOf('=');
         if (eqIdx === -1) continue;
         const prop = pair.substring(0, eqIdx).trim();
-        const val = await this.resolveValue(pair.substring(eqIdx + 1).trim());
+        let value = pair.substring(eqIdx + 1).trim();
+        value = this.app.utils.decodeString(value);
+        const val = await this.resolveValue(value);
         this.app.db.setObjValue(obj, prop, val);
         if (this.app.player.id == obj.id && prop === 'loc') {
           this.app.player.loc = obj.loc;
