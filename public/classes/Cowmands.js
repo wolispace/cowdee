@@ -268,9 +268,10 @@ export class Cowmands {
     },
     // UPDATE handler
     update: async (rest) => {
+      // "info='one%20two%20three%0A%0A%23%23%20one', extra='', material=''"
       rest = this.app.utils.decodeString(rest);
 
-      const match = rest.match(/^(.+?)\s*(to|=)\s*\"(.+)\"$/i);
+      const match = rest.match(/^(.+?)\s*(to|=)\s*\"(.+)\"$/is);
       if (!match) return;
       const obj = await this.resolveObj(match[1].trim());
       if (!obj) return;
