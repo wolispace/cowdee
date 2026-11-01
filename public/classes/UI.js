@@ -1,5 +1,5 @@
 // handles the splitter UI with scrollable panels top and bottom
-import { Markdown } from './Markdown.js';
+
 
 export class UI {
   dragging = false;
@@ -12,7 +12,7 @@ export class UI {
   loadingCount = 0;
   loadingTimer = null;
   hideTimer = null;
-  markdown = new Markdown();
+  
 
   constructor(app) {
     this.app = app;

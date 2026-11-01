@@ -4,6 +4,7 @@ export class Markdown {
   }
   
   render(md) {
+    md = md.replaceAll('\\n', '\n')
     const lines = md.split('\n')
     const html = []
     let inTable = false

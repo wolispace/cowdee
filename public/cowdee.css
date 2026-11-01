@@ -292,10 +292,6 @@ section::-webkit-scrollbar-thumb:hover {
   color: white;
 }
 
-li {
-  padding-bottom: .5rem;
-}
-
 dialog {
   background-color: slategray;
   border-radius: .5rem;

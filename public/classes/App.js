@@ -8,6 +8,7 @@ import { ID } from './ID.js';
 import { Player } from './Player.js';
 import { LookManager } from './LookManager.js';
 import { Context } from './Context.js';
+import { Markdown } from './Markdown.js';
 
 const LAST_CONTEXT_KEY = 'lastContext'; // how we local store the last seen context key
 
@@ -37,6 +38,7 @@ export class App {
     this.id = new ID(this); // generate unique sequential ids
     this.player = new Player(this);
     this.lookManager = new LookManager(this);
+    this.markdown = new Markdown();
 
     this.ui.initMenu();
 

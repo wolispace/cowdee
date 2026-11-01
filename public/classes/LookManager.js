@@ -1,5 +1,4 @@
 import { SetMap } from './SetMap.js';
-import { Markdown } from './Markdown.js';
 
 export class LookManager {
   seen = [];
@@ -7,7 +6,6 @@ export class LookManager {
   objs = {};
   groups = new SetMap();
   seen = new Set();
-  markdown = new Markdown();
   sentences = [];
   sentenceCounter = 0;
   objCounter = 0;
@@ -86,7 +84,7 @@ export class LookManager {
     this.sentences = [];
     const obj = await this.app.db.getById(context.target);
     let html = await this.app.db.getInfo(context.target);
-        html = html.replaceAll("\n", "<br/>");
+        //html = html.replaceAll("\n", "<br/>");
     if (!html) {
       if (!obj) {
         html = `Opps.. I can't find object ID ${context.target}. Reload. `; 
@@ -94,6 +92,7 @@ export class LookManager {
         html = `It's a pretty ordinary ${obj.class}`;
       }
     };
+    html = this.app.markdown.render(html);
     html = this.app.ui.makeClickLinks(html);
     const stats = await this.addStats('', obj);
 
@@ -116,7 +115,7 @@ export class LookManager {
         html += `<fieldset><legend>${foundObj.longname}</legend>${foundRead}</fieldset>`;
       }
     }
-    html = html.replaceAll("\n", "<br/>");
+    html = this.app.markdown.render(html);
     html = this.app.ui.makeClickLinks(html);
     this.info = this.wrapInfo(html);
     return this.returnData();
@@ -160,7 +159,7 @@ export class LookManager {
 | Code size | ${Math.round(stats.totalCodeSize / 1024)} KB |
 | Players | ${stats.totalPlayers} |
     `;
-    html = this.markdown.render(html);
+    html = this.app.markdown.render(html);
 
     this.info = this.wrapInfo(html);
     return this.returnData();
