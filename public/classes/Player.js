@@ -323,6 +323,8 @@ export class Player {
    */
   async wakePlayer() {
     console.log(`${this.app.name} wakePlayer:`, this.name, this.id, this.loc);
+    const obj = await this.app.db.getById(this.id);
+    await this.app.db.save(obj); // update location incase they were inactive
     // if this is a bot, then the new command is 'read'
     if (this.botTarget) {
       await this.app.sendCommand({ cmd: `read ${this.botTarget}`, actor: this.id, loc: this.loc, saveHistory: false });
