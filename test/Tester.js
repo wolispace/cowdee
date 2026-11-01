@@ -379,6 +379,10 @@ eg: type: [movehow me floats] or type: [movehow the mouse scurries]`,
       name: "point",
       info: `Point at something in your current location`,
       code: `find $loc, random not me;\nsay 'point', "[$actor] points at [$found_id]";`
+    }, {      
+      name: "hibernate",
+      info: `Put all old players into deep sleep`,
+      code: `hibernate players;\nsay 'hibernate', "[$actor] puts players into deep sleep";`      
     }
    ];
 

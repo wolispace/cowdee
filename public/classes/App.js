@@ -207,6 +207,26 @@ export class App {
     }
     return html;
   }
+
+  /**
+   * Read the 'name' 'p' players ids
+   * preload them
+   * Loop over each getting it and checking last update date
+   * If older then x then remove from their 'loc' shard but keep obj.loc incase they log in and restore ther place in the 'loc' shard
+   */
+  async hideInactivePlayers() {
+    const cutoff = Date.now() - (60 * 60 * 1000); // 1 hour ago in ms
+    const objIds = await this.db.findByName('player');
+    if (!objIds) return;
+    await this.db.preLoad('id', objIds);
+    for (const id of objIds) {
+      const obj = await this.db.getById(id);
+      if (new Date(obj.updated).getTime() < cutoff) {
+        await this.db.removeLoc(obj.loc, obj.id);
+      }
+    }
+  }
+
   /**
    * Sets the version and app name of this from the server
    * @param {object} appInfo 

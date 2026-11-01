@@ -756,8 +756,14 @@ export class Cowmands {
     },
 
     // FLUSH
-    flush: ($rest) => {
+    flush: () => {
       this.app.db.flush();
+    },
+
+    // HIBERNATE
+    hibernate: async (rest) => {
+      // we may want to hibernate other things but by default we 'hibernate players'
+      await this.app.hideInactivePlayers();
     },
 
   };
