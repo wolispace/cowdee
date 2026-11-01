@@ -107,7 +107,7 @@ export class SSE {
       }
     } catch (err) {
       if (this.aborted || err.name === 'AbortError') return;
-      // console.log(`${this.app.name} [SSEnode] error, state:`, err.message);
+      console.log(`${this.app.name} [SSEnode] error, state:`, err.message);
       setTimeout(() => {
         
         if (!this.aborted) this.connect();
@@ -144,7 +144,7 @@ export class SSE {
         }
       }
     } catch (e) {
-      // console.trace(`${this.app.name} [SSE] parse error:`, e.message);
+      console.trace(`${this.app.name} [SSE] parse error:`, e.message);
     }
   }
 

@@ -1,4 +1,5 @@
 import { SetMap } from './SetMap.js';
+import { Markdown } from './Markdown.js';
 
 export class LookManager {
   seen = [];
@@ -6,6 +7,7 @@ export class LookManager {
   objs = {};
   groups = new SetMap();
   seen = new Set();
+  markdown = new Markdown();
   sentences = [];
   sentenceCounter = 0;
   objCounter = 0;
@@ -118,9 +120,6 @@ export class LookManager {
     html = this.app.ui.makeClickLinks(html);
     this.info = this.wrapInfo(html);
     return this.returnData();
-
-
-
   }
 
   /**
@@ -149,18 +148,21 @@ export class LookManager {
     // YOU ARE HERE
     // why not fetchJson?
     // make pretty
-    const stats = await this.app.io._doFetch('server', {stats: 1});
+    const stats = await this.app.io.fetchJson('server', {stats: 1});
     // {"totalObjects":34,"totalDbSize":31532,"totalCodeSize":216590}
-    const html = `<table>    
-    <tr><td>${stats.appTitle}</td><td>v${stats.appVersion}</td></tr>
-    <tr><td>Total objects</td><td class="num">${stats.totalObjects}</td></tr>
-    <tr><td>Data size</td><td  class="num">${Math.round(stats.totalDbSize / 1024)}</td><td>KB</td></tr> 
-    <tr><td>Code size</td><td class="num">${Math.round(stats.totalCodeSize / 1024)}</td><td>KB</td></tr>
-    <tr><td>Players</td><td class="num">${stats.totalPlayers}</td></tr>
-    </table>
+
+    let html = `## ${this.app.title} v${this.app.version}\n`;
+    html += await this.app.listPlayers();
+    html += `
+|----|---|
+| Total objects | ${stats.totalObjects} |
+| Data size | ${Math.round(stats.totalDbSize / 1024)} KB |
+| Code size | ${Math.round(stats.totalCodeSize / 1024)} KB |
+| Players | ${stats.totalPlayers} |
     `;
+    html = this.markdown.render(html);
+
     this.info = this.wrapInfo(html);
-    //this.sentences.push(this.wrapInfo(html));
     return this.returnData();
   }
 

@@ -20,6 +20,10 @@ while (time() < $endTime) {
     $data = [
       'contexts' => $contexts,
       'players'  =>  getActivePlayers(),
+      'appinfo' => [
+        'apptitle' => APP_TITLE,
+        'version' => APP_VERSION
+      ]
     ];
     sse_event('contexts', $data);
     $last = end($contexts);
@@ -37,13 +41,3 @@ function sse_event($event, $data) {
   echo "data: " . json_encode($data) . "\n\n";
   flush();
 }
-
-
-/*
-  const eventSource = nw EventSource('sse.php');
-  eventSource.AddEventListener('context', (event) => {
-    console.log(event, data);
-    
-  })
-
-*/

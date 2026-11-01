@@ -157,12 +157,14 @@ export class App {
     }
     console.log(`${this.name} sendCommand:`, data);
     const result = await this.io.fetchJson('server', data);
+    console.log(`${this.name} sendCommand result:`, result);
+    if (result.players) {
+      this.updateActivePlayers(result.players);
+    }
+    if (result.appinfo) {
+      this.updateAppInfo(result.appinfo);
+    }
     if (result?.contexts) {
-      // TODO a list of player Ids should be coming back with these contexts
-      // keep our blobal player list in sync with the server
-      if (result.players) {
-        this.updateActivePlayers(result.players);
-      }
       const contexts = typeof result.contexts === 'string' ? JSON.parse(result.contexts) : result.contexts;
       await this.processContexts(contexts);
     }
@@ -180,6 +182,35 @@ export class App {
       const bits = player.split('-');
       this.activePlayers.add(bits[0]);
       this.activeLocations.add(bits[1]);
+    }
+  }
+
+  async listPlayers() {
+    let html = `*Active players:* \n`;
+    const ids = [];
+    for (const  playerId of this.activePlayers) {
+      ids.push(playerId);
+    }
+    for (const locationId of this.activeLocations) {
+      ids.push(locationId);
+    }
+    await this.db.preLoad('id', ids);
+    for (const playerId of this.activePlayers) {
+      const obj = await this.db.getById(playerId);
+      html += `\n- [${obj.id}] in [${obj.loc}]`;    
+    }
+    return html;
+  }
+  /**
+   * Sets the version and app name of this from the server
+   * @param {object} appInfo 
+   */
+  updateAppInfo(appInfo) {
+    if (appInfo?.version) {
+      this.version = appInfo.version;
+    }
+    if (appInfo?.title) {
+      this.title = appInfo.title;
     }
   }
 

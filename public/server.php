@@ -64,7 +64,15 @@ function handleInput($request)
       if ($written !== false) $processed++;
     }
 
-    outputJson(['status' => 'ok', 'count' => $processed, 'players' => getActivePlayers()]);
+    outputJson([
+      'status' => 'ok', 
+      'count' => $processed, 
+      'players' => getActivePlayers(),
+      'appinfo' => [
+        'title' => APP_TITLE,
+        'version' => APP_VERSION
+      ]
+    ]);
 
   } else if (isset($request['stats']) ) {
     $dbDir = DB_DIR;
@@ -131,13 +139,6 @@ function handleInput($request)
       'it' => $request['it'] ?? '',
       'cmd' => $request['cmd'],
     ];
-
-    // Belt and braces - there will always be a _context folder
-    // if (!is_dir(CONTEXT_DIR)) {
-    //     // Create the directory
-    //     mkdir(CONTEXT_DIR, 0755, true);
-    //     logIt("Folder created successfully!");
-    // }
 
     $filename = CONTEXT_DIR . "/{$mstimestamp}{$request['actor']}" . CONTEXT_EXT;
     file_put_contents($filename, json_encode($contextData));

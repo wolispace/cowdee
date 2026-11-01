@@ -1,4 +1,6 @@
 // handles the splitter UI with scrollable panels top and bottom
+import { Markdown } from './Markdown.js';
+
 export class UI {
   dragging = false;
   startY = 0;
@@ -10,6 +12,7 @@ export class UI {
   loadingCount = 0;
   loadingTimer = null;
   hideTimer = null;
+  markdown = new Markdown();
 
   constructor(app) {
     this.app = app;
@@ -82,17 +85,20 @@ export class UI {
     }
 
     context.msg = await this.expand(context, 'html');
+
     if (context.msg) {
       const div = document.createElement("div");
       const section = context.top ? '#top' : '#bottom';
       const info = document.querySelector(section);
-      div.innerHTML = context.msg;
       if (context.top) {
+        div.innerHTML = context.msg;
+
         info.replaceChildren(div);
         // auto-scroll top for new look around
         // TODO: only scroll if the current scroll position is at the bottom before appending the content
         info.scrollTop = 0;
       } else {
+        div.innerHTML = context.msg;
         info.appendChild(div);
         // auto-scroll bottom to newest content
         // TODO: only scroll if the current scroll position is at the bottom before appending the content
