@@ -370,11 +370,15 @@ export class DB {
   /**
    * Sets the value on an object, some are converted from string to array
    * eg: material='wood metal' becomes material=['wood', 'metal']
+   * values are sanitized so no punctuation eg.. cant add extra text of '../../filename.txt'
    * @param {object} obj 
    * @param {string} prop 
    * @param {string} val 
    */
   setObjValue(obj, prop, val) {
+    if(!['code', 'info', 'pw'].includes(prop)) {
+      val = this.app.utils.sanitiseWords(val);
+    }  
     if (this.arrayProps.includes(prop)) {
         obj[prop] = val.split(' ').map(s => s.trim());
     } else {

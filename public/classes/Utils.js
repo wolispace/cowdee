@@ -56,6 +56,19 @@ export class Utils {
     return msg.substring(1, msg.length - 1);
   }
 
+  /**
+   * Sanitises a string to only contain letters, numbers, and spaces. Removes all other characters.
+   * Used for 'extra' text or material strings or any other value wesave agains an object.
+   * 'info' and 'code' are sanatized differently
+   * @param {string} str 
+   * @returns {string}
+   */
+  sanitiseWords(str) {
+    if (!str) return '';
+    return str.replace(/[^a-z0-9 ]+/gi, '').trim();
+  }
+
+
   isString(v) {
     return typeof v === "string" || v instanceof String;
   }
