@@ -59,7 +59,7 @@ function handleInput($request)
       ];
 
       $filename = CONTEXT_DIR . "/{$ts}{$actor}" . CONTEXT_EXT;
-      $written  = file_put_contents($filename, json_encode($contextData));
+      $written  = file_put_contents($filename, json_encode($contextData), LOCK_EX);
       logIt('commands batch: ' . ($written !== false ? "saved $filename" : "FAILED to write $filename"));
       if ($written !== false) $processed++;
     }
@@ -141,7 +141,7 @@ function handleInput($request)
     ];
 
     $filename = CONTEXT_DIR . "/{$mstimestamp}{$request['actor']}" . CONTEXT_EXT;
-    file_put_contents($filename, json_encode($contextData));
+    file_put_contents($filename, json_encode($contextData), LOCK_EX);
     logIt("saved context file $filename");
 
     $autoSendNewContexts = false;
@@ -177,7 +177,7 @@ function handleInput($request)
         }
         outputJson(['status' => false]);
       }
-      outputJson(['status' => file_put_contents($lockfile, $request['lock']) > 0]);
+      outputJson(['status' => file_put_contents($lockfile, $request['lock'], LOCK_EX) > 0]);
     }
     outputJson(['status' => 'did nothing']);
   } else if (!empty($request['batch'])) {
@@ -189,7 +189,7 @@ function handleInput($request)
         file_put_contents($counterFile, $request['counter']);
       }
     } else if (isset($request['counter'])) {
-      file_put_contents($counterFile, $request['counter']);
+      file_put_contents($counterFile, $request['counter'], LOCK_EX);
     }
 
     foreach ($request['batch'] as $filename => $data) {
@@ -214,7 +214,7 @@ function handleInput($request)
       $oldCounter = file_exists($counterFile) ? (int) file_get_contents($counterFile) : 0;
       if (isset($request['counter']) && $request['counter'] > $oldCounter) {
         logIt("Incremented counter from {$oldCounter} to {$request['counter']}");
-        file_put_contents($counterFile, $request['counter']);
+        file_put_contents($counterFile, $request['counter'], LOCK_EX);
       }
       saveJson($file, json_decode($request['content'], true));
       outputJson(['ok' => true]);
@@ -237,7 +237,9 @@ function handleInput($request)
  */
 function shardName($filename)
 {
-  return DB_DIR . "/{$filename}" . DB_EXT;
+  // strip off any path traversal eg ../../
+  $safeName = basename($filename);
+  return DB_DIR . "/{$safeName}" . DB_EXT;
 }
 
 function outputJson($data)
@@ -258,7 +260,7 @@ function loadJson($file)
 function saveJson($file, $data)
 {
   logIt('save ' . $file . ' ' . json_encode($data));
-  file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
+  file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT), LOCK_EX);
 }
 
 

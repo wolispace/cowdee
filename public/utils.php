@@ -91,7 +91,7 @@ function refreshPlayer($pid)
 {
   if (empty($pid))
     return;
-  file_put_contents(PLAYER_DIR . "/{$pid}.txt", time());
+  file_put_contents(PLAYER_DIR . "/{$pid}.txt", time(), LOCK_EX);
 }
 
 /**
