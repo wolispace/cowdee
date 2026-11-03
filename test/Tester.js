@@ -54,8 +54,8 @@ export class Tester {
 
   async initObjects() {
     const startingLocId = this.app.id.new();
-    const wolisId = this.app.id.new();
     const libraryId = this.app.id.new();
+    const wolisId = this.app.id.new();
     const libraryDoorId = this.app.id.new();
     const bookOfBasicsId = this.app.id.new();
     const bookOfOtherId = this.app.id.new();
