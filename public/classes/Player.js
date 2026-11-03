@@ -1,13 +1,3 @@
-import './bcrypt.js';
-let bcrypt = globalThis.bcrypt;
-if (!bcrypt && typeof process !== 'undefined' && typeof window === 'undefined') {
-  try {
-    const { createRequire } = await import('module');
-    const require = createRequire(import.meta.url);
-    bcrypt = require('./bcrypt.js');
-  } catch (e) {}
-}
-
 // Handles current player info, logging in, updating storage, command history
 export class Player {
   id = '';
@@ -173,19 +163,19 @@ export class Player {
     if (data?.remember !== undefined) {
       this.remember = Boolean(data.remember === '1' || data.remember === true);
     }
-    const objPw = await this.app.db.getPw(this.id);
     const obj = await this.app.db.getById(this.id);
-
-    if (obj && objPw) {
-      const pwOk = await bcrypt.compare(data.pw, objPw);
-      console.log(`${this.app.name} password ${data.pw} is ${pwOk}`);
-      if (pwOk) {
-        await this.logon(obj);
-      } else {
-        this.app.ui.alert(`Hmm... that didn't match. Try again`);
-      }
-    } else {
+    if (!obj) {
       this.app.ui.alert(`${this.name} id=${this.id} can't be found`);
+      return;
+    }
+    this.loc = obj.loc;
+
+    const result = await this.app.io.fetchJson('server', { checkpw: true, id: this.id, pw: data.pw });
+    console.log(`${this.app.name} password check result:`, result);
+    if (result?.ok) {
+      await this.logon(obj);
+    } else {
+      this.app.ui.alert(`Hmm... that didn't match. Try again`);
     }
   }
 
@@ -197,7 +187,7 @@ export class Player {
     if (data?.remember !== undefined) {
       this.remember = Boolean(data.remember === '1' || data.remember === true);
     }
-    this.pendingPw = await bcrypt.hash(data.pw, 10);
+    this.pendingPw = data.pw;
     this.loc = '_2';
     await this.sendWakeCmd();
   }
@@ -228,7 +218,7 @@ export class Player {
       obj.color = 'gold';
       // is this the player who sent the context to create a new player?
       if (this.pendingPw) {
-        obj.pw = this.pendingPw;
+        await this.app.io.fetchJson('server', { setpw: true, id: newId, pw: this.pendingPw });
         delete this.pendingPw;
       }
     } else {

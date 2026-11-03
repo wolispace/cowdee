@@ -74,6 +74,43 @@ function handleInput($request)
       ]
     ]);
 
+  } else if (!empty($request['checkpw'])) {
+    $id = $request['id'] ?? '';
+    $pw = (string)($request['pw'] ?? '');
+    if (empty($id) || $pw === '') {
+      outputJson(['ok' => false, 'error' => 'Missing id or password']);
+    }
+    $file = pwShardFile($id);
+    $shard = loadJson($file);
+    if (!is_array($shard)) {
+      $shard = [];
+    }
+    $storedHash = $shard[$id] ?? null;
+    if (!$storedHash && str_starts_with($id, '_')) {
+      $storedHash = $shard[substr($id, 1)] ?? null;
+    }
+    if ($storedHash && password_verify($pw, $storedHash)) {
+      logIt("Password verified for player {$id}");
+      outputJson(['ok' => true]);
+    } else {
+      logIt("Password check failed for player {$id}");
+      outputJson(['ok' => false, 'error' => 'Invalid password']);
+    }
+  } else if (!empty($request['setpw'])) {
+    $id = $request['id'] ?? '';
+    $pw = (string)($request['pw'] ?? '');
+    if (empty($id) || $pw === '') {
+      outputJson(['ok' => false, 'error' => 'Missing id or password']);
+    }
+    $file = pwShardFile($id);
+    $shard = loadJson($file);
+    if (!is_array($shard)) {
+      $shard = [];
+    }
+    $shard[$id] = password_hash($pw, PASSWORD_BCRYPT);
+    saveJson($file, $shard);
+    logIt("Saved new password hash for player {$id} in {$file}");
+    outputJson(['ok' => true]);
   } else if (isset($request['stats']) ) {
     $dbDir = DB_DIR;
     $publicDir = __DIR__;
@@ -242,6 +279,12 @@ function shardName($filename)
   return DB_DIR . "/{$safeName}" . DB_EXT;
 }
 
+function pwShardFile($id)
+{
+  $prefix = strtoupper(substr($id, 0, 2));
+  return shardName("pw{$prefix}");
+}
+
 function outputJson($data)
 {
   header('Content-Type: application/json');
@@ -259,8 +302,10 @@ function loadJson($file)
 
 function saveJson($file, $data)
 {
+  $dir = dirname($file);
+  if (!is_dir($dir)) {
+    @mkdir($dir, 0777, true);
+  }
   logIt('save ' . $file . ' ' . json_encode($data));
   file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT), LOCK_EX);
 }
-
-

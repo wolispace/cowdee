@@ -65,7 +65,7 @@ export class Utils {
    */
   sanitiseWords(str) {
     if (!str) return '';
-    return str.replace(/[^a-z0-9 ]+/gi, '').trim();
+    return str.replace(/[^a-z0-9\_\- ]+/gi, '').trim();
   }
 
 
