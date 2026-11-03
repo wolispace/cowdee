@@ -13,10 +13,9 @@ async function runMultiUserSimulation() {
   initApp.tester = new Tester(initApp);
   await initApp.tester.deleteTestFiles();
   await initApp.tester.initObjects(initApp.settings.max);
-  await initApp.db.saveToDisk();
-  await initApp.utils.sleep(300);
+
   const startingLocId = '_2';
-  const libraryId = '_4';
+  const libraryId = '_3';
   let objId = initApp.id.new();
   let obj = {
     id: objId,
@@ -30,10 +29,17 @@ async function runMultiUserSimulation() {
     pw: "$2b$10$KrEhOb\/LpXNnqimUWwfKdO\/IITbgYbtImzEHQQZ\/a5OV\/VjoDU.3q",
   };
   await initApp.db.save(obj);
-  obj.name = 'Jane';
-  obj.loc = libraryId;
-  await initApp.db.save(obj);
 
+  let janeId = initApp.id.new();
+  const janeObj = {... obj};
+  janeObj.name = 'Jane';
+  janeObj.loc = libraryId;
+  janeObj.id = janeId;
+  janeObj.owner = janeId;
+  await initApp.db.save(janeObj);
+
+  await initApp.db.saveToDisk();
+  await initApp.utils.sleep(1000);
   console.log(`✔ Initialized test database fixtures. DB Counter: ${initApp.id.counter}\n`);
 
   // 2. Create 3 independent real App instances and connect to SSE / Server
@@ -46,7 +52,7 @@ async function runMultiUserSimulation() {
   await jane.start();
 
   // Allow initial SSE handshake
-  await initApp.utils.sleep(300);
+  await initApp.utils.sleep(1000);
 
   try {
     // 3. Log in players and verify player info & storage records
@@ -62,7 +68,7 @@ async function runMultiUserSimulation() {
     console.log(`   Jane logged in:  ID="${jane.player.id}", Loc="${jane.player.loc}"`);
 
     // Verify storage records for each player
-    const wolisStoredInfo = JSON.parse(wolis.storage.getItem('player__3'));
+    const wolisStoredInfo = JSON.parse(wolis.storage.getItem('player__4'));
     // const bobStoredInfo = JSON.parse(bob.storage.getItem('player__bob'));
     console.log('   Wolis stored info in storage:', wolisStoredInfo);
 //    console.log('   Bob stored info in storage:  ', bobStoredInfo);
@@ -73,7 +79,7 @@ async function runMultiUserSimulation() {
     // 5. Test Object creation & replication across clients over SSE
     const newObjName = 'pig';
     console.log('\n-----------------------------------------------------');
-    console.log(`TEST 3: Bob creates a pink ${newObjName} in Room _2`);
+    console.log(`TEST 3: Bob creates a pink ${newObjName} in Room ${startingLocId}`);
     console.log('-----------------------------------------------------');
     await bob.sendCommand(`create a pink ${newObjName}`);
 
