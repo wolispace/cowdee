@@ -150,6 +150,27 @@ async function runMultiUserSimulation() {
       throw new Error('FAILED: Jane received message from another room!');
     }
 
+
+    // Simulate a bot visiting https://localhost?_9 (_9 = the sign in the Old village, _u = the frog)
+    const targetId = '_u';
+    const bot = new App({ settings: { name: '_bot' } });
+    bot.player.isBot = true;
+    bot.player.botTarget = targetId;
+    await bot.start();
+    await bot.utils.sleep(1000);
+
+    // bot.player.load() calls welcome() → sendWakeCmd() → wakePlayer() → 'read _9'
+    await bot.player.load();
+    await bot.utils.sleep(1000);
+
+    const botLastMsg = bot.ui.messages[bot.ui.messages.length - 1];
+    console.log('Bot last message:', botLastMsg.substr(0, 100) + '...');
+    const wolisLastMsg = wolis.ui.messages[wolis.ui.messages.length - 1];
+    const janeLastMsg = jane.ui.messages[jane.ui.messages.length - 1];
+    if (botLastMsg === wolisLastMsg || botLastMsg === janeLastMsg) {
+      throw new Error('FAILED: Bot message shown to other players!');
+    }
+
     console.log('\n=====================================================');
     console.log('           ALL MULTI-USER TESTS PASSED!              ');
     console.log('=====================================================\n');
