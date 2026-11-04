@@ -516,9 +516,9 @@ If it all goes terribly wrong, reload your browser.
     console.warn(msg);
   }
 
-  randomColor() {
+  randomColor(randomFunction) {
     const names = this.colorNames();
-    return names[this.app.utils.random(names.length)];
+    return names[randomFunction(names.length)];
   }
     /**
    * Returns a list of known color names sorted by hue

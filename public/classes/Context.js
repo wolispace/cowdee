@@ -35,9 +35,9 @@ export class Context {
     if (this.cmd === 'wake') {
       // if the actor is an id then we have an existing player
       if ( !this.app.db.isId(this.actor)) {
-        this.actor = await this.app.player.newPlayer(this.actor);
+        this.actor = await this.app.player.newPlayer(this);
       }
-      await this.app.player.wakePlayer();
+      await this.app.player.wakePlayer(this.actor);
       this.msg = `[${this.actor}] wakes up`;
       this.to = 'all';
       await this.app.ui.addMessage(this);
@@ -53,6 +53,9 @@ export class Context {
     const { firstword, rest } = this.app.utils.splitFirstWord(this.cmd);
     let runFrom = '__start';
     this.firstword = firstword;
+    if (this.firstword === 'read') {
+      console.log(`${this.app.name} -- read command:`, this.actor, this.cmd);
+    }
     this.rest = rest;
     this.cmd_text = rest;
     let code = '';

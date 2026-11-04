@@ -198,9 +198,9 @@ export class Player {
    * @param {string} name 
    * @returns {string}
    */
-  async newPlayer(name) {
+  async newPlayer(context) {
     // split name on _. eg 'player-bob-_2' or 'bunny-_5-_2'
-    const parts = name.split('-');
+    const parts = context.actor.split('-');
 
     const newId = this.app.id.new();
     const obj = { 
@@ -222,8 +222,10 @@ export class Player {
         delete this.pendingPw;
       }
     } else {
+      const colornames = this.app.ui.colorNames();
+      const randomcolor = colornames[context.random(colornames.length)];
       obj.class = 'bunny';
-      obj.color = this.app.ui.randomColor();
+      obj.color = randomcolor;
       obj.movehow = 'hops';
       obj.material = 'roamer',
       obj.info = `Im a roaming temporary bunny`      
@@ -311,15 +313,16 @@ export class Player {
    * The player objects now exists and its attached to this.player 
    * so wake them by looking around or if its a bot, read the botTarget object
    */
-  async wakePlayer() {
-    console.log(`${this.app.name} wakePlayer:`, this.name, this.id, this.loc);
-    const obj = await this.app.db.getById(this.id);
-    await this.app.db.save(obj); // update location incase they were inactive
+  async wakePlayer(wakingObjId) {
+    console.log(`${this.app.name} wakePlayer:`, wakingObjId, 'run by:',this.name, this.id, this.loc);
+    const obj = await this.app.db.getById(wakingObjId);
+    if (obj.id !== this.id) return;
+    this.loc = obj.loc;
     // if this is a bot, then the new command is 'read'
     if (this.botTarget) {
-      await this.app.sendCommand({ cmd: `read ${this.botTarget}`, actor: this.id, loc: this.loc, saveHistory: false });
+      await this.app.sendCommand({ cmd: `read ${this.botTarget}`, actor: obj.id, loc: obj.loc, saveHistory: false });
     } else {
-      await this.app.sendCommand({ cmd: 'look', actor: this.id, loc: this.loc, saveHistory: false });
+      await this.app.sendCommand({ cmd: 'look', actor: obj.id, loc: obj.loc, saveHistory: false });
     }
   }
 
