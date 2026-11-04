@@ -180,22 +180,28 @@ export class UI {
     if (!['thename', 'longname', 'name', 'shorname', 'class'].includes(prop)) return val;
     if (obj.extra) val = `${val} ${obj.extra.trim()}`;
     if (format !== 'html') return val;
-    const style = obj.color ? `style="color: ${obj.color}"` : '';
+
     let cmd = 'examine', hint = 'Examine';
     let showloc = '';
-    if (obj.link) { 
-      cmd = 'doorway'; 
-      hint = 'Go';
+    if (obj.link) {
+      cmd = 'doorway'; hint = 'Go';
       showloc = await this.seeThroughDoorway(context, obj);
     }
-    if (/book|newspaper|magazine/.test(obj.class)) {
-      cmd = 'read'; 
-      hint = 'Read';      
-    }
-    
+    if (/book|newspaper|magazine/.test(obj.class)) { cmd = 'read'; hint = 'Read'; }
     if (context.cmd && context.cmd != '') { cmd = context.cmd; hint = `Choose this to ${context.cmd}`; }
-    const locked = (obj.lock && obj.lock != '') ? 'locked' : '';
-    return `<span class="click ${locked}" data-cmd="${cmd}" ${style} data-id="${id}" title="${hint} ${val} ${id}">${val}</span>${showloc}`;
+
+    // Build the span that looks like this
+    // <span class="click ${locked}" data-cmd="${cmd}" ${style} data-id="${id}" title="${hint} ${val} ${id}">${val}</span>${showloc}
+    const span = document.createElement('span');
+    span.className = `click${obj.lock ? ' locked' : ''}`;
+    span.dataset.cmd = cmd;
+    span.dataset.id = id;
+    span.title = `${hint} ${val} ${id}`;
+    span.textContent = val;
+    if (obj.color) span.style.color = obj.color;
+
+    // return the outerHTML so it slots into the existing string-replace flow
+    return span.outerHTML + showloc;
   }
 
   async seeThroughDoorway(context, obj) {
