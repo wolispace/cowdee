@@ -1,8 +1,14 @@
 import { App } from '../public/classes/App.js';
 import { Tester } from './Tester.js';
 
-const app = new App({settings: { name: 'initApp', generate: true, max: 3 } });
+const app = new App({
+  settings:
+    { name: 'initApp', generate: true, max: 3, nocompress: false }
+});
 app.tester = new Tester(app);
+// 1,033 bytes
+// 37,257 bytes
+
 
 console.log('-------------- START ----------------');
 
@@ -10,8 +16,8 @@ if (app.settings.generate) {
   app.tester.deleteTestFiles();
   await app.tester.initObjects(app.settings.max);
   console.log(`✔ Initialized test database fixtures. DB Counter: ${app.id.counter}\n`);
-  
-  await app.start();  
+
+  await app.start();
   await app.player.handleFindPlayer({ playername: 'Wolis' });
   await app.utils.sleep(300);
   const playerCommands = `
@@ -36,20 +42,20 @@ if (app.settings.generate) {
     movehow it hops
     material it as roamer
   `;
-  for(const cmd of playerCommands.split('\n')) {
+  for (const cmd of playerCommands.split('\n')) {
     if (cmd.trim()) {
       await app.sendCommand(cmd);
       await app.utils.sleep(300);
     }
   }
-  
+
   await app.utils.sleep(300);
   await app.db.saveToDisk();
 
   // find the fisherman and have them say something on a tick
   const fisherman = await app.db.getObjByName('fisherman');
   if (fisherman) {
-    console.log({fisherman});
+    console.log({ fisherman });
     fisherman.info = `I'm just minding my own business. Best not type: [push fisherman]`;
     fisherman.code = `if reacting to push then pushit;
   ##pushit:
@@ -70,6 +76,6 @@ if (app.settings.generate) {
   const ticking = await app.db.get('tick', '__');
   console.log(`${app.name} -- ticking =`, ticking);
 }
- 
+
 console.log('-------------- END ----------------');
 process.exit(0);

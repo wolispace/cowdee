@@ -1,4 +1,5 @@
 <?php
+// ini_set('zlib.output_compression', '1');
 // require_once "utils.php";
 define('APP_NAME', 'cowdee'); // name for cow
 define('APP_TITLE', 'Dirstibuted COW'); // name for cow
@@ -109,7 +110,7 @@ function getActivePlayers()
     $players[] = basename($file, '.txt');
     $mtime = @filemtime($file);
     if ($mtime === false) {
-        continue;
+      continue;
     }
     // if file is ? 20 seconds old, delete it as they are nolonger active
     if (time() - $mtime > ACTIVE_PLAYER_SECS) {

@@ -1,5 +1,6 @@
 // for handling data to and from server
 export class IO {
+  static LZ_PREFIX = 'LZ:';
   token = '';
 
   // --- command queue ---
@@ -11,12 +12,57 @@ export class IO {
     this.app = app;
     this.type = {
       server: `${this.app.webroot}/server.php`,
-      sse: `${this.app.wrbroot}/sse.php`
+      sse: `${this.app.webroot}/sse.php`
     };
   }
 
   setToken(token) {
     this.token = token;
+  }
+
+  /**
+   * Compresses data (object or string) into an ASCII Base64 LZ string with 'LZ:' prefix.
+   * Produces compact [A-Za-z0-9+/=] characters (no unicode or \uXXXX escaping).
+   * If LZString is not loaded, falls back to raw data gracefully.
+   */
+  compress(data) {
+    if (data === null || data === undefined || this.app.settings.nocompress) return data;
+    try {
+      const str = typeof data === 'string' ? data : JSON.stringify(data);
+      if (typeof LZString !== 'undefined' && LZString?.compressToBase64) {
+        const compressed = IO.LZ_PREFIX + LZString.compressToBase64(str);
+        return compressed.length < str.length ? compressed : str;
+      }
+      return data;
+    } catch (err) {
+      console.warn('Compression error:', err);
+      return data;
+    }
+  }
+
+  /**
+   * Decompresses data if compressed with LZString Base64.
+   */
+  decompress(data) {
+    if (data === null || data === undefined || this.app.settings.nocompress) return data;
+    if (typeof data === 'string' && data.startsWith(IO.LZ_PREFIX)) {
+      try {
+        if (typeof LZString !== 'undefined' && LZString?.decompressFromBase64) {
+          if (!data.startsWith(IO.LZ_PREFIX)) return data;
+          const raw = LZString.decompressFromBase64(data.slice(IO.LZ_PREFIX.length));
+          if (raw === null || raw === undefined) return data;
+          try {
+            return JSON.parse(raw);
+          } catch {
+            return raw;
+          }
+        }
+      } catch (err) {
+        console.warn('Decompression error:', err);
+        return data;
+      }
+    }
+    return data;
   }
 
   async loadJson(file) {
@@ -28,9 +74,6 @@ export class IO {
       this.app.ui.hideLoading();
     }
   }
-
-  // use LX to decompress json files
-  // decompressed = LZString.decompressFromUTF16(gameState);
 
   async loadFiles(files) {
     if (!files || files.length === 0) return {};
@@ -44,7 +87,12 @@ export class IO {
   }
 
   async saveJson(file, json) {
-    return await this.fetchJson('server', { file, token: this.token, pid: this.app.player.pid(), content: JSON.stringify(json) });
+    return await this.fetchJson('server', {
+      file,
+      token: this.token,
+      pid: this.app.player.pid(),
+      content: JSON.stringify(json)
+    });
   }
 
   async saveBatch(batch) {
@@ -55,9 +103,6 @@ export class IO {
       counter: this.app.id.counter
     });
   }
-
-  // use LZ compression when saving json
-  // compressed = LZString.compressToUTF16(json);
   async fetchJson(type, payload) {
     payload.token = this.token;
     payload.pid = this.app.player.pid();

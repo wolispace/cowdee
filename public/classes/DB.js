@@ -46,7 +46,7 @@ export class DB {
    */
   async preLoad(type, keys) {
     const files = [];
-    for(const key of keys) {
+    for (const key of keys) {
       // only wordKeys are lowercased so we can find things like name in mixed case
       // id, code, and info are all keyed by object ID which preserves case
       const lookup = this.wordKeys.includes(type) ? key.toLowerCase() : key;
@@ -92,11 +92,11 @@ export class DB {
       // get IDs for each word, intersect so ALL words must match the same ID
       const sets = await Promise.all(
         words.map(w => this.get('name', w)
-      ));
+        ));
       if (sets.some(set => !set || set.length === 0)) return undefined; // any word unmatched = no result
       candidates = sets.reduce(
         (acc, ids) => acc.filter(id => ids.includes(id)
-      ));   
+        ));
     }
 
     if (!candidates) {
@@ -191,15 +191,16 @@ export class DB {
     return `${objCode}\n${matCode}`;
   };
 
-    /**
- * Retruns just the code for the object id passed in
- * @param {string} id  
- * @returns {string}
- */
+  /**
+* Retruns just the code for the object id passed in
+* @param {string} id  
+* @returns {string}
+*/
   async getObjCode(id) {
     const obj = await this.get('code', id);
-    if (!obj) return '';    
-    const raw = obj?.code.replaceAll('\\n', '\n') ?? '';
+    if (!obj) return '';
+    const decompressed = obj?.code ? this.app.io.decompress(obj.code) : '';
+    const raw = (typeof decompressed === 'string' ? decompressed : '').replaceAll('\\n', '\n');
     return this.app.utils.decodeString(raw);
   };
 
@@ -242,7 +243,8 @@ export class DB {
   async getInfo(id) {
     const objInfo = await this.get('info', id);
     if (!objInfo) return '';
-    const raw = objInfo.replaceAll("\\n", "\n") ?? '';
+    const decompressed = this.app.io.decompress(objInfo);
+    const raw = (typeof decompressed === 'string' ? decompressed : '').replaceAll("\\n", "\n");
     return this.app.utils.decodeString(raw);
   };
 
@@ -376,11 +378,11 @@ export class DB {
    * @param {string} val 
    */
   setObjValue(obj, prop, val) {
-    if(!['code', 'info', 'pw'].includes(prop)) {
+    if (!['code', 'info', 'pw'].includes(prop)) {
       val = this.app.utils.sanitiseWords(val);
-    }  
+    }
     if (this.arrayProps.includes(prop)) {
-        obj[prop] = val.split(' ').map(s => s.trim());
+      obj[prop] = val.split(' ').map(s => s.trim());
     } else {
       obj[prop] = val;
     }
@@ -627,7 +629,8 @@ export class DB {
    * @param {object} obj 
    */
   async addCode(obj) {
-    await this.set('code', obj.id, { loc: obj.loc, code: obj.code });
+    const code = this.app.io.compress(obj.code);
+    await this.set('code', obj.id, { loc: obj.loc, code });
   }
 
   /**
@@ -647,7 +650,8 @@ export class DB {
    * @param {object} obj 
    */
   async addInfo(obj) {
-    await this.set('info', obj.id, obj.info);
+    const info = this.app.io.compress(obj.info);
+    await this.set('info', obj.id, info);
   }
 
   /**
@@ -711,7 +715,8 @@ export class DB {
       }
     }
     if (obj.code) {
-      await this.set('code', obj.id, { loc: obj.loc, code: obj.code });
+      const code = this.app.io.compress(obj.code);
+      await this.set('code', obj.id, { loc: obj.loc, code });
       // do not index reactions for material objects (so they dont react to tick etc..)
       if (obj.class !== 'material') {
         await this.addTriggers(obj);
@@ -719,14 +724,15 @@ export class DB {
       }
     }
     if (obj.info) {
-      await this.set('info', obj.id, obj.info);
+      const info = this.app.io.compress(obj.info);
+      await this.set('info', obj.id, info);
     }
     if (obj.pw) {
       await this.set('pw', obj.id, obj.pw);
     }
     if (obj.bot) {
       await this.addSub('bot', '__', obj.id);
-    }    
+    }
     // remove things we dont need to save into id:
     const clearList = ['info', 'code', 'pw'];
     for (const prop of clearList) {
@@ -848,7 +854,7 @@ export class DB {
       this.markDirty('info', infoPrefix);
     }
     // remove from bot and pw
-    
+
   }
 
   /**

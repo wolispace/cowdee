@@ -1,3 +1,4 @@
+import './lz-node.cjs';
 import { info } from 'node:console';
 import { Context } from '../public/classes/Context.js';
 
