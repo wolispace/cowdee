@@ -29,6 +29,9 @@ export class IO {
     }
   }
 
+  // use LX to decompress json files
+  // decompressed = LZString.decompressFromUTF16(gameState);
+
   async loadFiles(files) {
     if (!files || files.length === 0) return {};
     this.app.ui.showLoading();
@@ -53,6 +56,8 @@ export class IO {
     });
   }
 
+  // use LZ compression when saving json
+  // compressed = LZString.compressToUTF16(json);
   async fetchJson(type, payload) {
     payload.token = this.token;
     payload.pid = this.app.player.pid();

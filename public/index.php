@@ -10,6 +10,7 @@ $rnd = rand(0, 999999); ?>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
   <link rel='stylesheet' href='cowdee.css?<?= $rnd ?>' />
   <script type="module" src='cowdee.js?<?= $rnd ?>'></script>
+  <script src='lz-string.min.js?<?= $rnd ?>'></script>
 </head>
 
 <body>
