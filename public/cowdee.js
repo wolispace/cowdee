@@ -2,7 +2,7 @@
 import { App } from './classes/App.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const app = new App({ settings: { nosse: false, nocompress: false } });
+  const app = new App({ settings: { nosse: false, nocompress: false, noticks: false } });
   await app.start();
   document.getElementById('showmenu').addEventListener('click', () => app.toggleMenu());
 });

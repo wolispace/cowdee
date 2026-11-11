@@ -94,9 +94,11 @@ export class App {
         const cmd = this.clickCmds[el.dataset.cmd];
         if (cmd) {
           await this.sendCommand(cmd(el));
+          this.player.editing = false;
         } else {
           if (el.dataset.cmd) {
             await this.sendCommand(el.dataset.cmd.replace(/{id}/, el.dataset.id));
+            this.player.editing = false;
           } else {
             // console.log('click element has no data-cmd', el);
           }
@@ -147,7 +149,6 @@ export class App {
    * @param {object} data 
    */
   async sendCommand(data) {
-    this.player.editing = false;
     if (typeof data === 'string') {
       data = { cmd: data };
     }
@@ -264,6 +265,7 @@ export class App {
     } else if (data.type == 'newplayer') {
       await this.player.handleNewPlayer(data);
     } else if (data.type == 'cmd') {
+      this.player.editing = false;
       await this.sendCommand(data);
     } else if (['code', 'info'].includes(data.type)) {
       if (data.button === 'cancel') {
@@ -273,6 +275,7 @@ export class App {
         data.cmd = this.buildSaveCommand(data);
       }
       console.log('saving code', data);
+      this.player.editing = false;
       await this.sendCommand(data);
     }
   }
@@ -317,6 +320,7 @@ export class App {
    * - every day at 00:10 (10 mins after midnight, tickday)
    */
   initTickTimers() {
+    if (this.settings.noticks) return;
     if (this.tickTimersInitialized) return;
     this.tickTimersInitialized = true;
 

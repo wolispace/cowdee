@@ -42,10 +42,7 @@ export class UI {
 
   async addMessage(context) {
     // if its not in the players location, or its to the player or loc is all then dont show
-    if (!context) {
-      console.trace(`${this.app.name} no context passed in`);
-      return;
-    }
+    if (!context) return;
     if (!context.loc) {
       console.trace(`${this.app.name} no loc in context`);
       return;
@@ -77,6 +74,7 @@ export class UI {
       if (context.msg) {
         this.messages.push(context.msg);
         if (context.top) {
+          if (this.app.player.editing) return;
           this.topView = context.msg;
         }
       }
