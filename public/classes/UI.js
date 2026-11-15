@@ -12,7 +12,8 @@ export class UI {
   loadingCount = 0;
   loadingTimer = null;
   hideTimer = null;
-  
+  loadBar = null;
+
 
   constructor(app) {
     this.app = app;
@@ -23,6 +24,7 @@ export class UI {
     this.bottom = document.getElementById('bottom');
     this.input = document.getElementById('input');
     this.cmdInput = document.getElementById('cmd');
+    this.loadBar = document.getElementById('load-bar');
     this.minHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--section-min-height')) * parseFloat(getComputedStyle(document.documentElement).fontSize);
 
     this.setupEvents();
@@ -30,8 +32,8 @@ export class UI {
     this.initHistory();
 
     this.bottom.innerHTML = `<br/><br/>`;
-    this.bottom.addEventListener('click', () => { 
-      this.cmdInput.focus(); 
+    this.bottom.addEventListener('click', () => {
+      this.cmdInput.focus();
     });
 
     // When the tab regains focus, clear any unread '*' indicator from the title
@@ -50,7 +52,7 @@ export class UI {
     setTimeout(async () => {
       await this.app.db.findTrigger(context);
     }, 300);
-    
+
     if (!context.to && context.loc != this.app.player.loc) {
       // console.log(`${this.app.name} --- msg not shown`, context.loc, context.msg.slice(0, 30));
       return;
@@ -223,7 +225,7 @@ export class UI {
 
     for (const match of matches) {
       const cmd = match[1];
-      msg = msg.replace(`type: [${match[1]}]`, `<span class="click suggest" data-cmd="run" title="Click to perform this command as if you had typed it" data-id="${match[1]}">${match[1]}</span>`  );
+      msg = msg.replace(`type: [${match[1]}]`, `<span class="click suggest" data-cmd="run" title="Click to perform this command as if you had typed it" data-id="${match[1]}">${match[1]}</span>`);
     }
     return msg;
   }
@@ -464,7 +466,7 @@ If it all goes terribly wrong, reload your browser.
     }).observe(this.panels);
   }
 
-  // Set a timeout of 500ms to add the .loading class if loading takes longer than 500ms.
+  // Set a timeout of 100ms to add the .loading class if loading takes longer than 100ms.
   showLoading() {
     if (!this.app.window) return;
     this.loadingCount++;
@@ -478,7 +480,17 @@ If it all goes terribly wrong, reload your browser.
       this.loadingTimer = setTimeout(() => {
         if (this.top) {
           this.top.style.removeProperty('opacity');
-          this.top.classList.add('loading');
+          this.top.classList.add('loadFade');
+        }
+        if (this.loadBar) {
+          // Reset bar instantly (no transition), then trigger animation
+          this.loadBar.style.transition = 'none';
+          this.loadBar.style.width = '0%';
+          this.loadBar.style.opacity = '1';
+          // Force reflow so the reset takes effect before re-adding class
+          void this.loadBar.offsetWidth;
+          this.loadBar.style.transition = '';
+          this.loadBar.classList.add('grow');
         }
       }, 100);
     }
@@ -500,8 +512,22 @@ If it all goes terribly wrong, reload your browser.
             this.loadingTimer = null;
           }
           if (this.top) {
-            this.top.classList.remove('loading');
+            this.top.classList.remove('loadFade');
             this.top.style.opacity = '1';
+          }
+          if (this.loadBar) {
+            // Fade out the bar over 500ms
+            this.loadBar.classList.remove('grow');
+            this.loadBar.style.opacity = '0';
+            // After fade, snap width back to 0 so it's ready for next load
+            setTimeout(() => {
+              if (this.loadBar) {
+                this.loadBar.style.transition = 'none';
+                this.loadBar.style.width = '0%';
+                void this.loadBar.offsetWidth;
+                this.loadBar.style.transition = '';
+              }
+            }, 500);
           }
         }
       }, 80);
@@ -524,10 +550,10 @@ If it all goes terribly wrong, reload your browser.
     const names = this.colorNames();
     return names[randomFunction(names.length)];
   }
-    /**
-   * Returns a list of known color names sorted by hue
-   * @returns {array}
-   */
+  /**
+ * Returns a list of known color names sorted by hue
+ * @returns {array}
+ */
   colorNames() {
     return [
       "red", "darkred", "firebrick", "crimson", "indianred", "lightcoral", "salmon",

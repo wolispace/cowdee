@@ -168,6 +168,35 @@ section::-webkit-scrollbar-thumb:hover {
   user-select: none;
   background: rgba(255, 255, 255, 0.04);
   box-shadow: 0 0.2rem 1rem black;
+  position: relative;
+}
+
+/* ── Loading bar along the top edge of the splitter ── */
+#load-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 0.2rem;
+  width: 0%;
+  background: rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 500ms ease-out;
+}
+
+#load-bar.grow {
+  opacity: 1;
+  animation: loadBarGrow 10s linear forwards;
+}
+
+@keyframes loadBarGrow {
+  from {
+    width: 0%;
+  }
+
+  to {
+    width: 100%;
+  }
 }
 
 #splitter hr {
@@ -402,6 +431,11 @@ legend {
 .tiny {
   font-size: 65%;
   color: tan;
+}
+
+.loadFade {
+  opacity: 0.5;
+  transition: opacity 0.3s ease-in-out;
 }
 
 .loading {

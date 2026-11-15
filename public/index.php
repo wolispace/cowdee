@@ -24,6 +24,7 @@ $rnd = rand(0, 999999); ?>
 
       </section>
       <div id="splitter">
+        <div id="load-bar"></div>
         <hr />
       </div>
       <section id="bottom">
