@@ -210,6 +210,15 @@ export class App {
   }
 
   /**
+   * Returns true if the current player is the first player in the list of active platers
+   * @returns {boolean}
+   */
+  isFirstPlayer() {
+    const firstPlayer = this.activePlayers.values().next().value;
+    return firstPlayer === this.player.id;
+  }
+
+  /**
    * Read the 'name' 'p' players ids
    * preload them
    * Loop over each getting it and checking last update date

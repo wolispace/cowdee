@@ -292,7 +292,7 @@ eg: type: [inv]`,
     }, {
       name: "read",
       info: `Read the text of an object
-You can read any book even if it's in a dofferent location
+You can read any book even if it's in a different location
 eg: type: [read the book of basics]`,
       code: `get $target;\nsay 'read',"[$actor] reads [$target]";\rread $target;`
     }, {

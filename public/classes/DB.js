@@ -517,11 +517,11 @@ export class DB {
   }
 
   /**
-   * Save all firty shards to disk
+   * Save all dirty shards to disk only if you are the first player in the list of active players
    */
   async saveToDisk() {
     this.app.player.save();
-    // console.log(`${this.app.name} dirty`, this.dirty);
+    if (!this.app.isFirstPlayer()) return;
     const batch = {};
     for (const type of Object.keys(this.dirty)) {
       for (const prefix of this.dirty[type]) {
