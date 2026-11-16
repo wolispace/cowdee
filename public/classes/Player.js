@@ -216,8 +216,8 @@ export class Player {
       obj.owner = newId;
       obj.lock = 1;
       obj.color = 'gold';
-      // is this the player who sent the context to create a new player?
-      if (this.pendingPw) {
+      // is this the player who sent the context (same name) to create a new player?
+      if (this.pendingPw && this.name === obj.name) {
         await this.app.io.fetchJson('server', { setpw: true, id: newId, pw: this.pendingPw });
         delete this.pendingPw;
       }
@@ -236,7 +236,7 @@ export class Player {
     await this.app.db.save(obj);
 
     // if this browser has not current player it becomes this player
-    if (this.id === '') {
+    if (this.id === '' && this.name === obj.name) {
       this.id = obj.id;
       this.loc = obj.loc;
       this.app.name = obj.id;

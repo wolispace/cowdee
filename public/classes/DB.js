@@ -892,7 +892,7 @@ export class DB {
 
     // Set a new 5-second timer
     this.saveTimeout = setTimeout(async () => {
-      console.log(`${this.app.name} @@ timeout debounce save to disk`);
+      // console.log(`${this.app.name} @@ timeout debounce save to disk`);
       this.saveTimeout = null;
       await this.saveToDisk();
     }, this.interval);

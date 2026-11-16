@@ -43,8 +43,6 @@ export class Context {
       await this.app.ui.addMessage(this);
       return;
     }
-
-    if (!this.app.player.id) return;
     // same player then remember the last 'it'
     if (this.actor === this.app.player.id && this.app.player.id) {
       this.app.player.it = this.it;

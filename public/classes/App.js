@@ -491,7 +491,7 @@ export class App {
     if (this.window && document.visibilityState === 'hidden') return;
     const ids = await this.db.get(type, '__');
     if (!ids || ids.length === 0) return;
-    console.log(`${this.name} runTick ${type} ids:`, ids, 'activeLocations', this.activeLocations);
+    // preconsole.log(`${this.name} runTick ${type} ids:`, ids, 'activeLocations', this.activeLocations);
 
     for (const id of ids) {
       const obj = await this.db.get('id', id);
