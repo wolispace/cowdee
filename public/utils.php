@@ -15,10 +15,10 @@ define('PLAYER_DIR', '_players'); //where active players are recorded eg _2.txt 
 define('ACTIVE_PLAYER_SECS', 25); // (a bite more than a 20sec tick) if last activity from a player is > this then we consider them logged off/asleep
 define('ID_COUNTER_FILE', '_counter.txt'); // the counter of the last highest ID
 
-function logIt($str)
+function logIt($str, $file = '_log.txt')
 {
   $dateTime = date('Ymd H:i:s');
-  file_put_contents('_log.txt', "{$dateTime},{$_SERVER['REMOTE_ADDR']},{$str}\n", FILE_APPEND | LOCK_EX);
+  file_put_contents($file, "{$dateTime},{$_SERVER['REMOTE_ADDR']},{$str}\n", FILE_APPEND | LOCK_EX);
 }
 
 /**

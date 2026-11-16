@@ -61,6 +61,7 @@ function handleInput($request)
       $filename = CONTEXT_DIR . "/{$ts}{$actor}" . CONTEXT_EXT;
       $written  = file_put_contents($filename, json_encode($contextData), LOCK_EX);
       logIt('commands batch: ' . ($written !== false ? "saved $filename" : "FAILED to write $filename"));
+      logIt(json_encode($contextData), '_context.log');
       if ($written !== false) $processed++;
     }
 
@@ -179,7 +180,7 @@ function handleInput($request)
 
     $filename = CONTEXT_DIR . "/{$mstimestamp}{$request['actor']}" . CONTEXT_EXT;
     file_put_contents($filename, json_encode($contextData), LOCK_EX);
-    logIt("saved context file $filename");
+    logIt(json_encode($contextData), '_context.log');
 
     $autoSendNewContexts = false;
     if ($autoSendNewContexts) {
