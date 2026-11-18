@@ -128,6 +128,7 @@ section {
   /* starts at ~70%, grows/shrinks */
   mask-image: linear-gradient(to bottom, transparent, black 15%);
   background: linear-gradient(to top, black, transparent 50%);
+  padding-bottom: 4rem;
 }
 
 #bottom div {

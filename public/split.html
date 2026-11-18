@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <title>TEST splitter v1</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
+</head>
+<style>
+html, body {
+  background-color: #151821;
+  color: rgba(255, 255, 255, .75);
+  height: 100%;
+  margin: 0;
+  font-family: Tahoma, Verdana, Geneva, sans-serif;
+  overscroll-behavior: none;
+  overflow: hidden;
+}
+
+.layout {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+section {
+  padding: 0.1rem;
+}
+
+.top {
+  resize: vertical;
+  overflow: auto;
+  min-height: 100px;
+  max-height: 70%; /* calc(100vh - 150px); */
+  border-bottom: 3px solid black;
+}
+
+.bottom {
+  flex: 1;
+  padding-bottom: 3rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  mask-image: linear-gradient(to bottom, transparent, black 15%);
+  background: linear-gradient(to top, black, transparent 50%);    
+}
+
+.footer {
+  height: 3rem;
+  flex-shrink: 0;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: darkslategrey;
+}
+
+input {
+  width: 100%;
+  font-size: 1rem;
+  line-height: 1.5;
+  background-color: #111216;
+  box-shadow: inset 0.2rem 0.2rem 0.2rem black;
+  border-bottom-style: inset;
+  border-radius: .3rem;
+  border: 1px solid rgba(255, 255, 255, .35);
+}
+
+section::-webkit-scrollbar {
+  width: .7rem;
+}
+
+section::-webkit-scrollbar-track {
+  background: black;
+  /* dark track */
+}
+
+section::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, .5);
+  /* lighter thumb */
+  border-radius: .25rem;
+  border: .18rem solid rgba(0,0,0, .50);
+  border-top-color: rgba(255, 255, 255, .75);
+  border-left-color: rgba(255, 255, 255, .75);
+}
+
+section::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, .75);
+}
+::-webkit-scrollbar-corner {
+  background-color:black;
+  color: rgb(255, 255, 255);
+}
+
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <section class="top">
+    Top content...
+    Line 1<br/>
+    Line 2<br/>
+    Line 3<br/>
+    Line 4<br/>
+    Line 5<br/>
+    Line 6<br/>
+    Line 7<br/>
+    Splitter is over here on the right --->
+  </section>
+
+  <section class="bottom">
+    <br/>
+    Bottom content...
+    Line 1<br/>
+    Line 2<br/>
+    Line 3<br/>
+    Line 4<br/>
+    Line 5<br/>
+    Line 6<br/>
+    Line 7<br/>
+    Line 8<br/>
+    Line 9<br/>
+    Line 10<br/>
+    Line 11<br/>
+    Line 12<br/>
+    Line 13<br/>
+    Line 14<br/>
+    Line 15<br/>
+    Line 16<br/>
+    Line 17<br/>
+    Line 18<br/>
+    Line 19<br/>
+  </section>
+
+  <div class="footer">
+    <input type="text" placeholder="Click to open keyboard" />
+  </div>
+</div>
+
+</body>
+</html>
