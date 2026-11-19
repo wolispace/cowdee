@@ -406,10 +406,10 @@ If it all goes terribly wrong, reload your browser.
     // enforce minimums
     if (topH < this.minHeight) { topH = this.minHeight; bottomH = available - this.minHeight; }
     if (bottomH < this.minHeight) { bottomH = this.minHeight; topH = available - this.minHeight; }
-    bottomH -= 30;
+    // bottomH -= 30;
     this.top.style.flex = `0 0 ${topH}px`;
     // this.bottom.style.flex = '';
-    this.bottom.style.flex = ''; // `0 0 ${bottomH}px`;
+    this.bottom.style.flex = `0 0 ${bottomH}px`;
     this.bottom.scrollTop = this.bottom.scrollHeight;
   };
 
@@ -444,9 +444,9 @@ If it all goes terribly wrong, reload your browser.
         newTopH = this.startTopH + this.startBottomH - this.minHeight;
       }
 
-      newBottomH -= 30;
+      // newBottomH -= 30;
       this.top.style.flex = `0 0 ${newTopH}px`;
-      this.bottom.style.flex = ''; //`0 0 ${newBottomH}px`;
+      this.bottom.style.flex = `0 0 ${newBottomH}px`;
       this.bottom.scrollTop = this.bottom.scrollHeight;
     });
 

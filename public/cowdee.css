@@ -4,7 +4,7 @@
   --info-input-bg: #111216;
   --max-width: 800px;
   --splitter-height: 1rem;
-  --input-height: 2rem;
+  --input-height: 3rem;
   --section-min-height: 2rem;
 }
 
@@ -89,14 +89,11 @@ a:hover {
 content {
   display: flex;
   flex-direction: column;
-  /* dynamic viewport height — adjusts when mobile keyboard opens */
   width: 100%;
   max-width: var(--max-width);
   margin: 0 auto;
   overflow: hidden;
-  position: fixed;
-  top: var(--vv-top, 0px);
-  height: var(--vv-height, 100dvh);  
+  height: calc(100dvh - var(--input-height));
 }
 
 /* ── Panels wrapper: holds top/splitter/bottom, fills space above input ── */
@@ -216,7 +213,10 @@ section::-webkit-scrollbar-thumb:hover {
 
 /* ── Input form ── */
 .commandform {
-  flex: 0 0 var(--input-height);
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  max-width: var(--max-width);
   height: var(--input-height);
   background-color: rgba(0, 0, 0, .85);
   padding: 0 .25rem;
@@ -224,7 +224,7 @@ section::-webkit-scrollbar-thumb:hover {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  /* no longer position:fixed — flexbox keeps it at the bottom */
+  box-sizing: border-box;
 }
 
 .commandlabel {
