@@ -297,11 +297,20 @@ export class App {
 
   buildSaveCommand(data) {
     let encoded = this.utils.encodeString(data.val);
-    let extra = this.utils.encodeString(data.extra);
-    let material = this.utils.encodeString(data.material);
-    // let cmd = `::run set ${data.id}'s ${data.type} to "${encoded}";`;
-    // update $new_id to "worth=0, loc=$door1, pose='hidden'";
-    let cmd = `::run update ${data.id} to "${data.type}='${encoded}', extra='${extra}', material='${material}'";`;
+    const keys = ['extra', 'material', 'class', 'name', 'qty', 'lochow', 'movehow'];
+    const vals = {};
+    for (const key of keys) {
+      if (data[key]) {
+        vals[key] = this.utils.encodeString(data[key]);
+      }
+    }
+
+    let fields = '';
+    for (const [key, value] of Object.entries(vals)) {
+      fields += `, ${key}='${value}'`;
+    }
+
+    let cmd = `::run update ${data.id} to "${data.type}='${encoded}' ${fields}";`;
     cmd += `relook $actor's loc;`;
     cmd += `say 'edit',"[$actor] finishes with [${data.id}]";`;
     return cmd;

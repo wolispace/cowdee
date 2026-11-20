@@ -1,10 +1,10 @@
 # Issues to fix
 
-[ ] Splitter recals bottom wrong so it flows behind input footer
-[ ] Debounce Go button
-[ ] More fields editable in edit mode
+[x] Splitter recals bottom wrong so it flows behind input footer
+[x] Debounce Go button
+[x] More fields editable in edit mode
 [ ] Relook should work
-[ ] Reduce dropshadow on slider (when bottom is small?)
+[x] Reduce dropshadow on slider (when bottom is small?)
 [ ] Quick cmds when examining Read/edit
 
 # Features to add

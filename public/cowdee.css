@@ -174,7 +174,7 @@ section::-webkit-scrollbar-thumb:hover {
   /* prevent browser gestures while dragging */
   user-select: none;
   background: rgba(255, 255, 255, 0.04);
-  box-shadow: 0 0.2rem 1rem black;
+  box-shadow: 0 0.2rem .5rem black;
   position: relative;
 }
 
@@ -410,6 +410,21 @@ menu {
 
 .info table td.num {
   text-align: right;
+}
+
+.infogrid {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+    gap: .5rem .5rem;
+    align-items: center;
+}
+
+.infogrid label {
+    text-align: right;   /* optional */
+}
+
+.infogrid input {
+    width: 100%;
 }
 
 fieldset {

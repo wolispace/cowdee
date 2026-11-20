@@ -30,6 +30,9 @@ if (app.settings.generate) {
     build a road to a bridge
     lock the road
     paint it tan
+  `;
+
+  const cmds2 = `
     go road
     lochow on
     create a fisherman
@@ -40,7 +43,7 @@ if (app.settings.generate) {
     create a frog
     paint it green
     movehow it hops
-    material it as roamer
+    material it as roamer  
   `;
   for (const cmd of playerCommands.split('\n')) {
     if (cmd.trim()) {

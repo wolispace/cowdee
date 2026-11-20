@@ -216,13 +216,27 @@ export class LookManager {
 
     value = value.replaceAll("\n", "&#10;");
     const material = obj.material ? obj.material.join(' ') : '';
-    const extra = obj.extra ? obj.extra : '';
+
+    const fields = {
+      'class': 'What class of object is this',
+      'name': 'What is this objects specific name',
+      'material': 'What materials is this made of (space seperated words)',
+      'extra': 'Extra text after its name when looking',
+      'qty': 'How many of these are there',
+      'movehow': 'How does this move between locations (runs, hops, scampers)',
+      'lochow': `How are objects hosted 'in' or 'on' when looking in this`,
+    }
+    let html = '';
+    for (const [key, value] of Object.entries(fields)) {
+      const value = fields[key];
+      html += `<label class="infolabel">${key}</label>
+      <input class="infoinput" type="text" name="${key}" value="${obj[key] ?? ''}" placeholder="${value}" title="${value}" />`
+    }
     return `<form class='info'>
       <input type="hidden" name="type" value="${type}">
       <input type="hidden" name="id" value="${obj.id}">
       <textarea class="infoinput" name="val" placeholder="What you see when you examine or read this">${value}</textarea>
-      <input class="infoinput" type="text" name="extra" value="${extra}" placeholder="Extra text after its name when looking" title="The extra information shown when looking around" />
-      <input class="infoinput" type="text" name="material" value="${material}" placeholder="What materails is this made of" title="The materials this is made of" />
+      <div class="infogrid">${html}</div>
       <div class="buttons">
       <button type="submit" class="button" name="action" value="cancel">Cancel</button>
       <button type="submit" class="button" name="action" value="save">Save</button>
