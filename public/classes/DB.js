@@ -734,7 +734,7 @@ export class DB {
       await this.addSub('bot', '__', obj.id);
     }
     // remove things we dont need to save into id:
-    const clearList = ['info', 'code', 'pw'];
+    const clearList = ['info', 'code', 'pw', 'qtyText', 'thename', 'longname' ];
     for (const prop of clearList) {
       delete obj[prop];
     }
