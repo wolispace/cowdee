@@ -20,6 +20,7 @@ export class App {
   tickWatchdog = null;
   activePlayers = new Set();
   activeLocations = new Set();
+  isSubmitting = false;
 
   constructor(options = {}) {
     this.window = (typeof window !== "undefined");
@@ -69,14 +70,15 @@ export class App {
       // universal form submit we pass to the handler for forms
       document.addEventListener("submit", async (event) => {
         event.preventDefault();
-        const form = event.target;
-        const data = Object.fromEntries(new FormData(form));
-        data.button = event.submitter?.value;
-        await this.handleForm(data);
-        const cmdInput = document.getElementById('cmd');
-        if (cmdInput) {
-          cmdInput.value = '';
-          cmdInput.focus();
+        if (this.isSubmitting) return;
+        this.isSubmitting = true;
+        try {
+          const form = event.target;
+          const data = Object.fromEntries(new FormData(form));
+          data.button = event.submitter?.value;
+          await this.handleForm(data);
+        } finally {
+          this.isSubmitting = false;
         }
       });
 
@@ -274,7 +276,11 @@ export class App {
     } else if (data.type == 'newplayer') {
       await this.player.handleNewPlayer(data);
     } else if (data.type == 'cmd') {
+      const cmd = data.cmd?.trim();
+      if (!cmd) return;
       this.player.editing = false;
+      this.ui.cmdInput.value = '';
+      this.ui.cmdInput.focus();
       await this.sendCommand(data);
     } else if (['code', 'info'].includes(data.type)) {
       if (data.button === 'cancel') {
