@@ -295,9 +295,12 @@ export class App {
     }
   }
 
+  /*
+"_t to \"code='test%20%5B%24one%5D%20%22two%22%0A%0A%0A' , class='bucket', plural='buckets', qty='1'\""
+  */
   buildSaveCommand(data) {
     let encoded = this.utils.encodeString(data.val);
-    const keys = ['extra', 'material', 'class', 'name', 'qty', 'lochow', 'movehow'];
+    const keys = ['extra', 'material', 'class', 'name', 'plural', 'qty', 'lochow', 'movehow'];
     const vals = {};
     for (const key of keys) {
       if (data[key]) {

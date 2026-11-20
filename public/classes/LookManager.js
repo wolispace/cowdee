@@ -220,6 +220,7 @@ export class LookManager {
     const fields = {
       'class': 'What class of object is this',
       'name': 'What is this objects specific name',
+      'plural': 'The class when we have more than one',
       'material': 'What materials is this made of (space seperated words)',
       'extra': 'Extra text after its name when looking',
       'qty': 'How many of these are there',
@@ -228,7 +229,6 @@ export class LookManager {
     }
     let html = '';
     for (const [key, value] of Object.entries(fields)) {
-      const value = fields[key];
       html += `<label class="infolabel">${key}</label>
       <input class="infoinput" type="text" name="${key}" value="${obj[key] ?? ''}" placeholder="${value}" title="${value}" />`
     }

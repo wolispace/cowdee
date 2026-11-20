@@ -151,7 +151,10 @@ export class UI {
    * @returns 
    */
   async expand(context, format = 'html') {
+    console.log(`${this.app.name} expand() `, context);
     if (context.msg) {
+      // dont expand if we are showing an edit form
+      if (context.msg.includes('<form')) return context.msg;
       const matches = [...context.msg.matchAll(/\[(\w+)(?:\.(\w+))?\]/g)];
       const defaultProp = context.top ? 'longname' : 'thename';
       // make a list of all referenced object IDs for quick reference

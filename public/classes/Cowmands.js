@@ -279,8 +279,13 @@ export class Cowmands {
         const prop = pair.substring(0, eqIdx).trim();
         let value = pair.substring(eqIdx + 1).trim();
         value = this.app.utils.decodeString(value);
-        const val = await this.resolveValue(value);
-        this.app.db.setObjValue(obj, prop, val);
+        if (!['code', 'info'].includes(prop)) {
+          value = await this.resolveValue(value);
+        } else {
+          value = this.app.utils.trimQuotes(value);
+          value = this.app.utils.trimTrailingBlanks(value);
+        }
+        this.app.db.setObjValue(obj, prop, value);
         if (this.app.player.id == obj.id && prop === 'loc') {
           this.app.player.loc = obj.loc;
           this.app.player.save();

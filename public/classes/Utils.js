@@ -57,6 +57,15 @@ export class Utils {
   }
 
   /**
+   * Removes all new line and blanks from the end of a string
+   * @param {string} msg 
+   * @returns {string}
+   */
+  trimTrailingBlanks(msg) {
+    return msg.replace(/\s+$/, '');
+  }
+
+  /**
    * Sanitises a string to only contain letters, numbers, and spaces. Removes all other characters.
    * Used for 'extra' text or material strings or any other value wesave agains an object.
    * 'info' and 'code' are sanatized differently
