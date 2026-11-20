@@ -16,6 +16,7 @@ body {
   padding: 0;
   margin: 0;
   height: 100%;
+  overflow: hidden;
   /* prevent pull-to-refresh and overscroll on mobile */
   overscroll-behavior: none;
 }
@@ -93,7 +94,9 @@ content {
   max-width: var(--max-width);
   margin: 0 auto;
   overflow: hidden;
+  height: calc(100vh - var(--input-height));
   height: calc(100dvh - var(--input-height));
+  box-sizing: border-box;
 }
 
 /* ── Panels wrapper: holds top/splitter/bottom, fills space above input ── */
@@ -104,28 +107,34 @@ content {
   overflow: hidden;
   min-height: 0;
   background-color: #15171f;
+  box-sizing: border-box;
   /* allow flex child to shrink below content size */
 }
 
 /* ── Top & Bottom sections ── */
 section {
   padding: 0.5rem;
+  box-sizing: border-box;
   min-height: var(--section-min-height);
   overflow-y: scroll;
 }
 
 #top {
   /* starts at ~30%, grows/shrinks */
-  flex: 1 1 30%;
+  flex: 0 0 30%;
+  box-sizing: border-box;
   /* for loading animation */
   transition: opacity 250ms ease-in-out;
 }
 
 #bottom {
   /* starts at ~70%, grows/shrinks */
+  flex: 1 1 0;
+  min-height: 0;
+  box-sizing: border-box;
   mask-image: linear-gradient(to bottom, transparent, black 15%);
   background: linear-gradient(to top, black, transparent 50%);
-  padding-bottom: 4rem;
+  padding-bottom: 0.5rem;
 }
 
 #bottom div {
@@ -215,6 +224,9 @@ section::-webkit-scrollbar-thumb:hover {
 .commandform {
   position: fixed;
   bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
   width: 100%;
   max-width: var(--max-width);
   height: var(--input-height);
@@ -225,6 +237,7 @@ section::-webkit-scrollbar-thumb:hover {
   align-items: center;
   gap: 0.25rem;
   box-sizing: border-box;
+  z-index: 10;
 }
 
 .commandlabel {

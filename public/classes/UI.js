@@ -5,7 +5,6 @@ export class UI {
   dragging = false;
   startY = 0;
   startTopH = 0;
-  startBottomH = 0;
   splitRatio = null; // null = use CSS flex defaults; 0–1 = top's share after drag
   messages = [];
   topView = '';
@@ -25,12 +24,16 @@ export class UI {
     this.input = document.getElementById('input');
     this.cmdInput = document.getElementById('cmd');
     this.loadBar = document.getElementById('load-bar');
-    this.minHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--section-min-height')) * parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const secMin = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--section-min-height')) || 2;
+    const rootFs = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    this.minHeight = secMin * rootFs;
 
     this.setupEvents();
     this.initDialog();
     this.initHistory();
 
+    this.bottom.style.flex = '1 1 0';
+    this.bottom.style.minHeight = '0';
     this.bottom.innerHTML = `<br/><br/>`;
     this.bottom.addEventListener('click', () => {
       this.cmdInput.focus();
@@ -395,75 +398,92 @@ If it all goes terribly wrong, reload your browser.
   }
 
 
+  /**
+   * Returns the available height inside #panels for top and bottom sections,
+   * bounded strictly by the panels container and ensuring it never extends below/behind the input.
+   */
+  getAvailableHeight() {
+    if (!this.panels || !this.splitter) return 0;
+    const panelsRect = this.panels.getBoundingClientRect();
+    let panelsH = panelsRect.height;
+
+    // Never allow panels area to extend below/behind the fixed input/footer element
+    if (this.input) {
+      const inputRect = this.input.getBoundingClientRect();
+      const maxBottom = Math.min(panelsRect.bottom, inputRect.top);
+      panelsH = Math.max(0, maxBottom - panelsRect.top);
+    }
+
+    const splitterH = this.splitter.getBoundingClientRect().height;
+    return Math.max(0, panelsH - splitterH);
+  }
+
   /** Redistribute top/bottom within #panels based on the stored ratio */
   applySplitRatio() {
     if (this.splitRatio === null) return; // CSS flex handles it before any drag
-    const available = this.panels.getBoundingClientRect().height - this.splitter.getBoundingClientRect().height;
+    const available = this.getAvailableHeight();
+    if (available <= 0) return;
 
+    const minH = Math.min(this.minHeight, available / 2);
     let topH = available * this.splitRatio;
-    let bottomH = available * (1 - this.splitRatio);
 
-    // enforce minimums
-    if (topH < this.minHeight) { topH = this.minHeight; bottomH = available - this.minHeight; }
-    if (bottomH < this.minHeight) { bottomH = this.minHeight; topH = available - this.minHeight; }
-    // bottomH -= 30;
+    if (topH < minH) topH = minH;
+    if (topH > available - minH) topH = available - minH;
+
     this.top.style.flex = `0 0 ${topH}px`;
-    // this.bottom.style.flex = '';
-    this.bottom.style.flex = `0 0 ${bottomH}px`;
+    this.bottom.style.flex = '1 1 0';
     this.bottom.scrollTop = this.bottom.scrollHeight;
-  };
+  }
 
   /**
-   * Attach event listners to things that need them
+   * Attach event listeners to things that need them
    */
   setupEvents() {
     this.splitter.addEventListener('pointerdown', (e) => {
       this.dragging = true;
       this.startY = e.clientY;
       this.startTopH = this.top.getBoundingClientRect().height;
-      this.startBottomH = this.bottom.getBoundingClientRect().height;
-      this.inputH = this.input.getBoundingClientRect().height;
-      this.splitterH = this.splitter.getBoundingClientRect().height;
       this.splitter.setPointerCapture(e.pointerId);
       e.preventDefault();
     });
 
     this.splitter.addEventListener('pointermove', (e) => {
       if (!this.dragging) return;
-      const dy = e.clientY - this.startY - this.splitterH;
+      const available = this.getAvailableHeight();
+      if (available <= 0) return;
+
+      const minH = Math.min(this.minHeight, available / 2);
+      const dy = e.clientY - this.startY;
       let newTopH = this.startTopH + dy;
-      let newBottomH = this.startBottomH - dy - this.inputH;
 
-      // enforce minimums
-      if (newTopH < this.minHeight) {
-        newTopH = this.minHeight;
-        newBottomH = this.startTopH + this.startBottomH - this.minHeight;
-      }
-      if (newBottomH < this.minHeight) {
-        newBottomH = this.minHeight;
-        newTopH = this.startTopH + this.startBottomH - this.minHeight;
-      }
+      if (newTopH < minH) newTopH = minH;
+      if (newTopH > available - minH) newTopH = available - minH;
 
-      // newBottomH -= 30;
       this.top.style.flex = `0 0 ${newTopH}px`;
-      this.bottom.style.flex = `0 0 ${newBottomH}px`;
+      this.bottom.style.flex = '1 1 0';
       this.bottom.scrollTop = this.bottom.scrollHeight;
     });
 
     this.splitter.addEventListener('pointerup', (e) => {
       if (!this.dragging) return;
       this.dragging = false;
-      this.splitter.releasePointerCapture(e.pointerId);
-      // store ratio so resizes stay proportional
-      const topH = this.top.getBoundingClientRect().height;
-      const bottomH = this.bottom.getBoundingClientRect().height;
-      this.splitRatio = topH / (topH + bottomH);
-      // scroll bottom to the bottom
+      if (this.splitter.hasPointerCapture(e.pointerId)) {
+        this.splitter.releasePointerCapture(e.pointerId);
+      }
+      // Store ratio so resizes stay proportional
+      const available = this.getAvailableHeight();
+      if (available > 0) {
+        const topH = this.top.getBoundingClientRect().height;
+        this.splitRatio = Math.max(0, Math.min(1, topH / available));
+      }
       this.bottom.scrollTop = this.bottom.scrollHeight;
     });
 
     this.splitter.addEventListener('pointercancel', (e) => {
       this.dragging = false;
+      if (this.splitter.hasPointerCapture(e.pointerId)) {
+        this.splitter.releasePointerCapture(e.pointerId);
+      }
     });
 
     // ── Proportional resize when viewport changes (keyboard, window resize) ──
