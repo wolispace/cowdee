@@ -100,6 +100,12 @@ export class LookManager {
     return this.returnData();
   }
 
+  /**
+   * Displays a 'book' and all of the objects within it 
+   * Meant for displying in top 
+   * @param {object} context 
+   * @returns {object}
+   */
   async read(context) {
     this.app.player.editing = true;
     this.context = context;
@@ -119,6 +125,31 @@ export class LookManager {
     html = this.app.ui.makeClickLinks(html);
     this.info = this.wrapInfo(html);
     return this.returnData();
+  }
+
+  /**
+   * Formats the contets of a book for displaying in the help 
+   * so no impact on top or bottom and simpler layout
+   * @param {object} context (only need context.target)
+   * @returns {object}
+   */
+  async readText(context) {
+    this.context = context;
+    this.sentences = [];  
+    let html = '';
+    const obj = await this.app.db.getById(this.context.target);
+    this.found = await this.app.db.findInLoc(obj.id);
+    if (this.found) {
+      for(const found of this.found) {
+        const foundObj = await this.app.db.getById(found);
+        this.app.db.formatObject(foundObj);
+        const foundRead = await this.app.db.getInfo(foundObj.id);
+        html += `<div class="menutext"><strong>${foundObj.longname}</strong>: ${foundRead}</div>`;
+      }
+    }
+    //html = this.app.markdown.render(html);
+    html = this.app.ui.makeClickLinks(html);
+    return html;
   }
 
   /**

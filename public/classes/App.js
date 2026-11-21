@@ -41,8 +41,6 @@ export class App {
     this.lookManager = new LookManager(this);
     this.markdown = new Markdown();
 
-    this.ui.initMenu();
-
     // ui elements with click commands will execute these:
     this.clickCmds = {
       read: el => `read ${el.dataset.id}`,
@@ -51,7 +49,6 @@ export class App {
       doorway: el => `go ${el.dataset.id}`,
       paint: el => `paint ${el.dataset.id} ${el.dataset.color}`,
       run: el => `${el.dataset.id}`
-
     };
   }
 
@@ -59,6 +56,7 @@ export class App {
     this.lastContext = this.storage.getItem(LAST_CONTEXT_KEY) || '0';
     await this.id.load(); // Node: reads disk; Browser: fetches server counter
     await this.player.load();
+    await this.ui.initMenu();
 
     // start the SSE now we know the last context seen
     if (!this.settings.nosse) {

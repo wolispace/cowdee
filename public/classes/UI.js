@@ -242,15 +242,10 @@ export class UI {
     return msg;
   }
 
-  initMenu() {
-    const html = `<strong>Distributed COW</strong>
-
-type: [read the book of basics]
-
-Learn type: [about] cow
-
-If it all goes terribly wrong, reload your browser.
-    `;
+  async initMenu() {
+    let html = `<strong>Distributed COW</strong>
+    <p>If it all goes terribly wrong, reload your browser.<p>`;
+    html += await this.app.lookManager.readText({target:'_6'});
     this.app.menu(html);
   }
 

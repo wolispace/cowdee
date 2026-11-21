@@ -30,6 +30,17 @@ if (app.settings.generate) {
     build a road to a bridge
     lock the road
     paint it tan
+    go road
+    lochow on
+    create a fisherman
+    paint it olive
+    lock it
+    lock the road
+    paint it tan
+    create a frog
+    paint it green
+    movehow it hops
+    material it as roamer      
   `;
 
   const cmds2 = `
