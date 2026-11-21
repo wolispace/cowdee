@@ -132,7 +132,7 @@ section {
   flex: 1 1 0;
   min-height: 0;
   box-sizing: border-box;
-  mask-image: linear-gradient(to bottom, transparent, black 15%);
+  mask-image: linear-gradient(to bottom, transparent, black 5%);
   background: linear-gradient(to top, black, transparent 50%);
   padding-bottom: 0.5rem;
 }
