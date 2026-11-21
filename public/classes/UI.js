@@ -56,18 +56,24 @@ export class UI {
       await this.app.db.findTrigger(context);
     }, 300);
 
-    if (!context.to && context.loc != this.app.player.loc) {
-      // console.log(`${this.app.name} --- msg not shown`, context.loc, context.msg.slice(0, 30));
-      return;
-    }
-    // if its to someone but not to all or the player then return
-    if (context.to && context.to !== 'all' && context.to != this.app.player.id) {
-      console.log(`${this.app.name} --- msg not for this player. to:`, context.to, context.msg.slice(0, 30));
-      return;
+    if (!context.to){
+      // its not to anyone so check the location
+      if (context.loc != this.app.player.loc) {
+        console.log(`${this.app.name} --- msg not in same loc and not to anyone. to:`, context.to, context.msg.slice(0, 30));
+        return;
+      }
+      // we show msg
+    } else {
+      // its to someone
+      if (!['all', 'loc', this.app.player.id].includes(context.to)) {
+        console.log(`${this.app.name} --- msg not for all/loc or this player. to:`, context.to, context.msg.slice(0, 30));
+        return;
+      }
     }
 
     // DEBUG: If the user simply includes 'logoff' in the msg then logoff - make a propper command later
-    if (context?.msg?.includes('logoff')) {
+    // TODO: universal force logoff simply needs to check msg and not worry about player id
+    if (context?.msg?.includes('logoff') && context.actor === this.player.id) {
       this.app.player.clear();
       this.app.player.welcome();
       return;

@@ -251,6 +251,7 @@ export class LookManager {
     this.info = null;
     // unless the user send the command, dont generate a look msg for the top panel
     if (this.app.player.editing) {
+      console.log('player editing');
       return;
     }
     this.seen = new Set();

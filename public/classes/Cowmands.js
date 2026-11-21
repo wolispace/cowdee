@@ -521,7 +521,7 @@ export class Cowmands {
     relook: async (rest) => {
       const loc = await this.resolveValue(rest.trim());
       this.context.loc = loc;
-      this.context.to = this.context.actor;
+      this.context.to = 'loc';
       const data = await this.app.lookManager.look({ ...this.context });
       await this.app.ui.addMessage(data);
     },
