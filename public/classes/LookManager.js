@@ -39,7 +39,7 @@ export class LookManager {
         return this.returnData();
       }
     }
-    
+
     this.objs = await this.populateObjs();
     // add the location into the list of objects here .. do we need this?
     if (loc) {
@@ -74,20 +74,20 @@ export class LookManager {
     return this.returnData();
   }
 
-    /**
-   * Returns the html info of the object
-   * @param {Context} context 
-   */
+  /**
+ * Returns the html info of the object
+ * @param {Context} context 
+ */
   async examine(context) {
     this.app.player.editing = true;
     this.context = context;
     this.sentences = [];
     const obj = await this.app.db.getById(context.target);
     let html = await this.app.db.getInfo(context.target);
-        //html = html.replaceAll("\n", "<br/>");
+    //html = html.replaceAll("\n", "<br/>");
     if (!html) {
       if (!obj) {
-        html = `Opps.. I can't find object ID ${context.target}. Reload. `; 
+        html = `Opps.. I can't find object ID ${context.target}. Reload. `;
       } else {
         html = `It's a pretty ordinary ${obj.class}`;
       }
@@ -109,12 +109,14 @@ export class LookManager {
   async read(context) {
     this.app.player.editing = true;
     this.context = context;
-    this.sentences = [];  
+    this.sentences = [];
     const obj = await this.app.db.getById(this.context.target);
     let html = await this.app.db.getInfo(context.target);
     this.found = await this.app.db.findInLoc(obj.id);
     if (this.found) {
-      for(const found of this.found) {
+      await this.app.db.preLoad('id', this.found);
+      await this.app.db.preLoad('info', this.found);
+      for (const found of this.found) {
         const foundObj = await this.app.db.getById(found);
         this.app.db.formatObject(foundObj);
         const foundRead = await this.app.db.getInfo(foundObj.id);
@@ -135,12 +137,14 @@ export class LookManager {
    */
   async readText(context) {
     this.context = context;
-    this.sentences = [];  
+    this.sentences = [];
     let html = '';
     const obj = await this.app.db.getById(this.context.target);
     this.found = await this.app.db.findInLoc(obj.id);
     if (this.found) {
-      for(const found of this.found) {
+      await this.app.db.preLoad('id', this.found);
+      await this.app.db.preLoad('info', this.found);
+      for (const found of this.found) {
         const foundObj = await this.app.db.getById(found);
         this.app.db.formatObject(foundObj);
         const foundRead = await this.app.db.getInfo(foundObj.id);
@@ -178,7 +182,7 @@ export class LookManager {
     // YOU ARE HERE
     // why not fetchJson?
     // make pretty
-    const stats = await this.app.io.fetchJson('server', {stats: 1});
+    const stats = await this.app.io.fetchJson('server', { stats: 1 });
     // {"totalObjects":34,"totalDbSize":31532,"totalCodeSize":216590}
 
     let html = `## ${this.app.title} v${this.app.version}\n`;
@@ -196,10 +200,10 @@ export class LookManager {
     return this.returnData();
   }
 
-      /**
-   * Returns the html info of the object
-   * @param {Context} context 
-   */
+  /**
+* Returns the html info of the object
+* @param {Context} context 
+*/
   async code(context) {
     this.app.player.editing = true;
     this.context = context;
@@ -208,7 +212,7 @@ export class LookManager {
     let val = await this.app.db.getCode(context.target);
     if (!val) {
       if (!obj) {
-        val = `Opps.. I can't find object ID ${context.target}. Reload. `; 
+        val = `Opps.. I can't find object ID ${context.target}. Reload. `;
       } else {
         val = ``;
       }
@@ -217,7 +221,7 @@ export class LookManager {
     this.sentences.push(form);
     return this.returnData();
   }
-  
+
   /**
    * Returns the html form to edit info of the object
    * @param {Context} context 
@@ -232,7 +236,7 @@ export class LookManager {
     if (!val) {
       const obj = await this.app.db.getById(context.target);
       if (!obj) {
-        val = `Opps.. I can't find object ID ${context.target}. Reload. `; 
+        val = `Opps.. I can't find object ID ${context.target}. Reload. `;
       } else {
         val = ``;
       }
@@ -346,7 +350,7 @@ export class LookManager {
     const objs = {};
     if (!this.found || this.found.length === 0) return objs;
 
-   await this.app.db.preLoad('id', this.found);
+    await this.app.db.preLoad('id', this.found);
 
     for (const id of this.found) {
       const obj = await this.app.db.getById(id);
@@ -446,7 +450,7 @@ export class LookManager {
     // console.log(`${this.app.name}  ## sentences:`, this.sentences);
     let msg = '<p>' + this.sentences.join(`.</p><p>`) + '.</p>';
     if (this.info && this.info.length > 0) {
-      msg = this.info; 
+      msg = this.info;
     }
     return {
       msg: msg,

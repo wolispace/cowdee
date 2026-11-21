@@ -216,7 +216,7 @@ eg: type: [say Hi there] type: [say What am I doing here?]`,
     }, {
       name: "think",
       info: `Let others in your location know what your thinking
-eg: type: [think I keep thinking its Tuesday] or type: [think] to just think randomly`,
+eg: type: [think what are they building?] or type: [think] to just think randomly`,
       code: `get $text;\nif $text ne '' then thinkit else ponder;\n##thinkit:\nsay 'think',"[$actor] .oO( $text )";\n##ponder:\nsay 'think',"[$actor] .o0( I keep thinking its Tuesday )"`
     }, {
       name: "shout",

@@ -61,6 +61,7 @@ export class DB {
       for (const [filename, items] of Object.entries(fileMap)) {
         const prefix = filename.slice(-2); // filename.slice(0, filename.length - 2); // remove the last two chars to get the prefix
         // console.log(`${this.app.name} - preLoad ${type}${prefix} from disk`);
+        if (!this.memory[type]) this.memory[type] = {};
         this.memory[type][prefix] = items;
       }
     }
