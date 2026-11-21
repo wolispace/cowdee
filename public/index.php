@@ -20,7 +20,7 @@ $rnd = rand(0, 999999); ?>
     <div id="panels">
       <section id="top">
         <h2>Welcome to <?= APP_TITLE ?> v<?= APP_VERSION ?></h2>
-        <p>Log in to enter the world.</p>
+        <p>Please wait for stuff to load...</p>
 
       </section>
       <div id="splitter">

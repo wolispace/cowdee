@@ -420,11 +420,43 @@ menu {
 }
 
 .infogrid label {
-    text-align: right;   /* optional */
+    text-align: right;
 }
 
 .infogrid input {
     width: 100%;
+}
+
+.editcols {
+  display: flex;
+  gap: .5rem;
+}
+
+.editcols .left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.editcols .left textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.editcols .right {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+}
+
+.editcols .right .buttons {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
 }
 
 fieldset {

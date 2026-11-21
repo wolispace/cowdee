@@ -266,11 +266,18 @@ export class LookManager {
     return `<form class='info'>
       <input type="hidden" name="type" value="${type}">
       <input type="hidden" name="id" value="${obj.id}">
-      <textarea class="infoinput" name="val" placeholder="What you see when you examine or read this">${value}</textarea>
-      <div class="infogrid">${html}</div>
-      <div class="buttons">
-      <button type="submit" class="button" name="action" value="cancel">Cancel</button>
-      <button type="submit" class="button" name="action" value="save">Save</button>
+      <div class="editcols">
+        <div class="left">
+          <textarea class="infoinput" name="val" placeholder="What you see when you examine or read this">${value}</textarea>
+          <div class="infogrid">${html}</div>
+        </div>
+        <div class="right">
+          <div class="buttons">
+            <button type="submit" class="button" name="action" value="cancel">Cancel</button>
+            <button type="submit" class="button" name="action" value="save">Save</button>
+          </div>
+        </div>
+      </div>
       </form>`;
   }
 
