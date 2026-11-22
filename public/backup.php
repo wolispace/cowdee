@@ -8,6 +8,7 @@ if (php_sapi_name() !== 'cli') {
     foreach ($files as $file) {
         $db[basename($file)] = json_decode(file_get_contents($file), true);
     }
+    $db['_context.log'] = file_get_contents('_context.log');
     header('Content-Type: application/json');
     echo json_encode($db);
     exit;
@@ -24,14 +25,16 @@ if (!is_array($db)) {
     die("Invalid response from server\n");
 }
 
-// Delete existing local _db files (except index.html)
-foreach (glob(DB_DIR . '/*' . DB_EXT) as $file) {
-    unlink($file);
-}
+$localDir = '../_backups/' . DB_DIR . '_' . date('YmdHis');
+mkdir($localDir);
 
-// Write fetched files
 foreach ($db as $filename => $data) {
-    file_put_contents(DB_DIR . '/' . $filename, json_encode($data, JSON_PRETTY_PRINT));
+    print('.');
+    if ($filename === '_context.log') {
+        file_put_contents($localDir . '/' . $filename, $data);
+    } else {
+        file_put_contents($localDir . '/' . $filename, json_encode($data, JSON_PRETTY_PRINT));
+    }
 }
 
-echo "Restored " . count($db) . " files to " . DB_DIR . "/\n";
+echo "\nBacked up " . count($db) . " files to {$localDir}/\n";

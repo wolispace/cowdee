@@ -382,6 +382,11 @@ export class DB {
     if (!['code', 'info', 'pw'].includes(prop)) {
       val = this.app.utils.sanitiseWords(val);
     }
+    if (val === '') {
+      delete obj[prop];
+      return;
+    }
+
     if (this.arrayProps.includes(prop)) {
       obj[prop] = val.split(' ').map(s => s.trim());
     } else {

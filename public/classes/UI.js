@@ -118,6 +118,16 @@ export class UI {
   }
 
   /**
+   * Focus the cmd input, blank it and flag we are nolonger editing
+   */
+  focusInput() {
+    this.app.player.editing = false;
+    this.cmdInput.value = '';
+    this.cmdInput.focus();
+    console.log(`${this.app.name} focusInput()` );
+  }
+
+  /**
    * Flashes a '*' on and off in the tab title for the given duration to signal
    * a new message has arrived. Settles with '*' if the tab is unfocused, or
    * without if it has focus.

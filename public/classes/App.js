@@ -94,11 +94,11 @@ export class App {
         const cmd = this.clickCmds[el.dataset.cmd];
         if (cmd) {
           await this.sendCommand(cmd(el));
-          this.player.editing = false;
+          this.ui.focusInput();
         } else {
           if (el.dataset.cmd) {
             await this.sendCommand(el.dataset.cmd.replace(/{id}/, el.dataset.id));
-            this.player.editing = false;
+            this.ui.focusInput(); 
           } else {
             // console.log('click element has no data-cmd', el);
           }
@@ -276,9 +276,7 @@ export class App {
     } else if (data.type == 'cmd') {
       const cmd = data.cmd?.trim();
       if (!cmd) return;
-      this.player.editing = false;
-      this.ui.cmdInput.value = '';
-      this.ui.cmdInput.focus();
+      this.ui.focusInput();
       await this.sendCommand(data);
     } else if (['code', 'info'].includes(data.type)) {
       if (data.button === 'cancel') {
@@ -287,8 +285,7 @@ export class App {
       } else {
         data.cmd = this.buildSaveCommand(data);
       }
-      console.log('saving code', data);
-      this.player.editing = false;
+      this.ui.focusInput();
       await this.sendCommand(data);
     }
   }
@@ -299,20 +296,14 @@ export class App {
   buildSaveCommand(data) {
     let encoded = this.utils.encodeString(data.val);
     const keys = ['extra', 'material', 'class', 'name', 'plural', 'qty', 'lochow', 'movehow'];
-    const vals = {};
-    for (const key of keys) {
-      if (data[key]) {
-        vals[key] = this.utils.encodeString(data[key]);
-      }
-    }
-
     let fields = '';
-    for (const [key, value] of Object.entries(vals)) {
+    for (const key of keys) {
+      const value = this.utils.encodeString(data[key]);
       fields += `, ${key}='${value}'`;
     }
 
     let cmd = `::run update ${data.id} to "${data.type}='${encoded}' ${fields}";`;
-    cmd += `relook $actor's loc;`;
+    cmd += `relook ${this.player.loc};`;
     cmd += `say 'edit',"[$actor] finishes with [${data.id}]";`;
     return cmd;
   }
