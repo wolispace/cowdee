@@ -485,6 +485,7 @@ export class Cowmands {
       obj.id = this.app.id.new();
       obj.creator = this.context.actor;
       obj.owner = this.context.actor;
+      obj.color = 'white';
       await this.app.db.save(obj);
       this.context.target = obj.id;
       this.context.it = obj.id;
@@ -520,6 +521,7 @@ export class Cowmands {
     // RELOOK
     relook: async (rest) => {
       const loc = await this.resolveValue(rest.trim());
+      if (this.app.player.loc !== loc) return;
       this.context.loc = loc;
       this.context.to = 'loc';
       const data = await this.app.lookManager.look({ ...this.context });

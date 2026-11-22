@@ -1,9 +1,9 @@
 # Issues to fix
 
-[ ] Some commands like paint do not trigger a relook
-[ ] Sometimes players relook in the wrong location
-[ ] Default new object color = white
 [ ] Menu and X close button are too far right
+[x] Some commands like paint do not trigger a relook
+[x] Sometimes players relook in the wrong location
+[x] Default new object color = white
 [x] Saving a blanked text value should clear the the field not ignoe it
 
 

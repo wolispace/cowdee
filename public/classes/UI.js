@@ -303,7 +303,15 @@ export class UI {
   initHistory() {
     this.historySelect = document.getElementById('history');
     this.cmdInput = document.getElementById('cmd');
+    this.commandlabel = document.querySelector('.commandlabel');
     if (!this.historySelect || !this.cmdInput) return;
+    
+    // show the history for mobile users who cant cursor up
+    // remarked out until history filling is on a function not cursor up
+    // this.commandlabel.addEventListener('click', () => {
+    //     this.historySelect.hidden = false;
+    //     this.historySelect.focus();
+    // });
 
     // Open and focus history select on Cursor Up / Down in cmd input
     this.cmdInput.addEventListener('keydown', (e) => {

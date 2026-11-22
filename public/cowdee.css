@@ -58,6 +58,7 @@ a {
   cursor: pointer;
   text-shadow: -1px -1px 1px black;
   border-radius: .3rem;
+  z-index: 10;
 }
 
 .click-close:hover {
@@ -88,6 +89,7 @@ a:hover {
 
 /* ── Main layout: full viewport column ── */
 content {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -101,6 +103,7 @@ content {
 
 /* ── Panels wrapper: holds top/splitter/bottom, fills space above input ── */
 #panels {
+  position: relative;
   flex: 1 1 0;
   display: flex;
   flex-direction: column;
@@ -280,21 +283,21 @@ section::-webkit-scrollbar-thumb:hover {
 /* ── Command history select list ── */
 .history-select {
   position: absolute;
-  bottom: var(--input-height);
+  bottom: 0;
   left: 0;
-  right: 0;
+  right: 2.3rem;
   background-color: rgba(21, 23, 31, 0.98);
   color: wheat;
   font-family: inherit;
   font-size: 85%;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-bottom: 1px solid black;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 0 2rem 0rem rgba(0, 0, 0, 0.7);
   z-index: 100;
   outline: none;
   box-sizing: border-box;
-  border-radius: 1rem;
-  margin-left: 2rem;
+  border-top-left-radius: .5rem;
+  margin-left: 2.3rem;
 }
 
 .history-select option {
@@ -308,6 +311,25 @@ section::-webkit-scrollbar-thumb:hover {
 .history-select option:hover {
   background-color: #2a2e3d;
   color: white;
+}
+
+.history-select::-webkit-scrollbar {
+  width: .75rem;
+}
+
+.history-select::-webkit-scrollbar-track {
+  background: var(--background-color);
+  /* dark track */
+}
+
+.history-select::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, .5);
+  /* lighter thumb */
+  border-radius: .25rem;
+}
+
+.history-select::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, .75);
 }
 
 /* ── Hamburger menu ── */
@@ -413,18 +435,18 @@ menu {
 }
 
 .infogrid {
-    display: grid;
-    grid-template-columns: 5rem 1fr;
-    gap: .5rem .5rem;
-    align-items: center;
+  display: grid;
+  grid-template-columns: 5rem 1fr;
+  gap: .5rem .5rem;
+  align-items: center;
 }
 
 .infogrid label {
-    text-align: right;
+  text-align: right;
 }
 
 .infogrid input {
-    width: 100%;
+  width: 100%;
 }
 
 .editcols {
@@ -517,11 +539,11 @@ legend {
 
 .menutext {
   padding: 1rem 0;
-  border-bottom: .2rem solid rgba(0,0,0, .85); 
-  line-height: 1.3; 
+  border-bottom: .2rem solid rgba(0, 0, 0, .85);
+  line-height: 1.3;
 }
 
-.menutext strong{
+.menutext strong {
   color: white;
 }
 
