@@ -73,9 +73,8 @@ export class UI {
 
     // DEBUG: If the user simply includes 'logoff' in the msg then logoff - make a propper command later
     // TODO: universal force logoff simply needs to check msg and not worry about player id
-    if (context?.msg?.includes('logoff') && context.actor === this.player.id) {
-      this.app.player.clear();
-      this.app.player.welcome();
+    if (context?.msg?.includes('tries to logoff') && context.actor === this.app.player?.id) {
+      await this.app.player.logoff();
       return;
     }
     context.playerId = this.app.player.id;
