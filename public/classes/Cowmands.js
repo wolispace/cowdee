@@ -231,6 +231,7 @@ export class Cowmands {
       }
     },
     // SET handler
+    // TODO: set is decoding like update (info and code)
     set: async (rest) => {
       let match = rest.match(/^(\$?\w+)\s*'s\s+(\w+)\s+(?:to|=)\s+(.+)$/i);
       if (!match) {
@@ -259,6 +260,7 @@ export class Cowmands {
       const prop = match[2].toLowerCase();
       const oldObj = { ...obj };
       this.app.db.setObjValue(obj, prop, val);
+      obj.updater = this.context.actor;
       await this.app.db.save(obj, oldObj);
       // update the players location
       if (this.app.player.id == obj.id && prop === 'loc') {
@@ -291,6 +293,7 @@ export class Cowmands {
           this.app.player.save();
         }
       }
+      obj.updater = this.context.actor;
       await this.app.db.save(obj, oldObj);
     },
     // CLEAR
@@ -539,6 +542,9 @@ export class Cowmands {
     colorpicker: async (rest) => {
       // this.context.clickcmd = this.context.cmd.replace(this.context.ntarget, '{id}');
       this.context.to = this.context.actor;
+      if (this.context.ntarget === 'it') {
+        this.context.target = this.app.player.it;
+      }
       const data = await this.app.lookManager.colorpicker({ ...this.context });
       await this.app.ui.addMessage(data);
     },

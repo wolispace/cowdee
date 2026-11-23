@@ -67,7 +67,7 @@ export class LookManager {
     this.sentences = [];
     let html = '';
     for (const color of this.app.ui.colorNames()) {
-      html += `<span class='click' data-cmd='paint' data-id='${context.target}' data-color='${color}' style='color:${color};' title='paint ${context.ntarget} ${color}'>${context.ntarget} </span>`;
+      html += `<span class='click' data-cmd='paintas' data-id='${context.target}' data-color='${color}' style='color:${color};' title='paint ${context.ntarget} ${color}'>${context.ntarget} </span>`;
     }
     this.info = this.wrapInfo(html);
     this.context.clickcmd = `paint [${context.target}] {color}`;
@@ -165,23 +165,57 @@ export class LookManager {
     return `<div class='info'>${html}</div><div class="click buttonize click-close" data-cmd="close">X</div>`;
   }
 
+  /**
+   * Add created, updated stats and edit buttons for this object to its look when examining/reading
+   * @param {string} html 
+   * @param {object} obj 
+   * @returns 
+   */
   async addStats(html, obj) {
+    if (!obj) return html;
     const createDate = this.app.utils.toLocalTime(obj.created);
     const updateDate = this.app.utils.toLocalTime(obj.updated);
-    if (obj) {
-      html += `<div class='tiny'>Created ${createDate} by [${obj.owner}]<br/>Updated ${updateDate}</div>`;
+    const buttons = ['edit', 'paint', 'code', 'lock', 'push', 'pull', 'get', 'drop'];
+    
+    let buttonsHtml = '';
+    for (const btn of buttons) {
+      buttonsHtml += `<span class="click button buttonize" data-cmd="${btn}" 
+      data-id="${obj.id}" title="${btn} this">${btn}</span>`;
     }
-    return html;
+    let updateHtml = '';
+    if (obj.updater) {
+      updateHtml = `Updated ${updateDate} by [${obj.updater}]`;
+    }
+
+    return html += `<div class='objStats'>
+<div class='tiny'>Created ${createDate} by [${obj.owner}]<br/>${updateHtml}
+</div>
+<div class='statsButtons'>
+  ${buttonsHtml}
+</div>
+</div>`;
   }
 
+  /**
+ * Returns the the about cow table of data as if reading a book
+ * @param {Context} context
+ * @returns {object}
+ */
   async about(context) {
     // show info about cow using server.php?stats=1
     this.app.player.editing = true;
     this.context = context;
     this.sentences = [];
-    // YOU ARE HERE
-    // why not fetchJson?
-    // make pretty
+    const html = await this.aboutText();
+    this.info = this.wrapInfo(html);
+    return this.returnData();
+  }
+
+  /**
+   * Returns the html table about cow for embedding in an objects info
+   * @returns {string}
+   */
+  async aboutText () {
     const stats = await this.app.io.fetchJson('server', { stats: 1 });
     // {"totalObjects":34,"totalDbSize":31532,"totalCodeSize":216590}
 
@@ -196,8 +230,7 @@ export class LookManager {
     `;
     html = this.app.markdown.render(html);
 
-    this.info = this.wrapInfo(html);
-    return this.returnData();
+    return html;
   }
 
   /**

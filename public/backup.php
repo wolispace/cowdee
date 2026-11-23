@@ -9,6 +9,7 @@ if (php_sapi_name() !== 'cli') {
         $db[basename($file)] = json_decode(file_get_contents($file), true);
     }
     $db['_context.log'] = file_get_contents('_context.log');
+    unlink('_context.log');
     header('Content-Type: application/json');
     echo json_encode($db);
     exit;

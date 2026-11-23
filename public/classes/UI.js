@@ -171,6 +171,11 @@ export class UI {
     if (context.msg) {
       // dont expand if we are showing an edit form
       if (context.msg.includes('<form')) return context.msg;
+
+      // replace key words like [about] with about text
+      if (context.msg.includes('[about]')) {
+        context.msg = context.msg.replace('[about]', await this.app.lookManager.aboutText());
+      }
       const matches = [...context.msg.matchAll(/\[(\w+)(?:\.(\w+))?\]/g)];
       const defaultProp = context.top ? 'longname' : 'thename';
       // make a list of all referenced object IDs for quick reference
@@ -194,7 +199,6 @@ export class UI {
   }
 
   async expandToken(obj, id, attr, defaultProp, context, format) {
-    if (!obj) return ` (can't find id=${id}) `;
     this.app.db.formatObject(obj);
     const prop = attr || defaultProp;
     let val = obj[prop] !== undefined ? obj[prop] : '';
@@ -253,8 +257,9 @@ export class UI {
   }
 
   async initMenu() {
-    let html = `<strong>Distributed COW</strong>
-    <p>If it all goes terribly wrong, reload your browser.<p>`;
+    let html = `<p><strong>Distributed COW</strong></p>
+    <p>If it all goes terribly wrong, reload your browser.<p>
+    <p>type: [read about cow]</p>`;
     html += await this.app.lookManager.readText({target:'_6'});
     this.app.menu(html);
   }
@@ -305,7 +310,7 @@ export class UI {
     this.cmdInput = document.getElementById('cmd');
     this.commandlabel = document.querySelector('.commandlabel');
     if (!this.historySelect || !this.cmdInput) return;
-    
+
     // show the history for mobile users who cant cursor up
     // remarked out until history filling is on a function not cursor up
     // this.commandlabel.addEventListener('click', () => {

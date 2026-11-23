@@ -494,6 +494,22 @@ legend {
   text-shadow: .2rem .2rem .2rem black;
 }
 
+.objStats {
+  display: flex;
+  gap: 1rem;
+}
+
+.statsButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .2rem;
+}
+
+.statsButtons span {
+  padding: .1rem .3rem;
+  height: 1rem;
+}
+
 .hide {
   display: none;
 }

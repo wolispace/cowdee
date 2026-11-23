@@ -43,12 +43,18 @@ export class App {
 
     // ui elements with click commands will execute these:
     this.clickCmds = {
+      close: () => `look`,
+      run: el => `${el.dataset.id}`,
       read: el => `read ${el.dataset.id}`,
       examine: el => `examine ${el.dataset.id}`,
-      close: () => `look`,
       doorway: el => `go ${el.dataset.id}`,
-      paint: el => `paint ${el.dataset.id} ${el.dataset.color}`,
-      run: el => `${el.dataset.id}`
+      edit: el => `edit ${el.dataset.id}`,
+      code: el => `code ${el.dataset.id}`,
+      paintas: el => `paint ${el.dataset.id} ${el.dataset.color}`,
+      paint: el => `paint ${el.dataset.id}`,
+      get: el => `get ${el.dataset.id}`,
+      drop: el => `drop ${el.dataset.id}`,
+      push: el => `push ${el.dataset.id}`,
     };
   }
 
