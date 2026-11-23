@@ -210,7 +210,9 @@ export class App {
     await this.db.preLoad('id', ids);
     for (const playerId of this.activePlayers) {
       const obj = await this.db.getById(playerId);
-      html += `\n- [${obj.id}] in [${obj.loc}]`;    
+      const loc = await this.db.getById(obj.loc);
+      const inon = loc.lochow ? loc.lochow : 'in';
+      html += `\n- [${obj.id}] ${inon} [${obj.loc}]`;    
     }
     return html;
   }
@@ -283,7 +285,7 @@ export class App {
       const cmd = data.cmd?.trim();
       if (!cmd) return;
       this.ui.focusInput();
-      await this.sendCommand(data);
+      await this.sendCommands(cmd);
     } else if (['code', 'info'].includes(data.type)) {
       if (data.button === 'cancel') {
         // cancel edit and sent 'look'

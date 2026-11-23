@@ -1,11 +1,13 @@
 # Issues to fix
 
 [ ] Close is not clearing editing flag sometimes
+[ ] Close not always closing
+[ ] paint an object sometimes shows it not name
+[ ] multiple commands not knowing about it as they are sent before it is set
+[ ] active players not showing inon correctly
 
 # Features to add
 
-[ ] Emabled dot for multi commands in the user input 'create a bus. paint it red. get it'
-[x] Quick cmds when examining Read/edit
-[x] Help text in menu should be special format of 'the book of basics'
-[x] Toolbar buttons (Save/Cancel) on right of inputs (sticky to top)
-[x] Closing an edit or read should clear and focus the input
+[ ] mobile method of opening history
+[ ] truncate old history
+[ ] remember spliter position
