@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // always recieve json data
 $request = json_decode(file_get_contents('php://input'), true);
 
-logIt('input ' . json_encode($request));
+// logIt('input ' . json_encode($request));
 if (empty($request)) {
   $request = $_REQUEST;
 }
@@ -36,7 +36,7 @@ function handleInput($request)
 
     foreach ($request['commands'] as $cmd) {
       if (empty($cmd['cmd'])) {
-        logIt('commands batch: skipping entry with empty cmd: ' . json_encode($cmd));
+        // logIt('commands batch: skipping entry with empty cmd: ' . json_encode($cmd));
         continue;
       }
 
@@ -60,7 +60,7 @@ function handleInput($request)
 
       $filename = CONTEXT_DIR . "/{$ts}{$actor}" . CONTEXT_EXT;
       $written  = file_put_contents($filename, json_encode($contextData), LOCK_EX);
-      logIt('commands batch: ' . ($written !== false ? "saved $filename" : "FAILED to write $filename"));
+      // logIt('commands batch: ' . ($written !== false ? "saved $filename" : "FAILED to write $filename"));
       logIt(json_encode($contextData), '_context.log');
       if ($written !== false) $processed++;
     }
@@ -91,10 +91,10 @@ function handleInput($request)
       $storedHash = $shard[substr($id, 1)] ?? null;
     }
     if ($storedHash && password_verify($pw, $storedHash)) {
-      logIt("Password verified for player {$id}");
+      // logIt("Password verified for player {$id}");
       outputJson(['ok' => true]);
     } else {
-      logIt("Password check failed for player {$id}");
+      // logIt("Password check failed for player {$id}");
       outputJson(['ok' => false, 'error' => 'Invalid password']);
     }
   } else if (!empty($request['setpw'])) {
@@ -110,7 +110,7 @@ function handleInput($request)
     }
     $shard[$id] = password_hash($pw, PASSWORD_BCRYPT);
     saveJson($file, $shard);
-    logIt("Saved new password hash for player {$id} in {$file}");
+    // logIt("Saved new password hash for player {$id} in {$file}");
     outputJson(['ok' => true]);
   } else if (isset($request['stats']) ) {
     $dbDir = DB_DIR;
@@ -223,7 +223,7 @@ function handleInput($request)
     if (file_exists($counterFile)) {
       $oldCounter = (int) file_get_contents($counterFile);
       if (isset($request['counter']) && $request['counter'] > $oldCounter) {
-        logIt("Incremented counter from {$oldCounter} to {$request['counter']}");
+        // logIt("Incremented counter from {$oldCounter} to {$request['counter']}");
         file_put_contents($counterFile, $request['counter']);
       }
     } else if (isset($request['counter'])) {
@@ -244,14 +244,14 @@ function handleInput($request)
     outputJson($results);
   } else if (!empty($request['file'])) {
     $file = shardName($request['file']);
-    logIt('read file: ' . $file);
+    // logIt('read file: ' . $file);
     if (empty($request['content'])) {
       outputJson(loadJson($file));
     } else {
       $counterFile = DB_DIR . '/' . ID_COUNTER_FILE;
       $oldCounter = file_exists($counterFile) ? (int) file_get_contents($counterFile) : 0;
       if (isset($request['counter']) && $request['counter'] > $oldCounter) {
-        logIt("Incremented counter from {$oldCounter} to {$request['counter']}");
+        // logIt("Incremented counter from {$oldCounter} to {$request['counter']}");
         file_put_contents($counterFile, $request['counter'], LOCK_EX);
       }
       saveJson($file, json_decode($request['content'], true));
@@ -289,7 +289,7 @@ function pwShardFile($id)
 function outputJson($data)
 {
   header('Content-Type: application/json');
-  logIt('output ' . json_encode($data));
+  // logIt('output ' . json_encode($data));
   echo json_encode($data);
   exit;
 }
@@ -307,6 +307,6 @@ function saveJson($file, $data)
   if (!is_dir($dir)) {
     @mkdir($dir, 0777, true);
   }
-  logIt('save ' . $file . ' ' . json_encode($data));
+  // logIt('save ' . $file . ' ' . json_encode($data));
   file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT), LOCK_EX);
 }

@@ -334,7 +334,7 @@ export class Cowmands {
     },
     // SAY handler
     say: async (rest) => {
-      const match = rest.match(/^['"](\w+)['"]\s*,\s*(.+)$/i);
+      const match = rest.match(/^['"](.*)['"]\s*,\s*(.+)$/i);
       if (!match) return;
       this.context.trigger = match[1];
       const template = this.app.utils.decodeString(this.app.utils.trimQuotes(match[2].trim()));
@@ -343,6 +343,31 @@ export class Cowmands {
       this.context.msg = this.expandTemplate(template);
       delete this.context.to;
       await this.app.ui.addMessage(this.context);
+    },
+    // CALL - executes the command as if the calling object had typed it and sendCommand()
+    call: async(rest) => {
+      // Step 1: Try matching 2 parameters (command + delay) 
+      // e.g. "go north", 10 
+      let match = rest.match(/^['"](.*)['"]\s*,\s*(.+)$/i); 
+      if (match) { 
+        this.context.newCmd = match[1]; 
+        this.context.tickDelay = match[2].trim(); 
+      } else { 
+        // Step 2: Fallback to matching 1 parameter (command only) 
+        // e.g. "create a cat" 
+        match = rest.match(/^['"](.*)['"]$/i); 
+        if (!match) return; // Invalid syntax / no match 
+        this.context.newCmd = match[1]; 
+        this.context.tickDelay = '0'; // Default to immediate execution 
+      }
+      // now send a new command with this actor
+      await this.app.sendCommand({
+        cmd: this.context.newCmd,
+        actor: this.context.actor,
+        loc: this.context.loc,
+        saveHistory: false
+      });
+
     },
     // MSG - advanced say where we can control the location and who gets to see the msg
     msg: async (rest) => {

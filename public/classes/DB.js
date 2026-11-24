@@ -33,7 +33,10 @@ export class DB {
     if (!this.memory[type]) this.memory[type] = {};
     if (!this.memory[type][prefix]) {
       // console.log(`${this.app.name} - had to load ${type}${prefix} from disk for key ${key}`);
-      this.memory[type][prefix] = await this.app.io.loadJson(this.makeFileName(type, prefix));
+      const data = await this.app.io.loadJson(this.makeFileName(type, prefix));
+      if (data) {
+        this.memory[type][prefix] = data;
+      }
     }
     return this.memory[type][prefix][key];
   }
@@ -308,6 +311,7 @@ export class DB {
    * @returns 
    */
   async findTrigger(context) {
+    console.log(`${this.app.name} findTrigger()`, context);
     if (!context) return;
     if (!context.trigger) return;
     // console.log(`${this.app.name} findTrigger() context=`, context);

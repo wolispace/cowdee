@@ -17,8 +17,8 @@ define('ID_COUNTER_FILE', '_counter.txt'); // the counter of the last highest ID
 
 function logIt($str, $file = '_log.txt')
 {
-  //$dateTime = date('Ymd H:i:s');
-  //file_put_contents($file, "{$dateTime},{$_SERVER['REMOTE_ADDR']},{$str}\n", FILE_APPEND | LOCK_EX);
+  $dateTime = date('Ymd H:i:s');
+  file_put_contents($file, "{$dateTime},{$_SERVER['REMOTE_ADDR']},{$str}\n", FILE_APPEND | LOCK_EX);
 }
 
 /**
@@ -45,7 +45,7 @@ function get_new_contexts($lastContext)
 
     if ($ts < (time() - (60 * CONTEXT_MINS)) * 1000) {
       @unlink($file);
-      logIt('kill old file ' . $file . ', ' . $ts . ' < ' . (time() - 3600) * 1000);
+      //logIt('kill old file ' . $file . ', ' . $ts . ' < ' . (time() - 3600) * 1000);
       continue;
     }
     $data = json_decode(file_get_contents($file), true);
@@ -115,7 +115,7 @@ function getActivePlayers()
     // if file is ? 20 seconds old, delete it as they are nolonger active
     if (time() - $mtime > ACTIVE_PLAYER_SECS) {
       @unlink($file);
-      logIt("kill player file {$file}");
+      // logIt("kill player file {$file}");
     }
   }
   return $players;

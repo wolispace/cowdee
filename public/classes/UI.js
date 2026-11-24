@@ -123,7 +123,6 @@ export class UI {
     this.app.player.editing = false;
     this.cmdInput.value = '';
     this.cmdInput.focus();
-    console.log(`${this.app.name} focusInput()` );
   }
 
   /**
@@ -166,7 +165,6 @@ export class UI {
    * @returns 
    */
   async expand(context, format = 'html') {
-    console.log(`${this.app.name} expand() `, context);
     if (context.msg) {
       // dont expand if we are showing an edit form
       if (context.msg.includes('<form')) return context.msg;

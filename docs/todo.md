@@ -11,3 +11,4 @@
 [ ] mobile method of opening history
 [ ] truncate old history
 [ ] remember spliter position
+[ ] 'call' cowmand to execite whats in "" with an otional, delay (how many ticks before executing)
