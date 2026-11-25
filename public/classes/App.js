@@ -311,8 +311,9 @@ export class App {
     }
 
     let cmd = `::run update ${data.id} to "${data.type}='${encoded}' ${fields}";`;
-    cmd += `relook ${this.player.loc};`;
-    cmd += `say 'edit',"[$actor] finishes with [${data.id}]";`;
+    //TODO: we want everyone else but us to relook as we want the form to remain
+    // cmd += `relook ${this.player.loc};`;
+    cmd += `say 'edit',"[$actor] saves [${data.id}]";`;
     return cmd;
   }
 

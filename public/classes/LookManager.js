@@ -310,7 +310,7 @@ export class LookManager {
         </div>
         <div class="right">
           <div class="buttons">
-            <button type="submit" class="button" name="action" value="cancel">Cancel</button>
+            <button type="submit" class="button" name="action" value="cancel">Close</button>
             <button type="submit" class="button" name="action" value="save">Save</button>
           </div>
         </div>

@@ -9,9 +9,18 @@ export class Markdown {
     const html = []
     let inTable = false
     let inList = false
+    let inPre = false
 
     for (let i = 0; i < lines.length; i++) {
       let line = lines[i]
+
+      // Fenced code block
+      if (line.startsWith('```')) {
+        if (!inPre) { this._closeBlocks(html, inList, inTable); inList = inTable = false; html.push('<pre><code>'); inPre = true }
+        else { html.push('</code></pre>'); inPre = false }
+        continue
+      }
+      if (inPre) { html.push(line); continue }
 
       // Headings
       if (line.startsWith('### ')) { this._closeBlocks(html, inList, inTable); inList = inTable = false; html.push(`<h3>${this._inline(line.slice(4))}</h3>`); continue }
@@ -40,6 +49,7 @@ export class Markdown {
       html.push(`<p>${this._inline(line)}</p>`)
     }
 
+    if (inPre) html.push('</code></pre>')
     this._closeBlocks(html, inList, inTable)
     return html.join('\n')
   }
@@ -56,5 +66,6 @@ export class Markdown {
       .replace(/__(.+?)__/g,   '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g,   '<em>$1</em>')
       .replace(/(?<![\w\[])_(.+?)_(?![\w])/g, '<em>$1</em>')
+      .replace(/`(.+?)`/g, '<code>$1</code>')
   }
 }

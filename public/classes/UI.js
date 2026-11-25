@@ -189,7 +189,7 @@ export class UI {
         const replacement = await this.expandToken(obj, id, attr, defaultProp, context, format);
         context.msg = context.msg.replace(token, replacement);
       }
-      context.msg = context.msg.replace(/\s+/g, ' ').trim();
+      context.msg = context.msg.replace(/(<pre[\s\S]*?<\/pre>)|\s+/g, (m, pre) => pre || ' ').trim();
     }
     context.msg = context.msg.replace(/<p>\s*([a-z])/g, (_, letter) => `<p>${letter.toUpperCase()}`);
     return context.msg;
