@@ -305,7 +305,7 @@ export class LookManager {
       <input type="hidden" name="id" value="${obj.id}">
       <div class="editcols">
         <div class="left">
-          <textarea class="infoinput" name="val" placeholder="What you see when you examine or read this">${value}</textarea>
+          <textarea class="infoinput testarea_${type}" name="val" placeholder="What you see when you examine or read this">${value}</textarea>
           <div class="infogrid">${html}</div>
         </div>
         <div class="right">
