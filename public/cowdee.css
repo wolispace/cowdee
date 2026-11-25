@@ -498,7 +498,8 @@ pre, code {
   font-size: 1rem;
   color: limegreen;
   background: rgba(0, 0, 0, .85);
-    white-space: pre;
+  white-space: pre;
+  line-height: 1.2rem;
 }
 
 .objStats {

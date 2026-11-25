@@ -16,8 +16,14 @@ export class Markdown {
 
       // Fenced code block
       if (line.startsWith('```')) {
-        if (!inPre) { this._closeBlocks(html, inList, inTable); inList = inTable = false; html.push('<pre><code>'); inPre = true }
-        else { html.push('</code></pre>'); inPre = false }
+        if (!inPre) {
+          this._closeBlocks(html, inList, inTable); inList = inTable = false;
+          const inline = line.slice(3).trim();
+          html.push('<pre><code>' + (inline ? inline : ''));
+          inPre = true;
+        } else {
+          html.push('</code></pre>'); inPre = false;
+        }
         continue
       }
       if (inPre) { html.push(line); continue }
