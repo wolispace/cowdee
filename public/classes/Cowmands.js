@@ -119,11 +119,13 @@ export class Cowmands {
         ltarget = this.context.loc;
         const obj = await this.app.db.getById(this.context.loc);
         this.context.ntarget = obj.class;
+        this.context.target = obj.id;
       }
       if (this.context.second === 'location') {
         lsecond = this.context.loc;
         const obj = await this.app.db.getById(this.context.loc);
         this.context.nsecond = obj.class;
+        this.context.second = obj.id;
       }
       if (['me','myself'].includes(this.context.target)) {
         ltarget = this.context.actor;
@@ -533,6 +535,21 @@ export class Cowmands {
       obj.creator = this.context.actor;
       obj.owner = this.context.actor;
       await this.app.db.save(obj);
+    },
+    // FOREACH foreach 'in $actor do checkmail';
+    // loop through all objects in the target and perform the block using $for_id for each found
+    foreach: async (rest) => {
+      const match = rest.match(/^\s*in\s+(\S+)\s+do\s+(.+)$/s);
+      if (!match) return;
+      const [_, thisloc, block] = match;
+      const loc = await this.resolveValue(thisloc);
+      const found = await this.app.db.findInLoc(loc);
+      if (found) {
+        for(const id of found) {
+          this.context.for_id = id;
+          await this.context.runSub(block);
+        }
+      }
     },
     // RUNSUB
     runsub: async (rest) => {
