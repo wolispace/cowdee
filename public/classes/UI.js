@@ -31,6 +31,7 @@ export class UI {
     this.setupEvents();
     this.initDialog();
     this.initHistory();
+    this.initSplitter();
 
     this.bottom.style.flex = '1 1 0';
     this.bottom.style.minHeight = '0';
@@ -458,6 +459,13 @@ export class UI {
     this.bottom.style.flex = '1 1 0';
     this.bottom.scrollTop = this.bottom.scrollHeight;
   }
+  initSplitter() {
+    const splitRatio = this.app.storage?.getItem(`splitRatio`);
+    if (splitRatio) {
+      this.splitRatio = splitRatio;
+      this.applySplitRatio();
+    }
+  }
 
   /**
    * Attach event listeners to things that need them
@@ -501,6 +509,7 @@ export class UI {
         this.splitRatio = Math.max(0, Math.min(1, topH / available));
       }
       this.bottom.scrollTop = this.bottom.scrollHeight;
+      this.app.storage?.setItem(`splitRatio`, this.splitRatio);
     });
 
     this.splitter.addEventListener('pointercancel', (e) => {

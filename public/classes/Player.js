@@ -377,7 +377,7 @@ export class Player {
       id: this.id,
       name: this.name,
       loc: this.loc,
-      history: this.history
+      history: this.history,
     };
     this.app.storage?.setItem(`player_${this.id}`, JSON.stringify(data));
   }

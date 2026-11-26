@@ -311,7 +311,7 @@ export class DB {
    * @returns 
    */
   async findTrigger(context) {
-    console.log(`${this.app.name} findTrigger()`, context);
+    // console.log(`${this.app.name} findTrigger()`, context);
     if (!context) return;
     if (!context.trigger) return;
     // console.log(`${this.app.name} findTrigger() context=`, context);
