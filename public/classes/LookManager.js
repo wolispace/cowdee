@@ -25,7 +25,7 @@ export class LookManager {
     this.context = context;
     const loc = await this.app.db.getById(this.context.loc);
     if (this.context.found) {
-      this.sentences = [`Which one do you choose: `];
+      this.sentences = [`Choose wisely: `];
       this.found = this.context.found;
     } else {
       if (!loc) {
@@ -40,14 +40,12 @@ export class LookManager {
       }
     }
 
-    this.objs = await this.populateObjs();
-    // add the location into the list of objects here .. do we need this?
-    if (loc) {
-      this.objs[loc.id] = loc;
-    }
     let list = '';
     for (const id of this.found) {
-      list += `<li>[${id}]</li>`;
+      const obj = await this.app.db.getById(id);
+      const thisLoc = await this.app.db.getById(obj.loc);
+      const inon = thisLoc.lochow ? thisLoc.lochow : 'in';
+      list += `<li>[${id}] ${inon} [${thisLoc.id}] </li>`;
     }
     this.sentences.push(list);
     // TODO: better way needed to INV shoing what you hold noone

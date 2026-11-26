@@ -651,7 +651,13 @@ export class Cowmands {
       if (/^where\s+/i.test(rest)) return; // SQL – not yet implemented
 
       const commaIdx = rest.indexOf(',');
-      if (commaIdx === -1) return;
+      
+      // just 'find elephant' should return all IDs of all class or name = 'elephant'
+      if (commaIdx === -1) {
+        const name = await this.resolveValue(rest.trim());
+        this.context.found = await this.app.db.findByName(name) ?? [];
+        return;
+      }
 
       const locToken = rest.substring(0, commaIdx).trim();
       const criteria = rest.substring(commaIdx + 1).trim();
