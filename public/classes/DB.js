@@ -352,6 +352,9 @@ export class DB {
    * @returns nothing, the obj is updated
    */
   formatObject(obj) {
+    if (!obj) {
+      obj = {class: 'limbo', qty: 0, longname: 'limbo'};
+    }
     this.setQty(obj);
     if (obj.qty == 1) {
       obj.is = 'is';

@@ -257,13 +257,7 @@ export class Player {
     this.loc = obj.loc;
     this.name = obj.name;
     this.app.name = obj.id;
-    if (!this.loc) {
-      console.log('no loc so setting default');
-      obj.loc = this.startingLocation;
-      this.loc = obj.loc;
-      await this.app.db.save(obj);
-    }
-
+    await this.validateLocation();
     // Restore any previously stored history for this player
     this.loadHistory();
 
@@ -281,6 +275,25 @@ export class Player {
   async logoff() {
     this.clear();
     await this.welcome();
+  }
+
+  /**
+   * Make sure the player has a valid
+   */
+  async validateLocation() {
+    let valid = false;
+    if (this.loc) {
+      const loc = await this.app.db.getById(this.loc);
+      valid = !!loc;
+    }
+
+    if (!valid) {
+      console.log(`${this.app.name} player lost in [${this.loc}]`);
+      const obj = await this.app.db.getById(this.id);
+      obj.loc = this.startingLocation;
+      this.loc = obj.loc;
+      await this.app.db.save(obj);
+    }
   }
 
   /**

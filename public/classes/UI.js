@@ -100,8 +100,8 @@ export class UI {
       const section = context.top ? '#top' : '#bottom';
       const info = document.querySelector(section);
       if (context.top) {
+        // this.app.player.validateLocation();
         div.innerHTML = context.msg;
-
         info.replaceChildren(div);
         // auto-scroll top for new look around
         // TODO: only scroll if the current scroll position is at the bottom before appending the content
@@ -187,6 +187,7 @@ export class UI {
       for (const match of matches) {
         const [token, id, attr] = match;
         const obj = loadedObjs[id];
+
         const replacement = await this.expandToken(obj, id, attr, defaultProp, context, format);
         context.msg = context.msg.replace(token, replacement);
       }
@@ -197,6 +198,7 @@ export class UI {
   }
 
   async expandToken(obj, id, attr, defaultProp, context, format) {
+            if (!obj) return '';
     this.app.db.formatObject(obj);
     const prop = attr || defaultProp;
     let val = obj[prop] !== undefined ? obj[prop] : '';

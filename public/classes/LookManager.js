@@ -334,14 +334,14 @@ export class LookManager {
     this.context.trigger = 'look';
     this.sentences = [];
     this.objs = {};
+    const lostMsg = 'You have fallen asleep and are in limbo. Reload the page to wake up.';
     if (!this.context.loc) {
-      console.log('There is nothing to see as you are nowhere', context.actor, context.loc);
-      this.sentences.push('You are nowhere');
+      this.sentences.push(lostMsg);
       return this.returnData();
     }
     let loc = await this.app.db.getById(this.context.loc);
     if (!loc) {
-      this.sentences.push('You are nowhere');
+      this.sentences.push(lostMsg);
       return this.returnData();
     }
     this.app.db.formatObject(loc);
@@ -358,6 +358,7 @@ export class LookManager {
       return this.returnData();
     }
 
+    // TODO: use preload?
     this.objs = await this.populateObjs();
     this.hosted = this.buildHosted();
     // console.log(this.hosted.entries);
@@ -451,7 +452,7 @@ export class LookManager {
       const firstId = ids.values().next().value; // read first from a Set
       const obj = this.objs[firstId];
       const host = obj?.host;
-      const showClass = obj.qty == 1 ? 'class' : 'plural';
+      const showClass = obj?.qty == 1 ? 'class' : 'plural';
       let showHost = 'You also see';
       if (host) {
         if (lastHost == host) {
