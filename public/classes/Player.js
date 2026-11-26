@@ -188,7 +188,7 @@ export class Player {
       this.remember = Boolean(data.remember === '1' || data.remember === true);
     }
     this.pendingPw = data.pw;
-    this.loc = '_2';
+    this.loc = this.startingLocation;
     await this.sendWakeCmd();
   }
 
@@ -257,6 +257,12 @@ export class Player {
     this.loc = obj.loc;
     this.name = obj.name;
     this.app.name = obj.id;
+    if (!this.loc) {
+      console.log('no loc so setting default');
+      obj.loc = this.startingLocation;
+      this.loc = obj.loc;
+      await this.app.db.save(obj);
+    }
 
     // Restore any previously stored history for this player
     this.loadHistory();
