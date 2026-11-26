@@ -9,6 +9,7 @@ export class Player {
   remember = true;
   startingLocation = '_2';
   isBot = false;
+  cmdStack = []; // list of pending commands
 
   constructor(app) {
     this.app = app;

@@ -71,6 +71,11 @@ export class Context {
       };
     }
     await this.runCodeFrom(code, runFrom);
+    // if the current player has remaining commands in their stack then shift off the next one and send it.
+    if (this.app.player.cmdStack.length > 0) {
+      const cmd = this.app.player.cmdStack.shift();
+      await this.app.sendCommand(cmd.trim());
+    }
 
   }
 

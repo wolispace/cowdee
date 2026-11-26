@@ -3,7 +3,7 @@
 [ ] Close not always closing
 - this appears to be the player losing their location - why? how??
 [ ] paint an object sometimes shows it not name
-[ ] multiple commands not knowing about it as they are sent before it is set
+[x] multiple commands not knowing about it as they are sent before it is set
 [x] active players not showing inon correctly
 
 # Features to add

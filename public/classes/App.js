@@ -145,9 +145,14 @@ export class App {
    * @param {string} commands 
    */
   async sendCommands(commands) {
-    for (const cmd of commands.split('.')) {
-      await this.sendCommand(cmd.trim());
+    let cmd = commands;
+    if (commands.includes('.')) {
+      this.player.cmdStack = commands.split('.');
+      cmd = this.player.cmdStack.shift();
+      console.log(`${this.name} player stack`, this.player.cmdStack);
     }
+    await this.sendCommand(cmd.trim());
+    
   }
   /**
    * Sends one context to the server then processes all of the contexts it gets back (this being one of them)
