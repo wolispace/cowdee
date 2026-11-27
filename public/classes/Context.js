@@ -51,9 +51,6 @@ export class Context {
     const { firstword, rest } = this.app.utils.splitFirstWord(this.cmd);
     let runFrom = '__start';
     this.firstword = firstword;
-    if (this.firstword === 'read') {
-      console.log(`${this.app.name} -- read command:`, this.actor, this.cmd);
-    }
     this.rest = rest;
     this.cmd_text = rest;
     let code = '';
@@ -65,9 +62,10 @@ export class Context {
     } else {
       code = await this.app.db.findCommand(this);
       if (!code) {
-        this.msg = `[${this.actor}] tries to ${this.cmd}, but nothing happens`;
-        await this.app.ui.addMessage(this);
-        return;
+        this.firstword = 'say';
+        this.rest = this.cmd;
+        this.cmd_text = this.rest;
+        code = await this.app.db.findCommand(this);
       };
     }
     await this.runCodeFrom(code, runFrom);
