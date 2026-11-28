@@ -258,8 +258,16 @@ export class Cowmands {
         }
       }
 
-      const val = await this.resolveValue(match[3].trim());
+      let val = await this.resolveValue(match[3].trim());
       const prop = match[2].toLowerCase();
+      // magic words 
+      if (prop === 'color' && val === 'randomcolor') {
+        // TODO: need a nicer way of doing this
+        // maybe things like date and time are defined here
+        // map a word to a function 
+        val = this.context.randomColor();
+      }
+
       const oldObj = { ...obj };
       this.app.db.setObjValue(obj, prop, val);
       obj.updater = this.context.actor;
@@ -289,6 +297,14 @@ export class Cowmands {
           value = this.app.utils.trimQuotes(value);
           value = this.app.utils.trimTrailingBlanks(value);
         }
+        // TODO: need a nicer way of doing this
+        // maybe things like date and time are defined here
+        // map a word to a function 
+        // magic words 
+        if (prop === 'color' && val === 'randomcolor') {
+          val = this.context.randomColor();
+        }
+
         this.app.db.setObjValue(obj, prop, value);
         if (this.app.player.id == obj.id && prop === 'loc') {
           this.app.player.loc = obj.loc;

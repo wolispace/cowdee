@@ -200,5 +200,14 @@ export class Context {
     return Math.floor(rand * max);
   }
 
+  /**
+   * Returns a random color
+   * @returns {string}
+   */
+  randomColor() {
+    const names = this.app.ui.colorNames();
+    return names[this.random(names.length)];
+  }
+
 
 }
