@@ -539,10 +539,10 @@ export class UI {
 
     if (this.loadingCount === 1 && !this.loadingTimer) {
       this.loadingTimer = setTimeout(() => {
-        if (this.top) {
-          this.top.style.removeProperty('opacity');
-          this.top.classList.add('loadFade');
-        }
+        // if (this.top) {
+        //   this.top.style.removeProperty('opacity');
+        //   this.top.classList.add('loadFade');
+        // }
         if (this.loadBar) {
           // Reset bar instantly (no transition), then trigger animation
           this.loadBar.style.transition = 'none';
